@@ -43,7 +43,7 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
     for (int p = 0; p < 2; p++)
     {
         int na = 0;
-        for (int n = 0; n < 5; ++n) // set number of particles per cell in background
+        for (int n = 0; n < nback; ++n) // set number of particles per cell in background
         {
             for (int k = 1; k < n_space_divz - 1; ++k)
             {

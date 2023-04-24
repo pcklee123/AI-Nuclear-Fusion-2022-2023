@@ -9,9 +9,9 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
     fill(reinterpret_cast<float *>(ftemp), reinterpret_cast<float *>(ftemp) + n_cells, 0.f);
     // calculate center of charge field as offsets (-0.5 to 0.5) from cell center
     //   cout << "calculate center of charge field" << endl;
-    for (int k = 0; k < n_space_divz; k += 1)
-        for (int j = 0; j < n_space_divy; j += 1)
-            for (int i = 0; i < n_space_divx; i += 1)
+    for (int k = 0; k < n_space_divz; ++k)
+        for (int j = 0; j < n_space_divy; ++j )
+            for (int i = 0; i < n_space_divx; ++i )
             {
                 fc[k][j][i][0] = (fc[k][j][i][0] / (f[k][j][i] + 1.0e-5f));
                 fc[k][j][i][1] = (fc[k][j][i][1] / (f[k][j][i] + 1.0e-5f));
@@ -152,9 +152,9 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                 ftemp[k1][j1][i1] += f[k0][j0][i0] * fz0 * fy0 * fx0;
             }
     //  cout << "smoothfield copy back" << endl;
-    for (int k = 0; k < n_space_divz; k += 1)
-        for (int j = 0; j < n_space_divy; j += 1)
-            for (int i = 0; i < n_space_divx; i += 1)
+    for (int k = 0; k < n_space_divz; ++k )
+        for (int j = 0; j < n_space_divy; ++j )
+            for (int i = 0; i < n_space_divx; ++i )
             {
                 f[k][j][i] = ftemp[k][j][i];
             }
