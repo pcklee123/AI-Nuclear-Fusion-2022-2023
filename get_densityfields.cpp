@@ -102,7 +102,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         //        cout << p << "number of particles out of bounds " << nob[p] << endl;
     }
 #pragma omp barrier
-    //   cout << "get_density_checked out of bounds\n";
+      cout << "get_density_checked out of bounds\n";
 
 #pragma omp parallel num_threads(2)
     {
@@ -166,7 +166,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp section
         {
             int p = 0;
-            //  cout << "jx :" << omp_get_thread_num() << endl;
+            cout << "jx :" << p << " " << omp_get_thread_num() << endl;
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
