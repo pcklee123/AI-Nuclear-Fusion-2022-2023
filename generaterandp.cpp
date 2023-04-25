@@ -64,7 +64,7 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
             }
         }
 
-#pragma omp parallel for
+#pragma omp parallel for ordered
         for (int n = na; n < n_partd; n++)
         {
             float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.3333333333);

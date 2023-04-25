@@ -15,6 +15,7 @@
             "cwd": "${fileDirname}",
             "environment": [],
             "externalConsole": false,
+            "preLaunchTask": "make: TS3",
             "MIMode": "gdb",
             "miDebuggerPath": "c:/msys64/ucrt64/bin/gdb.exe",
             "setupCommands": [
@@ -34,6 +35,7 @@
             "name": "Debug",
             "type": "gdb",
             "request": "launch",
+            "preLaunchTask": "make: TS3",
             "target": "./TS3.exe",
             "cwd": "${workspaceRoot}",
             "valuesFormatting": "parseText"

@@ -13,9 +13,10 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
         for (int j = 0; j < n_space_divy; ++j )
             for (int i = 0; i < n_space_divx; ++i )
             {
-                fc[k][j][i][0] = (fc[k][j][i][0] / (f[k][j][i] + 1.0e-5f));
-                fc[k][j][i][1] = (fc[k][j][i][1] / (f[k][j][i] + 1.0e-5f));
-                fc[k][j][i][2] = (fc[k][j][i][2] / (f[k][j][i] + 1.0e-5f));
+                fc[k][j][i][0] = (fc[k][j][i][0] / (f[k][j][i] + 1.0e-1f));
+                fc[k][j][i][1] = (fc[k][j][i][1] / (f[k][j][i] + 1.0e-1f));
+                fc[k][j][i][2] = (fc[k][j][i][2] / (f[k][j][i] + 1.0e-1f));
+                //if (fabs(f[k][j][i])>0.01)  cout << fc[k][j][i][0] << " ";
                 /*
                 if (fc[k][j][i][1] > 0.5)
                     cout << fc[k][j][i][0] << " ";

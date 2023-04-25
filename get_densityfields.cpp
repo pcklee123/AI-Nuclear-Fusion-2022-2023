@@ -118,6 +118,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             nt[p] += q[p][n];
         }
         KEtot[p] *= 0.5 * mp[p] / (e_charge_mass)*r_part_spart; // as if these particles were actually samples of the greater thing
+
 #pragma omp barrier
 #pragma omp parallel for simd num_threads(nthreads)
         for (int n = 0; n < n_part[p]; ++n)
@@ -126,58 +127,120 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             v[p][1][n] *= q[p][n];
             v[p][2][n] *= q[p][n];
         }
+    }
 #pragma omp barrier
-#pragma omp parallel sections
+#pragma omp parallel sections num_threads(nthreads)
+    {
+#pragma omp section
         {
-#pragma omp section 
+            int p = 0;
+         //   cout << "np :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
             {
-                // #pragma omp parallel for simd num_threads(nthreads)
-                for (int n = 0; n < n_part[p]; ++n)
-                {
-                    unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                    np[p][k][j][i] += q[p][n];
-                    np_center[p][k][j][i][0] += q[p][n] * offset[p][0][n];
-                    np_center[p][k][j][i][1] += q[p][n] * offset[p][1][n];
-                    np_center[p][k][j][i][2] += q[p][n] * offset[p][2][n];
-                }
-                smoothscalarfield(np[p], np_center[p]);
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                np[p][k][j][i] += q[p][n];
+                np_center[p][k][j][i][0] += q[p][n] * offset[p][0][n];
+                np_center[p][k][j][i][1] += q[p][n] * offset[p][1][n];
+                np_center[p][k][j][i][2] += q[p][n] * offset[p][2][n];
             }
+            smoothscalarfield(np[p], np_center[p]);
+        }
+        {
+            int p = 1;
+         //   cout << "np :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
+            {
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                np[p][k][j][i] += q[p][n];
+                np_center[p][k][j][i][0] += q[p][n] * offset[p][0][n];
+                np_center[p][k][j][i][1] += q[p][n] * offset[p][1][n];
+                np_center[p][k][j][i][2] += q[p][n] * offset[p][2][n];
+            }
+            smoothscalarfield(np[p], np_center[p]);
+        }
 #pragma omp section
+        {
+            int p = 0;
+          //  cout << "jx :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
             {
-                for (int n = 0; n < n_part[p]; ++n)
-                {
-                    unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                    currentj[p][0][k][j][i] += v[p][0][n];
-                    jc_center[p][0][k][j][i][0] += v[p][0][n] * offset[p][0][n];
-                    jc_center[p][0][k][j][i][1] += v[p][0][n] * offset[p][1][n];
-                    jc_center[p][0][k][j][i][2] += v[p][0][n] * offset[p][2][n];
-                }
-                // smoothscalarfield(currentj[p][0], jc_center[p][0]);
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                currentj[p][0][k][j][i] += v[p][0][n];
+                jc_center[p][0][k][j][i][0] += v[p][0][n] * offset[p][0][n];
+                jc_center[p][0][k][j][i][1] += v[p][0][n] * offset[p][1][n];
+                jc_center[p][0][k][j][i][2] += v[p][0][n] * offset[p][2][n];
             }
+             smoothscalarfield(currentj[p][0], jc_center[p][0]);//jx
+        }
 #pragma omp section
+        {
+            int p = 1;
+        //    cout << "jx :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
             {
-                for (int n = 0; n < n_part[p]; ++n)
-                {
-                    unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                    currentj[p][1][k][j][i] += v[p][1][n];
-                    jc_center[p][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
-                    jc_center[p][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
-                    jc_center[p][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
-                }
-                //  smoothscalarfield(currentj[p][1], jc_center[p][1]);
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                currentj[p][0][k][j][i] += v[p][0][n];
+                jc_center[p][0][k][j][i][0] += v[p][0][n] * offset[p][0][n];
+                jc_center[p][0][k][j][i][1] += v[p][0][n] * offset[p][1][n];
+                jc_center[p][0][k][j][i][2] += v[p][0][n] * offset[p][2][n];
             }
+             smoothscalarfield(currentj[p][0], jc_center[p][0]);
+        }
 #pragma omp section
+        {
+            int p = 0;
+      //      cout << "jy :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
             {
-                for (int n = 0; n < n_part[p]; ++n)
-                {
-                    unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                    currentj[p][2][k][j][i] += v[p][2][n];
-                    jc_center[p][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
-                    jc_center[p][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
-                    jc_center[p][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
-                }
-                // smoothscalarfield(currentj[p][2], jc_center[p][2]);
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                currentj[p][1][k][j][i] += v[p][1][n];
+                jc_center[p][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
+                jc_center[p][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
+                jc_center[p][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
             }
+              smoothscalarfield(currentj[p][1], jc_center[p][1]);
+        }
+#pragma omp section
+        {
+            int p = 1;
+        //    cout << "jy :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
+            {
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                currentj[p][1][k][j][i] += v[p][1][n];
+                jc_center[p][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
+                jc_center[p][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
+                jc_center[p][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
+            }
+              smoothscalarfield(currentj[p][1], jc_center[p][1]);
+        }
+#pragma omp section
+        {
+            int p = 0;
+        //    cout << "jz :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
+            {
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                currentj[p][2][k][j][i] += v[p][2][n];
+                jc_center[p][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
+                jc_center[p][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
+                jc_center[p][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+            }
+             smoothscalarfield(currentj[p][2], jc_center[p][2]);
+        }
+#pragma omp section
+        {
+            int p = 1;
+         //   cout << "jz :" << omp_get_thread_num() << endl;
+            for (int n = 0; n < n_part[p]; ++n)
+            {
+                unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+                currentj[p][2][k][j][i] += v[p][2][n];
+                jc_center[p][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
+                jc_center[p][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
+                jc_center[p][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+            }
+             smoothscalarfield(currentj[p][2], jc_center[p][2]);
         }
     }
 

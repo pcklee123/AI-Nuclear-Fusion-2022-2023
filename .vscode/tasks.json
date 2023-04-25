@@ -7,7 +7,17 @@
             "label": "echo",
             "type": "shell",
             "command": "make",
-            "args":["${workspaceFolder}/Makefile"]
+            "args": [
+                "${workspaceFolder}/Makefile"
+            ]
+        },
+        {
+            "type": "make",
+            "targetName": "TS3",
+            "makeFileRelativePath": "Makefile",
+            "problemMatcher": [],
+            "label": "make: TS3",
+            "detail": "./Makefile"
         }
     ]
     }

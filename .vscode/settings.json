@@ -4,7 +4,8 @@
         "new": "cpp",
         "ostream": "cpp",
         "iostream": "cpp",
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "ratio": "cpp"
     },
     "makefile.launchConfigurations": [
         {

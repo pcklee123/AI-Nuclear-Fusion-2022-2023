@@ -16,7 +16,7 @@ constexpr float a0 = 10e-3; // typical dimensions of a cell
 constexpr float target_part = 1e12;
 
 // technical parameters
-constexpr int n_space = 64;                                      // must be 2 to power of n
+constexpr int n_space = 32;                                      // must be 2 to power of n
 constexpr int n_partd = n_space * n_space * n_space * nback * 4; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 1,E 1e9,a0 10e-3,part 1e12,nspace 64 npartd *64
@@ -26,7 +26,7 @@ constexpr int n_output_part = (n_partd > 8192) ? 8192 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 9; // total number of time steps to calculate
-constexpr int nc = 30;         // number of times to calculate E and B between printouts
+constexpr int nc = 2;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;      // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
