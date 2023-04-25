@@ -195,12 +195,23 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                currentj[p][0][k][j][i] += v[p][0][n];
-                jc_center[p][0][k][j][i][0] += v[p][0][n] * offset[p][0][n];
-                jc_center[p][0][k][j][i][1] += v[p][0][n] * offset[p][1][n];
-                jc_center[p][0][k][j][i][2] += v[p][0][n] * offset[p][2][n];
+                if (v[p][0][n] > 0)
+                {
+                    jc2[p][0][0][k][j][i] += v[p][0][n];
+                    jc_center[p][0][0][k][j][i][0] += v[p][0][n] * offset[p][0][n];
+                    jc_center[p][0][0][k][j][i][1] += v[p][0][n] * offset[p][1][n];
+                    jc_center[p][0][0][k][j][i][2] += v[p][0][n] * offset[p][2][n];
+                }
+                else
+                {
+                    jc2[p][1][0][k][j][i] += v[p][0][n];
+                    jc_center[p][1][0][k][j][i][0] += v[p][0][n] * offset[p][0][n];
+                    jc_center[p][1][0][k][j][i][1] += v[p][0][n] * offset[p][1][n];
+                    jc_center[p][1][0][k][j][i][2] += v[p][0][n] * offset[p][2][n];
+                }
             }
-            //      smoothscalarfield(currentj[p][0], jc_center[p][0]);
+            smoothscalarfield(jc2[p][0][0], jc_center[p][0][0]); // jxp
+            smoothscalarfield(jc2[p][1][0], jc_center[p][1][0]); // jxn
         }
 #pragma omp section
         {
@@ -209,12 +220,23 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                currentj[p][1][k][j][i] += v[p][1][n];
-                jc_center[p][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
-                jc_center[p][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
-                jc_center[p][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
+                if (v[p][1][n] > 0)
+                {
+                    jc2[p][0][1][k][j][i] += v[p][1][n];
+                    jc_center[p][0][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
+                    jc_center[p][0][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
+                    jc_center[p][0][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
+                }
+                else
+                {
+                    jc2[p][1][1][k][j][i] += v[p][1][n];
+                    jc_center[p][1][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
+                    jc_center[p][1][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
+                    jc_center[p][1][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
+                }
             }
-            //           smoothscalarfield(currentj[p][1], jc_center[p][1]);
+            smoothscalarfield(jc2[p][0][1], jc_center[p][0][1]); // jyp
+            smoothscalarfield(jc2[p][1][1], jc_center[p][1][1]); // jyn
         }
 #pragma omp section
         {
@@ -223,12 +245,23 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                currentj[p][1][k][j][i] += v[p][1][n];
-                jc_center[p][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
-                jc_center[p][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
-                jc_center[p][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
+                if (v[p][1][n] > 0)
+                {
+                    jc2[p][0][1][k][j][i] += v[p][1][n];
+                    jc_center[p][0][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
+                    jc_center[p][0][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
+                    jc_center[p][0][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
+                }
+                else
+                {
+                    jc2[p][1][1][k][j][i] += v[p][1][n];
+                    jc_center[p][1][1][k][j][i][0] += v[p][1][n] * offset[p][0][n];
+                    jc_center[p][1][1][k][j][i][1] += v[p][1][n] * offset[p][1][n];
+                    jc_center[p][1][1][k][j][i][2] += v[p][1][n] * offset[p][2][n];
+                }
             }
-            //         smoothscalarfield(currentj[p][1], jc_center[p][1]);
+            smoothscalarfield(jc2[p][0][1], jc_center[p][0][1]); // jyp
+            smoothscalarfield(jc2[p][1][1], jc_center[p][1][1]); // jyn
         }
 #pragma omp section
         {
@@ -237,12 +270,23 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                currentj[p][2][k][j][i] += v[p][2][n];
-                jc_center[p][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
-                jc_center[p][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
-                jc_center[p][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+                if (v[p][2][n] > 0)
+                {
+                    jc2[p][0][2][k][j][i] += v[p][2][n];
+                    jc_center[p][0][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
+                    jc_center[p][0][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
+                    jc_center[p][0][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+                }
+                else
+                {
+                    jc2[p][1][2][k][j][i] += v[p][2][n];
+                    jc_center[p][1][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
+                    jc_center[p][1][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
+                    jc_center[p][1][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+                }
             }
-            //      smoothscalarfield(currentj[p][2], jc_center[p][2]);
+            smoothscalarfield(jc2[p][0][2], jc_center[p][0][2]); // jyp
+            smoothscalarfield(jc2[p][1][2], jc_center[p][1][2]); // jyn
         }
 #pragma omp section
         {
@@ -251,12 +295,23 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                currentj[p][2][k][j][i] += v[p][2][n];
-                jc_center[p][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
-                jc_center[p][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
-                jc_center[p][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+                if (v[p][2][n] > 0)
+                {
+                    jc2[p][0][2][k][j][i] += v[p][2][n];
+                    jc_center[p][0][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
+                    jc_center[p][0][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
+                    jc_center[p][0][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+                }
+                else
+                {
+                    jc2[p][1][2][k][j][i] += v[p][2][n];
+                    jc_center[p][1][2][k][j][i][0] += v[p][2][n] * offset[p][0][n];
+                    jc_center[p][1][2][k][j][i][1] += v[p][2][n] * offset[p][1][n];
+                    jc_center[p][1][2][k][j][i][2] += v[p][2][n] * offset[p][2][n];
+                }
             }
-            // smoothscalarfield(currentj[p][2], jc_center[p][2]);
+            smoothscalarfield(jc2[p][0][2], jc_center[p][0][2]); // jyp
+            smoothscalarfield(jc2[p][1][2], jc_center[p][1][2]); // jyn
         }
     }
 
