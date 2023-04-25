@@ -155,5 +155,5 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
                             float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
                             int q[2][n_partd], int m[2][n_partd], int nt[2], float dt[2]);
 void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
-                       float fc[n_space_divz][n_space_divy][n_space_divx][3]);
+                       float fc[n_space_divz][n_space_divy][n_space_divx][3],int s);
 #endif // TRAJ_H_INCLUDED

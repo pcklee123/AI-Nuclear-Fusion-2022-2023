@@ -24,7 +24,7 @@ void save_files(int i_time, unsigned int n_space_div[3], float posL[3], float dd
   save_vtp("d", i_time, n_output_part, 1, t, KE, posp);
 #endif
 }
-void save_hist(int i_time, double t, int npart, float dt[2], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],int n_part[3])
+void save_hist(int i_time, double t, int npart, float dt[2], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int n_part[3])
 {
   // Create the vtkTable object
   vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
@@ -36,27 +36,31 @@ void save_hist(int i_time, double t, int npart, float dt[2], float pos0x[2][n_pa
   vtkSmartPointer<vtkDoubleArray> ionHistArray = vtkSmartPointer<vtkDoubleArray>::New();
   ionHistArray->SetName("Ion KE Histogram");
 
-  double KEhist[2][Hist_n];
+  long KEhist[2][Hist_n];
   memset(KEhist, 0, sizeof(KEhist));
+  float coef[2];
   for (int p = 0; p < 2; ++p)
+  {
+    coef[p] = 0.5 * (float)mp[p] * (float)Hist_n / (e_charge_mass * dt[p] * dt[p] * (float)Hist_max);
     for (int i = 0; i < n_part[p]; ++i)
     {
       float dx = pos1x[p][i] - pos0x[p][i];
       float dy = pos1y[p][i] - pos0y[p][i];
       float dz = pos1z[p][i] - pos0z[p][i];
-      unsigned int index = (int)floor(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * dt[p] * dt[p]*(float)Hist_max)) ;
+      unsigned int index = (int)floor(coef[p] * (dx * dx + dy * dy + dz * dz));
       if (index < Hist_n)
-//        index = Hist_n - 1;
-   //   if (index < 0)
-   //     cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * dt[p] * dt[p]*(float)Hist_max))<< endl;
-      KEhist[p][index]++;
+        //        index = Hist_n - 1;
+        //   if (index < 0)
+        //     cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * dt[p] * dt[p]*(float)Hist_max))<< endl;
+        KEhist[p][index]++;
     }
+  }
   // Add the histogram values to the arrays
   for (int i = 0; i < Hist_n; ++i)
   {
-    energyArray->InsertNextValue(((double)(i+0.5) * (double)Hist_max) / (double)(Hist_n));
-    electronHistArray->InsertNextValue(KEhist[0][i] + 1);
-    ionHistArray->InsertNextValue(KEhist[1][i] + 1);
+    energyArray->InsertNextValue(((double)(i + 0.5) * (double)Hist_max) / (double)(Hist_n));
+    electronHistArray->InsertNextValue((double)(KEhist[0][i] + 1));
+    ionHistArray->InsertNextValue((double)(KEhist[1][i] + 1));
   }
 
   // Add the histogram arrays to the table
