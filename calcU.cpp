@@ -43,11 +43,13 @@ void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
                 float c11 = V[k + 1][j + 1][i] * dx1 + V[k + 1][j + 1][i + 1] * dx;
                 float c = (c00 * (1 - dy) + c10 * dy) * (1 - dz) + (c01 * (1 - dy) + c11 * dy) * dz;
                 EUtot += c * q[p][n];
+                /* 
                 if (isnanf(V[k][j][i]))
                     cout << "V is NAN ";
-                // if (isnanf(q[p][n])) cout <<"q is NAN ";
                 if (isnanf(c))
                     cout << "c is NAN ";
+                    */
+               
             }
         }
         EUtot *= 0.5f * e_charge;

@@ -16,7 +16,7 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                 fc[k][j][i][0] = (fc[k][j][i][0] / (f[k][j][i] + 1.0e-1f));
                 fc[k][j][i][1] = (fc[k][j][i][1] / (f[k][j][i] + 1.0e-1f));
                 fc[k][j][i][2] = (fc[k][j][i][2] / (f[k][j][i] + 1.0e-1f));
-                // if (fabs(f[k][j][i])>0.01)  cout << fc[k][j][i][0] << " ";
+                if (fabs(fc[k][j][i][0])>0.6)  cout << fc[k][j][i][0] << " "<<f[k][j][i] <<" "<<i<<" " <<j<<" "<<k<<" "<<endl;
                 /*
                 if (fc[k][j][i][1] > 0.5)
                     cout << fc[k][j][i][0] << " ";
@@ -127,7 +127,7 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                     fx1 = 1 - fc[k0][j0][i0][0];
                     break;
                 default:
-                    cout << "smoothfield default " << sw << endl;
+                    cout << "error smoothfield default " << sw << endl;
                 }
                 /*
                 if (fx0 < 0)
@@ -160,6 +160,7 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
             for (int i = 0; i < n_space_divx; ++i)
             {
                 f[k][j][i] = ftemp[k][j][i];
+                /*
                 if (i == 0)
                     f[k][j][i] = 0;
                 if (i == n_space_divx - 1)
@@ -172,6 +173,7 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                     f[k][j][i] = 0;
                 if (k == n_space_divz - 1)
                     f[k][j][i] = 0;
+                    */
             }
         }
     }
