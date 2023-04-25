@@ -10,13 +10,13 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
     // calculate center of charge field as offsets (-0.5 to 0.5) from cell center
     //   cout << "calculate center of charge field" << endl;
     for (int k = 0; k < n_space_divz; ++k)
-        for (int j = 0; j < n_space_divy; ++j )
-            for (int i = 0; i < n_space_divx; ++i )
+        for (int j = 0; j < n_space_divy; ++j)
+            for (int i = 0; i < n_space_divx; ++i)
             {
                 fc[k][j][i][0] = (fc[k][j][i][0] / (f[k][j][i] + 1.0e-1f));
                 fc[k][j][i][1] = (fc[k][j][i][1] / (f[k][j][i] + 1.0e-1f));
                 fc[k][j][i][2] = (fc[k][j][i][2] / (f[k][j][i] + 1.0e-1f));
-                //if (fabs(f[k][j][i])>0.01)  cout << fc[k][j][i][0] << " ";
+                // if (fabs(f[k][j][i])>0.01)  cout << fc[k][j][i][0] << " ";
                 /*
                 if (fc[k][j][i][1] > 0.5)
                     cout << fc[k][j][i][0] << " ";
@@ -153,12 +153,28 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                 ftemp[k1][j1][i1] += f[k0][j0][i0] * fz0 * fy0 * fx0;
             }
     //  cout << "smoothfield copy back" << endl;
-    for (int k = 0; k < n_space_divz; ++k )
-        for (int j = 0; j < n_space_divy; ++j )
-            for (int i = 0; i < n_space_divx; ++i )
+    for (int k = 0; k < n_space_divz; ++k)
+    {
+        for (int j = 0; j < n_space_divy; ++j)
+        {
+            for (int i = 0; i < n_space_divx; ++i)
             {
                 f[k][j][i] = ftemp[k][j][i];
+                if (i == 0)
+                    f[k][j][i] = 0;
+                if (i == n_space_divx - 1)
+                    f[k][j][i] = 0;
+                if (j == 0)
+                    f[k][j][i] = 0;
+                if (j == n_space_divy - 1)
+                    f[k][j][i] = 0;
+                if (k == 0)
+                    f[k][j][i] = 0;
+                if (k == n_space_divz - 1)
+                    f[k][j][i] = 0;
             }
+        }
+    }
     _aligned_free(ftemp);
 }
 
