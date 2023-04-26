@@ -174,6 +174,7 @@ int main()
 
     int i_time = 0;
     get_densityfields(currentj, np, npt, nt, KEtot, posL, posH, dd, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, dt, n_part, jc);
+    //return(0);
     calcEBV(V, E, B, Ee, Be, npt, jc, dd, Emax, Bmax);
     cout << "calc trilin constants\n";
     calc_trilin_constants(E, Ea, dd, posL);

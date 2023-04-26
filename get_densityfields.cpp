@@ -35,11 +35,13 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     //   static auto *jc_center = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 3 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
 
     // set fields=0 in preparation// Could split into threads
-    fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
     fill(reinterpret_cast<float *>(np), reinterpret_cast<float *>(np) + n_cells * 2, 0.f);
+ //   fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
+
+    fill(reinterpret_cast<float *>(np_center), reinterpret_cast<float *>(np_center) + n_cells * 3 * 2, 0.f);
     fill(reinterpret_cast<float *>(jc2), reinterpret_cast<float *>(jc2) + n_cells * 2 * 2 * 3, 0.f);
     fill(reinterpret_cast<float *>(jc_center), reinterpret_cast<float *>(jc_center) + n_cells * 2 * 2 * 3 * 3, 0.f);
-    fill(reinterpret_cast<float *>(np_center), reinterpret_cast<float *>(np_center) + n_cells * 3 * 2, 0.f);
+
 
     static auto oblist = new unsigned int[2][n_parte]; // list of out of bound particles
     static auto iblist = new unsigned int[2][n_parte];
@@ -102,7 +104,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         //        cout << p << "number of particles out of bounds " << nob[p] << endl;
     }
 #pragma omp barrier
-  //  cout << "get_density_checked out of bounds\n";
+    //  cout << "get_density_checked out of bounds\n";
 
 #pragma omp parallel num_threads(2)
     {
@@ -142,10 +144,10 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                np[p][k][j][i] += q[p][n];
-                np_center[p][k][j][i][0] += q[p][n] * offset[p][0][n];
-                np_center[p][k][j][i][1] += q[p][n] * offset[p][1][n];
-                np_center[p][k][j][i][2] += q[p][n] * offset[p][2][n];
+                np[p][k][j][i] += (float)q[p][n];
+                np_center[p][k][j][i][0] += (float)q[p][n] * offset[p][0][n];
+                np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
+                np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
             }
             smoothscalarfield(np[p], np_center[p], 0); // n
         }
@@ -156,10 +158,10 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             for (int n = 0; n < n_part[p]; ++n)
             {
                 unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                np[p][k][j][i] += q[p][n];
-                np_center[p][k][j][i][0] += q[p][n] * offset[p][0][n];
-                np_center[p][k][j][i][1] += q[p][n] * offset[p][1][n];
-                np_center[p][k][j][i][2] += q[p][n] * offset[p][2][n];
+                np[p][k][j][i] += (float)q[p][n];
+                np_center[p][k][j][i][0] += (float)q[p][n] * offset[p][0][n];
+                np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
+                np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
             }
             smoothscalarfield(np[p], np_center[p], 1); // p
         }
@@ -213,7 +215,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             smoothscalarfield(jc2[p][1][c], jc_center[p][1][c], 1); // n
         }
 #pragma omp section
-        {            //    cout << "jy :" << omp_get_thread_num() << endl;
+        { //    cout << "jy :" << omp_get_thread_num() << endl;
             int p = 1;
             int c = 1;
             for (int n = 0; n < n_part[p]; ++n)
@@ -228,9 +230,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             smoothscalarfield(jc2[p][0][c], jc_center[p][0][c], 0); // p
             smoothscalarfield(jc2[p][1][c], jc_center[p][1][c], 1); // n
         }
-        
+
 #pragma omp section
-        {            //    cout << "jz :" << omp_get_thread_num() << endl;
+        { //    cout << "jz :" << omp_get_thread_num() << endl;
             int p = 0;
             int c = 2;
             for (int n = 0; n < n_part[p]; ++n)
@@ -245,9 +247,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             smoothscalarfield(jc2[p][0][c], jc_center[p][0][c], 0); // p
             smoothscalarfield(jc2[p][1][c], jc_center[p][1][c], 1); // n
         }
-        
+
 #pragma omp section
-        {            //   cout << "jz :" << omp_get_thread_num() << endl;
+        { //   cout << "jz :" << omp_get_thread_num() << endl;
             int p = 1;
             int c = 2;
             for (int n = 0; n < n_part[p]; ++n)
@@ -262,7 +264,6 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             smoothscalarfield(jc2[p][0][c], jc_center[p][0][c], 0); // p
             smoothscalarfield(jc2[p][1][c], jc_center[p][1][c], 1); // n
         }
-        
     }
 
 #pragma omp barrier

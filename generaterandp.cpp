@@ -81,7 +81,7 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
             //         nt[p] += q[p][n];
         }
     }
-#pragma barrier
+#pragma omp barrier
     gsl_rng_free(rng); // dealloc the rng
 }
 void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
@@ -129,27 +129,37 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
     long seed;
     gsl_rng *rng;                        // random number generator
     rng = gsl_rng_alloc(gsl_rng_rand48); // pick random number generator
-    seed = 1670208073;                   // time(NULL);
+
+    time_t myTime;
+    seed = time(&myTime);
     cout << "seed=" << seed << "\n";
     gsl_rng_set(rng, seed); // set seed
 
     for (int p = 0; p < 2; p++)
     {
         int na = 0;
-        for (int k = 1; k < n_space_divz - 1; ++k)
-            for (int j = 1; j < n_space_divy - 1; ++j)
-                for (int i = 1; i < n_space_divx - 1; ++i)
-                {
-                    pos0x[p][na] = (float)(i - n_space_divx / 2) * a0;
-                    pos0y[p][na] = (float)(j - n_space_divy / 2) * a0;
-                    pos0z[p][na] = (float)(k - n_space_divz / 2) * a0;
-                    pos1x[p][na] = pos0x[p][na];
-                    pos1y[p][na] = pos0y[p][na];
-                    pos1z[p][na] = pos0z[p][na];
-                    q[p][na] = qs[p];
-                    m[p][na] = mp[p];
-                    na++;
-                }
+        for (int n = 0; n < nback; ++n) // set number of particles per cell in background
+        {
+            for (int k = 1; k < n_space_divz - 1; ++k)
+            {
+                for (int j = 1; j < n_space_divy - 1; ++j)
+                    for (int i = 1; i < n_space_divx - 1; ++i)
+                    {
+                        pos0x[p][na] = ((float)(i - n_space_divx / 2) + (float)rand() / RAND_MAX) * a0;
+                        pos0y[p][na] = ((float)(j - n_space_divy / 2) + (float)rand() / RAND_MAX) * a0;
+                        pos0z[p][na] = ((float)(k - n_space_divz / 2) + (float)rand() / RAND_MAX) * a0;
+                        pos1x[p][na] = pos0x[p][na];
+                        pos1y[p][na] = pos0y[p][na];
+                        pos1z[p][na] = pos0z[p][na];
+                        q[p][na] = qs[p];
+                        m[p][na] = mp[p];
+                        na++;
+                    }
+      //      cout << pos1z[p][na - 1] << " ";
+            }
+        }
+
+#pragma omp parallel for ordered
         for (int n = na; n < n_partd; n++)
         {
             float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.5);
@@ -165,8 +175,9 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
             //          if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << dt[p]<<endl;
             q[p][n] = qs[p];
             m[p][n] = mp[p];
-            nt[p] += q[p][n];
+            //        nt[p] += q[p][n];
         }
     }
+#pragma omp barrier
     gsl_rng_free(rng); // dealloc the rng
 }

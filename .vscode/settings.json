@@ -13,6 +13,11 @@
             "cwd": "c:\\Users\\pckle\\AI-Nuclear-Fusion-2022-2023",
             "binaryPath": "c:\\Users\\pckle\\AI-Nuclear-Fusion-2022-2023\\TS3",
             "binaryArgs": []
+        },
+        {
+            "cwd": "e:\\ckplee@niestaffondrive\\OneDrive - Nanyang Technological University\\Documents\\AI-Nuclear-Fusion-2022-2023",
+            "binaryPath": "e:\\ckplee@niestaffondrive\\OneDrive - Nanyang Technological University\\Documents\\AI-Nuclear-Fusion-2022-2023\\TS3",
+            "binaryArgs": []
         }
     ],
     "C_Cpp.errorSquiggles": "enabled"
