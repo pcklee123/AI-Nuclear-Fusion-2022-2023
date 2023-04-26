@@ -23,8 +23,8 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                 fc[k][j][i][2] = (fc[k][j][i][2] / (f[k][j][i] + d));
                 if (fabs(fc[k][j][i][0]) > 0.6)
                     cout << fc[k][j][i][0] << " " << f[k][j][i] << " " << i << " " << j << " " << k << " " << endl;
-                if (fabs(f[k][j][i]) > 1.0e12)
-                    cout << fc[k][j][i][0] << " " << f[k][j][i] << " " << i << " " << j << " " << k << " " << endl;
+          //      if (fabs(f[k][j][i]) > 1.0e12)
+       //             cout << fc[k][j][i][0] << " " << f[k][j][i] << " " << i << " " << j << " " << k << " " << endl;
                 /*
                 if (fc[k][j][i][1] > 0.5)
                     cout << fc[k][j][i][0] << " ";

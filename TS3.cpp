@@ -71,8 +71,7 @@ int main()
     auto *currentj = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
     auto *jc = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
 
-    //    auto *jc = new float[3][n_space_divz][n_space_divy][n_space_divx];
-    float U[2] = {0, 0};
+    float U[2] = {0, 0};//{Electric PE, magnetic PE}
 
     ofstream E_file, B_file;
 
@@ -86,8 +85,7 @@ int main()
          << "int32_t size=" << sizeof(int32_t) << ", "
          << "int size=" << sizeof(int) << endl;
 
-    int total_ncalc[2] = {0, 0};
-    // particle 0 - electron, particle 1 deuteron
+    int total_ncalc[2] = {0, 0};    // particle 0 - electron, particle 1 deuteron
     float dt[2];
     cout << "Start up dt = " << timer.replace() << "s\n";
 #define generateRandom
@@ -121,8 +119,6 @@ int main()
         cout << posL[c] << "," << posH[c] << "," << dd[c] << endl;
     }
 
-    // unsigned int ci[7] = {n_partd, n_cells, n_space_divx, n_space_divy, n_space_divz, 0, n_space * 2 - 1};
-    // float cf[11]] = {0, 0, posL[0], posH[0], posL[1], posH[1], posL[2], posH[2], dd[0], dd[1], dd[2]};
     unsigned int ci[2] = {n_partd, 0};
     float cf[2] = {0, 0};
     fftwf_init_threads();
@@ -131,41 +127,16 @@ int main()
 
     // print initial conditions
     {
-        /*
-        cout << "electron Temp = " << Temp[0] << " K, electron Density = " << Density_e << " m^-3" << endl;
-        cout << "Plasma Frequency(assume cold) = " << plasma_freq << " Hz, Plasma period = " << plasma_period << " s" << endl;
-        cout << "Cyclotron period = " << Tcyclotron << " s, Time for electron to move across 1 cell = " << Tv << " s" << endl;
-        cout << "Time taken for electron at rest to accelerate across 1 cell due to E = " << TE << " s" << endl;
-        cout << "electron thermal velocity = " << vel_e << endl;
-        cout << "dt = " << dt[0] << " s, Total time = " << dt[0] * ncalc[0] * ndatapoints * nc << ", s" << endl;
-        cout << "Debye Length = " << Debye_Length << " m, initial dimension = " << a0 << " m" << endl;
-        cout << "number of particle per cell = " << n_partd / (n_space * n_space * n_space) * 8 << endl;
-    */
         E_file.open("info.csv");
-        /*
-        E_file << ",X, Y, Z" << endl;
         E_file << "Data Origin," << posL[0] << "," << posL[1] << "," << posL[0] << endl;
         E_file << "Data Spacing," << dd[0] << "," << dd[1] << "," << dd[2] << endl;
         E_file << "Data extent x, 0," << n_space - 1 << endl;
         E_file << "Data extent y, 0," << n_space - 1 << endl;
         E_file << "Data extent z, 0," << n_space - 1 << endl;
-
-        E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
-        E_file << "electron Density =," << Density_e << ",m^-3" << endl;
-        E_file << "electron thermal velocity = ," << vel_e << endl;
+ //       E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
         E_file << "Maximum expected B = ," << Bmax << endl;
-        E_file << "Plasma Frequency(assume cold) = ," << plasma_freq << ", Hz" << endl;
-        E_file << "Plasma period =," << plasma_period << ",s" << endl;
-        E_file << "Cyclotron period =," << Tcyclotron << ",s" << endl;
-        E_file << "Time for electron to move across 1 cell Tv =," << Tv << ",s" << endl;
-        E_file << "Time for electron to move across 1 cell TE =," << TE << ",s" << endl;
         E_file << "time step between prints = ," << dt[0] * ncalc[0] * nc << ",s" << endl;
         E_file << "time step between EBcalc = ," << dt[0] * ncalc[0] << ",s" << endl;
-
-        E_file << "Debye Length =," << Debye_Length << ",m" << endl;
-        E_file << "Larmor radius =," << vel_e / (Bmax * e_charge_mass) << ",m" << endl;
-
-    */
         E_file << "dt =," << dt[0] << ",s" << endl;
         E_file << "cell size =," << a0 << ",m" << endl;
         E_file << "number of particles per cell = ," << n_partd / (n_space * n_space * n_space) << endl;
@@ -174,7 +145,7 @@ int main()
 
     int i_time = 0;
     get_densityfields(currentj, np, npt, nt, KEtot, posL, posH, dd, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, dt, n_part, jc);
-    //return(0);
+    // return(0);
     calcEBV(V, E, B, Ee, Be, npt, jc, dd, Emax, Bmax);
     cout << "calc trilin constants\n";
     calc_trilin_constants(E, Ea, dd, posL);

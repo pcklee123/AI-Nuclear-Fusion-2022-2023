@@ -87,6 +87,7 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
 void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                             float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
                             int q[2][n_partd], int m[2][n_partd], int nt[2], float dt[2])
+
 {
     // set plasma parameters
     // float mp[2]= {9.10938356e-31,3.3435837724e-27}; //kg
@@ -94,12 +95,11 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
     // spherical plasma radius is 1/8 of total extent.
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, -1e7 /*1e6*/}, {0, 0, 0}};
+    float v0[2][3] = {{0, 0, 1e7f}, {0, 0, 0}};/*1e6*/
 
     float r0 = a0; // the radius
     float area = pi * r0 * r0;
     float volume = pi * r0 * r0 * n_space * a0;
-    // float volume=((posHp[0]-posLp[0])*(posHp[1]-posLp[1])*(posHp[2]-posLp[2]))); //cube
 
     // calculated plasma parameters
     cout << "initial e Temperature, = " << Temp_e / 11600 << "eV, initial d Temperature, = " << Temp_d / 11600 << " eV\n";
@@ -112,8 +112,10 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
-    float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass));
+    float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass) + v0[0][0] * v0[0][0] + v0[0][1] * v0[0][1] + v0[0][2] * v0[0][2]);
+    cout << "electron velocity due to temp and initial velocity " << vel_e << endl;
     float Tv = a0 / vel_e; // time for electron to move across 1 cell
+    cout << "Tv = " << Tv << endl;
     float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * Bmax0);
     float TDebye = Debye_Length / vel_e;
     float TE = sqrt(2 * a0 / e_charge_mass / Emax0);
@@ -121,11 +123,21 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
 
     dt[0] = 4 * min(min(min(TDebye, min(Tv / md_me, Tcyclotron) / 4), plasma_period / ncalc0[0] / 4), TE / ncalc0[0]) / 2; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
     dt[1] = dt[0] * md_me;
+    cout << "dt[0] = " << dt[0] << endl;
     //  float mu0_4pidt[2]= {mu0_4pi/dt[0],mu0_4pi/dt[1]};
     cout << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
-
+    /*
+    cout << "electron Temp = " << Temp[0] << " K, electron Density = " << Density_e << " m^-3" << endl;
+    cout << "Plasma Frequency(assume cold) = " << plasma_freq << " Hz, Plasma period = " << plasma_period << " s" << endl;
+    cout << "Cyclotron period = " << Tcyclotron << " s, Time for electron to move across 1 cell = " << Tv << " s" << endl;
+    cout << "Time taken for electron at rest to accelerate across 1 cell due to E = " << TE << " s" << endl;
+    cout << "electron thermal velocity = " << vel_e << endl;
+    cout << "dt = " << dt[0] << " s, Total time = " << dt[0] * ncalc[0] * ndatapoints * nc << ", s" << endl;
+    cout << "Debye Length = " << Debye_Length << " m, initial dimension = " << a0 << " m" << endl;
+    cout << "number of particle per cell = " << n_partd / (n_space * n_space * n_space) * 8 << endl;
+*/
     // set initial positions and velocity
-    float sigma[2] = {sqrt(kb * Temp[0] / (mp[0] * e_mass)), sqrt(kb * Temp[1] / (mp[1] * e_mass))};
+    double sigma[2] = {sqrt(kb * Temp[0] / (mp[0] * e_mass)), sqrt(kb * Temp[1] / (mp[1] * e_mass))};
     long seed;
     gsl_rng *rng;                        // random number generator
     rng = gsl_rng_alloc(gsl_rng_rand48); // pick random number generator
@@ -155,16 +167,16 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
                         m[p][na] = mp[p];
                         na++;
                     }
-      //      cout << pos1z[p][na - 1] << " ";
+                //      cout << pos1z[p][na - 1] << " ";
             }
         }
 
-#pragma omp parallel for ordered
+//#pragma omp parallel for ordered
         for (int n = na; n < n_partd; n++)
         {
             float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.5);
             double x, y, z;
-            z = gsl_ran_flat(rng, -1.0, 1.0) * a0 * n_space / 2;
+            z = gsl_ran_flat(rng, -1.0, 1.0) * a0 * (n_space-2) * 0.5;
             gsl_ran_dir_2d(rng, &x, &y);
             pos0x[p][n] = r * x;
             pos1x[p][n] = pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * dt[p];
@@ -172,12 +184,13 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
             pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * dt[p];
             pos0z[p][n] = z;
             pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * dt[p];
+ //           cout << pos1z[p][n] << " ";
             //          if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << dt[p]<<endl;
             q[p][n] = qs[p];
             m[p][n] = mp[p];
             //        nt[p] += q[p][n];
         }
     }
-#pragma omp barrier
+//#pragma omp barrier
     gsl_rng_free(rng); // dealloc the rng
 }

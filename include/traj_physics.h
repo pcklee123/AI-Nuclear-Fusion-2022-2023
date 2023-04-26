@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 0
+#define cldevice 1
 //#define sphere // do hot spot  problem
  #define cylinder //do hot rod problem
 #define Temp_e 1e7 // in Kelvin
@@ -8,12 +8,12 @@
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 1;
-constexpr float Emax0 = 1e7; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float Bmax0 = 10;
+constexpr float Emax0 = 1e9; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback = 32;  // background particles per cell - improves stability
 
 constexpr float a0 = 10e-3; // typical dimensions of a cell
-constexpr float target_part = 1e8;
+constexpr float target_part = 1e16;
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n
