@@ -14,5 +14,6 @@
             "binaryPath": "c:\\Users\\pckle\\AI-Nuclear-Fusion-2022-2023\\TS3",
             "binaryArgs": []
         }
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "enabled"
 }

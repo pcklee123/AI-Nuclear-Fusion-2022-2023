@@ -4,7 +4,11 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\msys64\\ucrt64\\include/**"
+                "C:\\msys64\\ucrt64\\include\\**",
+                "C:\\msys64\\ucrt64\\include\\vtk\\**",
+                "C:\\msys64\\ucrt64\\include\\vtk\\vtksys\\**",
+                "C:/msys64/ucrt64/include/",
+                "C:/msys64/ucrt64/include/vtk"
             ],
             "defines": [
                 "_DEBUG",
