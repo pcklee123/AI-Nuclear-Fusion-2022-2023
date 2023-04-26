@@ -32,6 +32,7 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                     cout << fc[k][j][i][1] << " " << f[k][j][i] << " ";
                     */
             }
+            //why are there a bunch of stuff here?
     fc[1][1][1][0] = 0;
     fc[1][1][1][1] = 0;
     fc[1][1][1][2] = 0;
