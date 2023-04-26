@@ -8,7 +8,7 @@
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 10;
+constexpr float Bmax0 = 20;
 constexpr float Emax0 = 1e9; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback = 32;  // background particles per cell - improves stability
 
@@ -26,7 +26,7 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 8192) ? 8192 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 9; // total number of time steps to calculate
+constexpr int ndatapoints = 90; // total number of time steps to calculate
 constexpr int nc = 2;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;      // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 

@@ -23,8 +23,8 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                 fc[k][j][i][2] = (fc[k][j][i][2] / (f[k][j][i] + d));
                 if (fabs(fc[k][j][i][0]) > 0.6)
                     cout << fc[k][j][i][0] << " " << f[k][j][i] << " " << i << " " << j << " " << k << " " << endl;
-          //      if (fabs(f[k][j][i]) > 1.0e12)
-       //             cout << fc[k][j][i][0] << " " << f[k][j][i] << " " << i << " " << j << " " << k << " " << endl;
+                //      if (fabs(f[k][j][i]) > 1.0e12)
+                //             cout << fc[k][j][i][0] << " " << f[k][j][i] << " " << i << " " << j << " " << k << " " << endl;
                 /*
                 if (fc[k][j][i][1] > 0.5)
                     cout << fc[k][j][i][0] << " ";
@@ -32,6 +32,9 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                     cout << fc[k][j][i][1] << " " << f[k][j][i] << " ";
                     */
             }
+    fc[1][1][1][0] = 0;
+    fc[1][1][1][1] = 0;
+    fc[1][1][1][2] = 0;
     // calculate the 8 coefficients out of 27 and their indices
     /* center is [0][0][0] [dk][dj][di]so [-1][-1][-1],[-1][-1][0],[-1][-1][1] ... dk*n_space_divx*n_space_divx+dj*n_space_divx+di */
     int k1, j1, i1, sw;
