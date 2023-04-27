@@ -10,9 +10,9 @@ This project aims to develop a Particle in Cell plasma code.
 Original code in 2021 by Hilary,Yin Yue and Chloe, extensive improvements by Samuel,Ananth and Vishwa.
 
 ## Getting Started
-### Prerequisites
+### Prerequisites for windows
 - MSYS2
-- to avoid confusion, use either of "mingw64" or "ucrt" and do not mix the two. The following examples make use pf ucrt  
+- to avoid confusion, use either of "mingw64" or "ucrt" and do not mix the two. The following examples make use of ucrt  
 - Tools 
     pacman -S base-devel cmake git mingw-w64-ucrt-x86_64-gcc paraview  
 - Libs (Opencl, OpenMP, gsl, fftw, vtk, nfftw)
@@ -24,7 +24,7 @@ https://www-user.tu-chemnitz.de/~potts/nfft/installation.php
     - In the root directory, run `export PATH=$PATH:/ucrt64/bin`
     - this can also be added in windows "edit system environment variables" , "Path". Add C:\msys64\usr\bin and C:\msys64\ucrt64\bin
 
-
+### Prerequisites for Linux
 
 ## Usage
 
@@ -38,7 +38,7 @@ https://www-user.tu-chemnitz.de/~potts/nfft/installation.php
     - Setup external fields. 
         - Electric field along the cylinder.
 - add in "artificial viscosity" to simulate energy loss/gain
-    - F=q(E+vxB)+rv w
+    - F=q(E+vxB)+rv
     - here viscosity r is negative when there is energy loss and positive when there is energy gain
 - add temperature field Te[x][y][z]
     - approximate Te as average KE of particles
