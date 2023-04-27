@@ -60,8 +60,8 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             offset[p][0][n] = (pos1x[p][n] - posL[0]) * ddi[0] - (float)(ii[p][0][n]);
             offset[p][1][n] = (pos1y[p][n] - posL[1]) * ddi[1] - (float)(ii[p][1][n]);
             offset[p][2][n] = (pos1z[p][n] - posL[2]) * ddi[2] - (float)(ii[p][2][n]);
-    //        if ((pos1x[p][n] - posL[0]) * ddi[0] < 0)
-      //          cout << ii[p][0][n] << " ";
+            //        if ((pos1x[p][n] - posL[0]) * ddi[0] < 0)
+            //          cout << ii[p][0][n] << " ";
         }
     }
 #pragma omp barrier
@@ -70,9 +70,92 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         int p = omp_get_thread_num();
         nob[p] = 0;
         nib[p] = 0;
+        int nzm = 0;
+        int nzp = 0;
         for (unsigned int n = 0; n < n_part[p]; ++n)
         { // particle on 1st and last cell must be rejected so that indices [k-1][j-1][i-1] ..  [k+1][j+1][i+1] are OK.
-          //  if ((ii[p][0][n] > (n_space_divx - 1)) || (ii[p][1][n] > (n_space_divy - 1)) || (ii[p][2][n] > (n_space_divz - 1)))
+//  if ((ii[p][0][n] > (n_space_divx - 1)) || (ii[p][1][n] > (n_space_divy - 1)) || (ii[p][2][n] > (n_space_divz - 1)))
+#ifdef cylinder // rollover particles in z direction
+            if (ii[p][2][n] == 0)
+            {
+                pos0z[p][n] += (n_space_divz - 2) * dd[2];
+                pos1z[p][n] += (n_space_divz - 2) * dd[2];
+                ii[p][2][n] = n_space_divz - 2;
+                nzm++;
+            }
+            if (ii[p][2][n] == n_space_divz - 1)
+            {
+                pos0z[p][n] -= (n_space_divz - 2) * dd[2];
+                pos1z[p][n] -= (n_space_divz - 2) * dd[2];
+                ii[p][2][n] = 1;
+                nzp++;
+            }
+
+            // hit wall replace with stationary particle
+            if (ii[p][0][n] == 0)
+            {
+                pos1x[p][n] += dd[0];
+                pos0x[p][n] = pos1x[p][n];
+                ii[p][0][n]++;
+            }
+            if (ii[p][0][n] == n_space_divx - 1)
+            {
+                pos1x[p][n] -= dd[0];
+                pos0x[p][n] = pos1x[p][n];
+                ii[p][0][n]--;
+            }
+            if (ii[p][1][n] == 0)
+            {
+                pos1y[p][n] += dd[1];
+                pos0y[p][n] = pos1y[p][n];
+                ii[p][1][n]++;
+            }
+            if (ii[p][1][n] == n_space_divy - 1)
+            {
+                pos1y[p][n] -= dd[1];
+                pos0y[p][n] = pos1y[p][n];
+                ii[p][1][n]--;
+            }
+#endif
+#ifdef sphere
+            // hit wall replace with stationary particle
+            if (ii[p][0][n] == 0)
+            {
+                pos1x[p][n] += dd[0];
+                pos0x[p][n] = pos1x[p][n];
+                ii[p][0][n]++;
+            }
+            if (ii[p][0][n] == n_space_divx - 1)
+            {
+                pos1x[p][n] -= dd[0];
+                pos0x[p][n] = pos1x[p][n];
+                ii[p][0][n]--;
+            }
+            if (ii[p][1][n] == 0)
+            {
+                pos1y[p][n] += dd[1];
+                pos0y[p][n] = pos1y[p][n];
+                ii[p][1][n]++;
+            }
+            if (ii[p][0][n] == n_space_divy - 1)
+            {
+                pos1y[p][n] -= dd[1];
+                pos0y[p][n] = pos1y[p][n];
+                ii[p][1][n]--;
+            }
+            if (ii[p][2][n] == 0)
+            {
+                pos1z[p][n] += dd[2];
+                pos0z[p][n] = pos1z[p][n];
+                ii[p][2][n]++;
+            }
+            if (ii[p][0][n] == n_space_divz - 1)
+            {
+                pos1z[p][n] -= dd[2];
+                pos0z[p][n] = pos1z[p][n];
+                ii[p][2][n]--;
+            }
+#endif
             if ((ii[p][0][n] > (n_space_divx - 2)) || (ii[p][1][n] > (n_space_divy - 2)) || (ii[p][2][n] > (n_space_divz - 2)) || (ii[p][0][n] < 1) || (ii[p][1][n] < 1) || (ii[p][2][n] < 1))
             {
                 oblist[p][nob[p]] = n;
@@ -84,6 +167,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 nib[p]++;
             }
         }
+        cout << "nzp " << nzp << endl;
+        cout << "nzm " << nzm << endl;
+
         for (unsigned int n = 0; n < nob[p]; ++n)
         {
             n_part[p]--;

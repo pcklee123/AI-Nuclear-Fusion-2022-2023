@@ -20,7 +20,6 @@ int main()
     else if (!std::filesystem::create_directory(outpath2))
         outpath = outpath2;
     else
-        return (1);
     cout << "Output dir: " << outpath << "\n";
 
     timer.mark(); // Yes, 3 time marks. The first is for the overall program dt
