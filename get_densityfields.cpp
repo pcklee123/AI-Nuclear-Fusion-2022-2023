@@ -36,12 +36,11 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 
     // set fields=0 in preparation// Could split into threads
     fill(reinterpret_cast<float *>(np), reinterpret_cast<float *>(np) + n_cells * 2, 0.f);
- //   fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
+    //   fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
 
     fill(reinterpret_cast<float *>(np_center), reinterpret_cast<float *>(np_center) + n_cells * 3 * 2, 0.f);
     fill(reinterpret_cast<float *>(jc2), reinterpret_cast<float *>(jc2) + n_cells * 2 * 2 * 3, 0.f);
     fill(reinterpret_cast<float *>(jc_center), reinterpret_cast<float *>(jc_center) + n_cells * 2 * 2 * 3 * 3, 0.f);
-
 
     static auto oblist = new unsigned int[2][n_parte]; // list of out of bound particles
     static auto iblist = new unsigned int[2][n_parte];
@@ -61,6 +60,8 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             offset[p][0][n] = (pos1x[p][n] - posL[0]) * ddi[0] - (float)(ii[p][0][n]);
             offset[p][1][n] = (pos1y[p][n] - posL[1]) * ddi[1] - (float)(ii[p][1][n]);
             offset[p][2][n] = (pos1z[p][n] - posL[2]) * ddi[2] - (float)(ii[p][2][n]);
+    //        if ((pos1x[p][n] - posL[0]) * ddi[0] < 0)
+      //          cout << ii[p][0][n] << " ";
         }
     }
 #pragma omp barrier
