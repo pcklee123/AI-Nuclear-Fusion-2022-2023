@@ -13,14 +13,14 @@ constexpr float Emax0 = 1e10; // 1e11V/m is approximately interatomic E field -e
 constexpr float nback = 64;  // background particles per cell - improves stability
 
 constexpr float a0 = 10e-3; // typical dimensions of a cell
-constexpr float target_part = 1e15;
+constexpr float target_part = 1e16;
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n
 constexpr int n_partd = n_space * n_space * n_space * nback * 4; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 0.1,E 1e7,nback 32, a0 10e-3,part 1e12,nspace 32 npartd *4 sphere
-// Te 1e7,Td 1e7,B 100,E 1e10,nback 64, a0 10e-3,part 1e15,nspace 64 npartd *4 cylinder
+//r0=8*a0 Te 1e7,Td 1e7,B 100,E 1e10,nback 64, a0 10e-3,part 1e15,nspace 64 npartd *4 cylinder
 constexpr unsigned int ncoeff = 8;
 
 constexpr int n_output_part = (n_partd > 8192) ? 8192 : n_partd; // maximum number of particles to output to file

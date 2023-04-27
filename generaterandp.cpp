@@ -97,7 +97,7 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
     // initial bulk electron, ion velocity
     float v0[2][3] = {{0, 0, -1e7f}, {0, 0, 0}};/*1e6*/
 
-    float r0 = 4*a0; // the radius
+    float r0 = 8*a0; // the radius
     float area = pi * r0 * r0;
     float volume = pi * r0 * r0 * n_space * a0;
 
