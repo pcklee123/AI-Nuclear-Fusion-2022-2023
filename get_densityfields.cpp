@@ -83,7 +83,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 ii[p][2][n] = n_space_divz - 2;
                 nzm++;
             }
-            if (ii[p][2][n] == n_space_divz - 1)
+            if (ii[p][2][n] == (n_space_divz - 1))
             {
                 pos0z[p][n] -= (n_space_divz - 2) * dd[2];
                 pos1z[p][n] -= (n_space_divz - 2) * dd[2];
@@ -98,7 +98,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 pos0x[p][n] = pos1x[p][n];
                 ii[p][0][n]++;
             }
-            if (ii[p][0][n] == n_space_divx - 1)
+            if (ii[p][0][n] == (n_space_divx - 1))
             {
                 pos1x[p][n] -= dd[0];
                 pos0x[p][n] = pos1x[p][n];
@@ -110,7 +110,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 pos0y[p][n] = pos1y[p][n];
                 ii[p][1][n]++;
             }
-            if (ii[p][1][n] == n_space_divy - 1)
+            if (ii[p][1][n] == (n_space_divy - 1))
             {
                 pos1y[p][n] -= dd[1];
                 pos0y[p][n] = pos1y[p][n];

@@ -13,7 +13,7 @@ constexpr float Emax0 = 1e10; // 1e11V/m is approximately interatomic E field -e
 constexpr float nback = 64;  // background particles per cell - improves stability
 
 constexpr float a0 = 10e-3; // typical dimensions of a cell
-constexpr float target_part = 1e16;
+constexpr float target_part = 1e15;
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n
