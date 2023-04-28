@@ -20,6 +20,7 @@ constexpr int n_space = 32;                                      // must be 2 to
 constexpr int n_partd = n_space * n_space * n_space * nback * 8; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
+// a sphere 0.4 mm radius with 1e24*4/3*pi()*0.4^3 *1.6e-19C E on surface =2.4e12Vm-1 if all electrons have left.
 //r0=8*a0 Te 1e7,Td 1e7,B 100,E 1e10,nback 64, a0 1e-3,part 1e15,nspace 64 npartd *4 cylinder
 constexpr unsigned int ncoeff = 8;
 

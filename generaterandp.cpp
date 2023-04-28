@@ -16,7 +16,7 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
     float Density_e = (n_partd - (n_space_divx - 2) * (n_space_divy - 2) * (n_space_divz - 2) * nback) / volume * r_part_spart;
     float Density_e1 = nback * r_part_spart / (a0 * a0 * a0);
 
-    cout << "initial density = " << Density_e << "/m^3,  background density = " << Density_e1 < < < < "/m^3 \n";
+    cout << "initial density = " << Density_e << "/m^3,  background density = " << Density_e1 << "/m^3 \n";
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
