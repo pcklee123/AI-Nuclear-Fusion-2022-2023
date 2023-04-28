@@ -8,13 +8,15 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
     // initial bulk electron, ion velocity
     float v0[2][3] = {{0, 0, 0 /*1e6*/}, {0, 0, 0}};
 
-    float r0 = 2 * a0; // if sphere this is the radius
+    float r0 = 4 * a0; // if sphere this is the radius
     float area = 4 * pi * r0 * r0;
     float volume = 4 / 3 * pi * r0 * r0 * r0;
 
     // calculated plasma parameters
-    float Density_e = n_partd / volume * r_part_spart;
-    cout << "electron Density = " << Density_e << "/m^3 \n";
+    float Density_e = (n_partd - (n_space_divx - 2) * (n_space_divy - 2) * (n_space_divz - 2) * nback) / volume * r_part_spart;
+    float Density_e1 = nback * r_part_spart / (a0 * a0 * a0);
+
+    cout << "initial density = " << Density_e << "/m^3,  background density = " << Density_e1 < < < < "/m^3 \n";
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
@@ -95,16 +97,17 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
     // spherical plasma radius is 1/8 of total extent.
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, -1e7f}, {0, 0, 0}};/*1e6*/
+    float v0[2][3] = {{0, 0, -1e7f}, {0, 0, 0}}; /*1e6*/
 
-    float r0 = 8*a0; // the radius
+    float r0 = 8 * a0; // the radius
     float area = pi * r0 * r0;
     float volume = pi * r0 * r0 * n_space * a0;
 
     // calculated plasma parameters
     cout << "initial e Temperature, = " << Temp_e / 11600 << "eV, initial d Temperature, = " << Temp_d / 11600 << " eV\n";
-    float Density_e = n_partd / volume * r_part_spart;
-    cout << "initial density = " << Density_e << endl;
+    float Density_e = (n_partd - (n_space_divx - 2) * (n_space_divy - 2) * (n_space_divz - 2) * nback) / volume * r_part_spart;
+    float Density_e1 = nback * r_part_spart / (a0 * a0 * a0);
+    cout << "initial density = " << Density_e << "background density = " << Density_e1 << endl;
     float initial_current = Density_e * e_charge * v0[0][2] * area;
     cout << "initial current = " << initial_current << endl;
     float Bmaxi = initial_current * 2e-7 / r0;
@@ -171,12 +174,12 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
             }
         }
 
-//#pragma omp parallel for ordered
+        // #pragma omp parallel for ordered
         for (int n = na; n < n_partd; n++)
         {
             float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.5);
             double x, y, z;
-            z = gsl_ran_flat(rng, -1.0, 1.0) * a0 * (n_space-2) * 0.5;
+            z = gsl_ran_flat(rng, -1.0, 1.0) * a0 * (n_space - 2) * 0.5;
             gsl_ran_dir_2d(rng, &x, &y);
             pos0x[p][n] = r * x;
             pos1x[p][n] = pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * dt[p];
@@ -184,13 +187,13 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
             pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * dt[p];
             pos0z[p][n] = z;
             pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * dt[p];
- //           cout << pos1z[p][n] << " ";
+            //           cout << pos1z[p][n] << " ";
             //          if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << dt[p]<<endl;
             q[p][n] = qs[p];
             m[p][n] = mp[p];
             //        nt[p] += q[p][n];
         }
     }
-//#pragma omp barrier
+    // #pragma omp barrier
     gsl_rng_free(rng); // dealloc the rng
 }
