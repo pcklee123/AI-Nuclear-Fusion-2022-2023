@@ -20,7 +20,7 @@ int main()
     else if (!std::filesystem::create_directory(outpath2))
         outpath = outpath2;
     else
-    cout << "Output dir: " << outpath << "\n";
+        cout << "Output dir: " << outpath << "\n";
 
     timer.mark(); // Yes, 3 time marks. The first is for the overall program dt
     timer.mark(); // The second is for compute_d_time
@@ -70,7 +70,7 @@ int main()
     auto *currentj = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
     auto *jc = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
 
-    float U[2] = {0, 0};//{Electric PE, magnetic PE}
+    float U[2] = {0, 0}; //{Electric PE, magnetic PE}
 
     ofstream E_file, B_file;
 
@@ -83,8 +83,8 @@ int main()
     cout << "float size=" << sizeof(float) << ", "
          << "int32_t size=" << sizeof(int32_t) << ", "
          << "int size=" << sizeof(int) << endl;
-
-    int total_ncalc[2] = {0, 0};    // particle 0 - electron, particle 1 deuteron
+    // const float coef = (float)qs[p] * e_charge_mass / (float)mp[p] * dt[p] * 0.5f;
+    int total_ncalc[2] = {0, 0}; // particle 0 - electron, particle 1 deuteron
     float dt[2];
     cout << "Start up dt = " << timer.replace() << "s\n";
 #define generateRandom
@@ -132,7 +132,7 @@ int main()
         E_file << "Data extent x, 0," << n_space - 1 << endl;
         E_file << "Data extent y, 0," << n_space - 1 << endl;
         E_file << "Data extent z, 0," << n_space - 1 << endl;
- //       E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
+        //       E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
         E_file << "Maximum expected B = ," << Bmax << endl;
         E_file << "time step between prints = ," << dt[0] * ncalc[0] * nc << ",s" << endl;
         E_file << "time step between EBcalc = ," << dt[0] * ncalc[0] << ",s" << endl;
@@ -146,17 +146,16 @@ int main()
     get_densityfields(currentj, np, npt, nt, KEtot, posL, posH, dd, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, dt, n_part, jc);
     // return(0);
     calcEBV(V, E, B, Ee, Be, npt, jc, dd, Emax, Bmax);
-    cout << "calc trilin constants\n";
+    // cout << "calc trilin constants\n";
     calc_trilin_constants(E, Ea, dd, posL);
     calc_trilin_constants(B, Ba, dd, posL);
 #ifdef Uon_
-    cout << "calcU\n";
+    //  cout << "calcU\n";
     calcU(V, E, B, pos1x, pos1y, pos1z, posL, dd, n_part, q, U);
 #endif
-    cout << i_time << "." << 0 << " (compute_time = " << timer.elapsed() << "s): ";
-    cout << "dt = {" << dt[0] << " " << dt[1] << "}, t_sim = " << t << " s"
-         << ", ne = " << nt[0] << ", ni = " << nt[1];
-    cout << "\nKEtot e = " << KEtot[0] << ", KEtot i = " << KEtot[1] << ", Eele = " << U[0] << ", Emag = " << U[1] << ", Etot = " << KEtot[0] + KEtot[1] + U[0] + U[1] << " eV\n";
+    //    cout << i_time << "." << 0 << " (compute_time = " << timer.elapsed() << "s): ";
+    //    cout << "dt = {" << dt[0] << " " << dt[1] << "}, t_sim = " << t << " s" << ", ne = " << nt[0] << ", ni = " << nt[1];
+    //    cout << "KEtot e = " << KEtot[0] << ", KEtot i = " << KEtot[1] << ", Eele = " << U[0] << ", Emag = " << U[1] << ", Etot = " << KEtot[0] + KEtot[1] + U[0] + U[1] << " eV\n";
     sel_part_print(n_part, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, dt);
     save_files(i_time, n_space_div, posL, dd, t, np, currentj, V, E, B, KE, posp);
     cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << 0 << ")\n";
@@ -193,7 +192,7 @@ int main()
                 tnp(Ea1, Ba1, pos0x[p], pos0y[p], pos0z[p], pos1x[p], pos1y[p], pos1z[p], cf, ci);
                 total_ncalc[p] += ncalc[p];
             }
-            cout << "motion: " << timer.elapsed() << "s, ";
+            cout << "\nmotion: " << timer.elapsed() << "s, ";
 
             t += dt[0] * ncalc[0];
 
@@ -208,22 +207,38 @@ int main()
             // calcEeBe(Ee,Be,t);
             int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, dd, Emax, Bmax);
             /* change time step if E or B too big*/
-            if (cdt)
+            switch (cdt)
             {
-                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part);
+            case 0:
+                break;
+            case 1: // decrease dt
+                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt);
                 dt[0] /= 2;
                 dt[1] /= 2;
-                ncalc[0] *= 2;
-                ncalc[1] *= 2;
-                Emax *= 4;
+                // ncalc[0] *= 2;
+                //  ncalc[1] *= 2;
+                Emax *= 2;
                 Bmax *= 2;
-                // cout <<"\ndtchanged\n";
+                cout << "\ndt decreased\n";
+                break;
+            case 2: // increase dt
+                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt);
+                dt[0] *= 2;
+                dt[1] *= 2;
+                if (ncalc[1] > 1)
+                {
+                    ncalc[0] /= 2;
+                    ncalc[1] /= 2;
+                }
+                Emax /= 2;
+                Bmax /= 2;
+                cout << "\ndt increased\n";
             }
             cout << "EBV: " << timer.elapsed() << "s, ";
 
 #ifdef Uon_
             // calculate the total potential energy U
-            cout << "calculate the total potential energy U\n";
+            //        cout << "calculate the total potential energy U\n";
             timer.mark();
 
             calcU(V, E, B, pos1x, pos1y, pos1z, posL, dd, n_part, q, U);
@@ -234,15 +249,11 @@ int main()
             timer.mark();
             calc_trilin_constants(E, Ea, dd, posL);
             calc_trilin_constants(B, Ba, dd, posL);
-            cout << "trilin const: " << timer.elapsed() << "s";
-
-            cout << "\n\n"
-                 << i_time << "." << ntime << " (compute_time = " << timer.elapsed() << "s): ";
-            if (cdt)
-                cout << "dtchanged\n";
-            cout << "dt = {" << dt[0] << " " << dt[1] << "}, t_sim = " << t << " s"
-                 << ", ne = " << nt[0] << ", ni = " << nt[1];
-            cout << "\nKEtot e = " << KEtot[0] << ", KEtot i = " << KEtot[1] << ", Eele = " << U[0] << ", Emag = " << U[1] << ", Etot = " << KEtot[0] + KEtot[1] + U[0] + U[1] << " eV\n";
+            cout << "trilin const: " << timer.elapsed() << "s\n";
+            cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
+            // if (cdt)  cout << "dtchanged\n";
+            //  cout << "dt = {" << dt[0] << " " << dt[1] << "}, t_sim = " << t << " s"<< ", ne = " << nt[0] << ", ni = " << nt[1];
+            //  cout << "\nKEtot e = " << KEtot[0] << ", KEtot i = " << KEtot[1] << ", Eele = " << U[0] << ", Emag = " << U[1] << ", Etot = " << KEtot[0] + KEtot[1] + U[0] + U[1] << " eV\n";
             log_entry(i_time, ntime, cdt ? 1 : 0, total_ncalc, dt, t, nt, KEtot, U);
         }
 

@@ -56,25 +56,14 @@ void vector_muls(fftwf_complex *dst, fftwf_complex *A, fftwf_complex *B, int n)
     queue.enqueueReadBuffer(buffer_A, CL_TRUE, 0, sizeof(fftwf_complex) * n, dst);
 }
 
-bool checkInRange(string name, float data[3][n_space_divz][n_space_divy][n_space_divz], float minval, float maxval)
+int checkInRange(string name, float data[3][n_space_divz][n_space_divy][n_space_divz], float minval, float maxval)
 {
-    bool toolow = false, toohigh = false;
+    bool toolow = true, toohigh = false;
     const float *data_1d = reinterpret_cast<float *>(data);
     for (unsigned int i = 0; i < n_cells * 3; ++i)
     {
-        toolow |= data_1d[i] < minval;
-        toohigh |= data_1d[i] > maxval;
-    }
-    if (toolow)
-    {
-        const float *minelement = min_element(data_1d, data_1d + 3 * n_cells);
-        size_t pos = minelement - &data[0][0][0][0];
-        int count = 0;
-        for (unsigned int n = 0; n < n_cells * 3; ++n)
-            count += data_1d[n] < minval;
-        int x, y, z;
-        id_to_cell(pos, &x, &y, &z);
-        cout << "Min " << name << ": " << *minelement << " (" << x << "," << y << "," << z << ") (" << count << " values below threshold)\n";
+        toolow &= fabs(data_1d[i]) < minval;
+        toohigh |= fabs(data_1d[i]) > maxval;
     }
     if (toohigh)
     {
@@ -82,12 +71,28 @@ bool checkInRange(string name, float data[3][n_space_divz][n_space_divy][n_space
         size_t pos = maxelement - &data[0][0][0][0];
         int count = 0;
         for (unsigned int n = 0; n < n_cells * 3; ++n)
-            count += data_1d[n] > maxval;
+            count += fabs(data_1d[n]) > maxval;
         int x, y, z;
         id_to_cell(pos, &x, &y, &z);
         cout << "Max " << name << ": " << *maxelement << " (" << x << "," << y << "," << z << ") (" << count << " values above threshold)\n";
+        return 1;
     }
-    return toolow || toohigh;
+    if (toolow)
+    {
+        /*
+        const float *minelement = min_element(data_1d, data_1d + 3 * n_cells);
+         size_t pos = minelement - &data[0][0][0][0];
+         int count = 0;
+         for (unsigned int n = 0; n < n_cells * 3; ++n)
+             count += fabs(data_1d[n]) > minval;
+         int x, y, z;
+         id_to_cell(pos, &x, &y, &z);
+         cout << "Min " << name << ": " << *minelement << " (" << x << "," << y << "," << z << ") (" << count << " values above threshold)\n";
+         */
+        return 2;
+    }
+
+    return 0;
 }
 
 // Shorthand for cleaner code
@@ -367,6 +372,10 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 #endif
 #endif
     first = 0;
-    bool E_exceeds = checkInRange("E", E, -Emax, Emax), B_exceeds = checkInRange("B", B, -Bmax, Bmax);
-    return E_exceeds || B_exceeds;
+    int E_exceeds = checkInRange("E", E, Emax / 8, Emax / 2), B_exceeds = checkInRange("B", B, Bmax / 8, Bmax / 2);
+    if ((E_exceeds == 2) & (B_exceeds == 2))
+        return 2;
+    if ((E_exceeds == 1) | (B_exceeds == 1))
+        return 1;
+    return 0;
 }
