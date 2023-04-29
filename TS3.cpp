@@ -14,13 +14,27 @@ int main()
     // Fast printing
     cin.tie(NULL);
     // ios_base::sync_with_stdio(false);
-
-    if (!std::filesystem::create_directory(outpath1))
-        outpath = outpath1;
-    else if (!std::filesystem::create_directory(outpath2))
-        outpath = outpath2;
-    else
-        cout << "Output dir: " << outpath << "\n";
+    try
+    {
+        if (!std::filesystem::create_directory(outpath1))
+            outpath = outpath1;
+        else if (!std::filesystem::create_directory(outpath2))
+            outpath = outpath2;
+    }
+    catch (const std::filesystem::__cxx11::filesystem_error &e)
+    {
+        std::cerr << "Error creating output directory: " << e.what() << '\n';
+        try
+        {
+            if (!std::filesystem::create_directory(outpath2))
+                outpath = outpath2;
+        }
+        catch (const std::filesystem::__cxx11::filesystem_error &e)
+        {
+            std::cerr << "Error creating output directory: " << e.what() << '\n';
+        }
+    }
+    std::cout << "Output dir: " << outpath << "\n";
 
     timer.mark(); // Yes, 3 time marks. The first is for the overall program dt
     timer.mark(); // The second is for compute_d_time
@@ -211,27 +225,54 @@ int main()
             {
             case 0:
                 break;
-            case 1: // decrease dt
+            case 1: // E exceeded decrease dt
                 changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt);
                 dt[0] /= 2;
                 dt[1] /= 2;
                 // ncalc[0] *= 2;
                 //  ncalc[1] *= 2;
-                Emax *= 2;
-                Bmax *= 2;
+                Emax *= 1.2;
+                //         Bmax *= 1.2;
                 cout << "\ndt decreased\n";
                 break;
-            case 2: // increase dt
+            case 2: // E too low increase dt
                 changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt);
                 dt[0] *= 2;
                 dt[1] *= 2;
+                /*
                 if (ncalc[1] > 1)
                 {
                     ncalc[0] /= 2;
                     ncalc[1] /= 2;
                 }
-                Emax /= 2;
-                Bmax /= 2;
+                */
+                Emax /= 1.2;
+                //       Bmax /= 1.2;
+                cout << "\ndt increased\n";
+
+            case 3: // B exceeded decrease dt
+                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt);
+                dt[0] /= 2;
+                dt[1] /= 2;
+                // ncalc[0] *= 2;
+                //  ncalc[1] *= 2;
+                //     Emax *= 1.2;
+                Bmax *= 1.2;
+                cout << "\ndt decreased\n";
+                break;
+            case 4: // B too low increase dt
+                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt);
+                dt[0] *= 2;
+                dt[1] *= 2;
+                /*
+                if (ncalc[1] > 1)
+                {
+                    ncalc[0] /= 2;
+                    ncalc[1] /= 2;
+                }
+                */
+                // Emax /= 1.2;
+                Bmax /= 1.2;
                 cout << "\ndt increased\n";
             }
             cout << "EBV: " << timer.elapsed() << "s, ";

@@ -372,10 +372,6 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 #endif
 #endif
     first = 0;
-    int E_exceeds = checkInRange("E", E, Emax / 8, Emax / 2), B_exceeds = checkInRange("B", B, Bmax / 8, Bmax / 2);
-    if ((E_exceeds == 2) & (B_exceeds == 2))
-        return 2;
-    if ((E_exceeds == 1) | (B_exceeds == 1))
-        return 1;
-    return 0;
+    int E_exceeds = checkInRange("E", E, Emax / 16, Emax / 4), B_exceeds = checkInRange("B", B, Bmax / 16, Bmax / 4);
+    return E_exceeds+B_exceeds*4;
 }
