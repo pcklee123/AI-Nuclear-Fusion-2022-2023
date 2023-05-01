@@ -106,15 +106,11 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             ii[p][0][n] = (int)roundf((pos1x[p][n] - par->posL[0]) * ddi[0]);
             ii[p][1][n] = (int)roundf((pos1y[p][n] - par->posL[1]) * ddi[1]);
             ii[p][2][n] = (int)roundf((pos1z[p][n] - par->posL[2]) * ddi[2]);
-            // hit wall replace with stationary particle
 
             offset[p][0][n] = (pos1x[p][n] - par->posL[0]) * ddi[0] - (float)(ii[p][0][n]);
             offset[p][1][n] = (pos1y[p][n] - par->posL[1]) * ddi[1] - (float)(ii[p][1][n]);
             offset[p][2][n] = (pos1z[p][n] - par->posL[2]) * ddi[2] - (float)(ii[p][2][n]);
-            //        if ((pos1x[p][n] - par->posL[0]) * ddi[0] < 0)
-            //          cout << ii[p][0][n] << " ";
         }
-        //        cout << "p: " << p << " nzp " << nzp << " nzm " << nzm << endl;
     }
 #pragma omp barrier
     /*
@@ -165,7 +161,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
-#pragma omp parallel for simd num_threads(nthreads)
+        // #pragma omp parallel for simd num_threads(nthreads)
         for (int n = 0; n < par->n_part[p]; ++n)
         {
             v[p][0][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
@@ -182,30 +178,17 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         }
         par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass)*r_part_spart; // as if these particles were actually samples of the greater thing
         par->nt[p] = nt;
+#pragma omp barrier
 
-#pragma omp barrier
-#pragma omp parallel sections num_threads(nthreads)
-        {
-#pragma omp section
-            {
-#pragma omp parallel for simd // num_threads(nthreads)
-                for (int n = 0; n < par->n_part[p]; ++n)
-                    v[p][0][n] *= (float)q[p][n];
-            }
-#pragma omp section
-            {
-#pragma omp parallel for simd
-                for (int n = 0; n < par->n_part[p]; ++n)
-                    v[p][1][n] *= (float)q[p][n];
-            }
-#pragma omp section
-            {
-#pragma omp parallel for simd 
-                for (int n = 0; n < par->n_part[p]; ++n)
-                    v[p][2][n] *= (float)q[p][n];
-            }
-        }
-#pragma omp barrier
+        for (int n = 0; n < par->n_part[p]; ++n)
+            v[p][0][n] *= (float)q[p][n];
+
+        for (int n = 0; n < par->n_part[p]; ++n)
+            v[p][1][n] *= (float)q[p][n];
+
+        for (int n = 0; n < par->n_part[p]; ++n)
+            v[p][2][n] *= (float)q[p][n];
+
         cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
 #pragma omp parallel sections num_threads(nthreads)
         {
@@ -339,18 +322,18 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         }
     }
 #pragma omp barrier
-#pragma omp parallel for simd num_threads(nthreads)
+    // #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells * 3; i++)
         (reinterpret_cast<float *>(currentj[0]))[i] = (reinterpret_cast<float *>(jc2[0][0]))[i] + (reinterpret_cast<float *>(jc2[0][1]))[i];
-#pragma omp parallel for simd num_threads(nthreads)
+    // #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells * 3; i++)
         (reinterpret_cast<float *>(currentj[1]))[i] = (reinterpret_cast<float *>(jc2[1][0]))[i] + (reinterpret_cast<float *>(jc2[1][1]))[i];
 
-#pragma omp parallel for simd num_threads(nthreads)
+    // #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells * 3; i++)
         (reinterpret_cast<float *>(jc))[i] = (reinterpret_cast<float *>(currentj[0]))[i] + (reinterpret_cast<float *>(currentj[1]))[i];
-#pragma omp parallel for simd num_threads(nthreads)
+    // #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells; i++)
         (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
-#pragma omp barrier
+    // #pragma omp barrier
 }
