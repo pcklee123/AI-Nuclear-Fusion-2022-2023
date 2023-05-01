@@ -4,7 +4,7 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                        float fc[n_space_divz][n_space_divy][n_space_divx][3], int s)
 {
     float d;
-    if (s == 1)
+    if ((s%2) == 1)
         d = 0.00001f;
     else
         d = -0.00001f;
@@ -20,8 +20,10 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
                 fc[k][j][i][0] = (fc[k][j][i][0] / (f[k][j][i] + d));
                 fc[k][j][i][1] = (fc[k][j][i][1] / (f[k][j][i] + d));
                 fc[k][j][i][2] = (fc[k][j][i][2] / (f[k][j][i] + d));
+                if (fabs(fc[k][j][i][0]) > 0.5)
+                    cout << " (fabs(fc[k][j][i][0] )>0.5) " << d << " " << f[k][j][i] << " " << s << " " << i << " " << j << " " << k << endl;
             }
-            //why are there a bunch of stuff here?
+    // why are there a bunch of stuff here?
     fc[1][1][1][0] = 0;
     fc[1][1][1][1] = 0;
     fc[1][1][1][2] = 0;
@@ -141,12 +143,14 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
             }
     //  cout << "smoothfield copy back" << endl;
 
- // #pragma omp parallel for
-    for (int n = 0; n < n_cells ; ++n)
-    {
-     reinterpret_cast<float *>(f)[n] = reinterpret_cast<float *>(ftemp)[n];
-    }
+    // #pragma omp parallel for
     /*
+       for (int n = 0; n < n_cells ; ++n)
+       {
+        reinterpret_cast<float *>(f)[n] = reinterpret_cast<float *>(ftemp)[n];
+       }
+       */
+
     for (int k = 0; k < n_space_divz; ++k)
     {
         for (int j = 0; j < n_space_divy; ++j)
@@ -157,6 +161,6 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
             }
         }
     }
-    */
+
     _aligned_free(ftemp);
 }

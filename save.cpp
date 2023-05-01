@@ -103,14 +103,6 @@ void save_vti_c(string filename, int i,
   imageData->GetPointData()->GetScalars()->SetName(filename.c_str());
   float *data2 = static_cast<float *>(imageData->GetScalarPointer()); // Get a pointer to the density field array
 
-  /*
-    float *data_1d = reinterpret_cast<float *>(data1);
-  #pragma omp parallel for
-    for (int n = 0; n < n_cells * 3; ++n)
-    {
-      data2[n] = B_1d[n];
-    }
-    */
   for (int k = 0; k < nz; ++k)
     for (int j = 0; j < ny; ++j)
       for (int i = 0; i < nx; ++i)
