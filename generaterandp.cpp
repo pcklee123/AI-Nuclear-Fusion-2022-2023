@@ -1,19 +1,19 @@
 #include "traj.h"
-void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
+void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                           float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                          int q[2][n_partd], int m[2][n_partd], int nt[2], float dt[2])
+                          int q[2][n_partd], int m[2][n_partd],par *par)
 {
     // spherical plasma set plasma parameters
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
     float v0[2][3] = {{0, 0, 0 /*1e6*/}, {0, 0, 0}};
 
-    float r0 = 4 * a0; // if sphere this is the radius
+    float r0 = 8 * a0; // if sphere this is the radius
     float area = 4 * pi * r0 * r0;
     float volume = 4 / 3 * pi * r0 * r0 * r0;
 
     // calculated plasma parameters
-    float Density_e = (n_partd -( (n_space_divx - 2) * (n_space_divy - 2) * (n_space_divz - 2) * nback)) / volume * r_part_spart;
+    float Density_e = (n_partd - ((n_space_divx - 2) * (n_space_divy - 2) * (n_space_divz - 2) * nback)) / volume * r_part_spart;
     float Density_e1 = nback * r_part_spart / (a0 * a0 * a0);
 
     cout << "initial density = " << Density_e << "/m^3,  background density = " << Density_e1 << "/m^3 \n";
@@ -27,9 +27,9 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
     float TE = sqrt(2 * a0 / e_charge_mass / Emax0);
     // set time step to allow electrons to gyrate if there is B field or to allow electrons to move slowly throughout the plasma distance
 
-    dt[0] = 4 * min(min(min(TDebye, min(Tv / md_me, Tcyclotron) / 4), plasma_period / ncalc0[0] / 4), TE / ncalc0[0]) / 2; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
-    dt[1] = dt[0] * md_me;
-    //  float mu0_4pidt[2]= {mu0_4pi/dt[0],mu0_4pi/dt[1]};
+    par->dt[0] = 4 * min(min(min(TDebye, min(Tv / md_me, Tcyclotron) / 4), plasma_period / ncalc0[0] / 4), TE / ncalc0[0]) / 2; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
+    par->dt[1] = par->dt[0] * md_me;
+    //  float mu0_4pidt[2]= {mu0_4pi/par->dt[0],mu0_4pi/par->dt[1]};
     cout << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
 
     // set initial positions and velocity
@@ -73,11 +73,11 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
             double x, y, z;
             gsl_ran_dir_3d(rng, &x, &y, &z);
             pos0x[p][n] = r * x;
-            pos1x[p][n] = pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * dt[p];
+            pos1x[p][n] = pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * par->dt[p];
             pos0y[p][n] = r * y;
-            pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * dt[p];
+            pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * par->dt[p];
             pos0z[p][n] = r * z;
-            pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * dt[p];
+            pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * par->dt[p];
             q[p][n] = qs[p];
             m[p][n] = mp[p];
             //         nt[p] += q[p][n];
@@ -86,9 +86,9 @@ void generate_rand_sphere(float a0, float pos0x[2][n_partd], float pos0y[2][n_pa
 #pragma omp barrier
     gsl_rng_free(rng); // dealloc the rng
 }
-void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
+void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                             float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                            int q[2][n_partd], int m[2][n_partd], int nt[2], float dt[2])
+                            int q[2][n_partd], int m[2][n_partd], par *par)
 
 {
     // set plasma parameters
@@ -124,10 +124,10 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
     float TE = sqrt(2 * a0 / e_charge_mass / Emax0);
     // set time step to allow electrons to gyrate if there is B field or to allow electrons to move slowly throughout the plasma distance
 
-    dt[0] = 4 * min(min(min(TDebye, min(Tv / md_me, Tcyclotron) / 4), plasma_period / ncalc0[0] / 4), TE / ncalc0[0]) / 2; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
-    dt[1] = dt[0] * md_me;
-    cout << "dt[0] = " << dt[0] << endl;
-    //  float mu0_4pidt[2]= {mu0_4pi/dt[0],mu0_4pi/dt[1]};
+    par->dt[0] = 4 * min(min(min(TDebye, min(Tv / md_me, Tcyclotron) / 4), plasma_period / ncalc0[0] / 4), TE / ncalc0[0]) / 2; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
+    par->dt[1] = par->dt[0] * md_me;
+    cout << "par->dt[0] = " << par->dt[0] << endl;
+    //  float mu0_4pidt[2]= {mu0_4pi/par->dt[0],mu0_4pi/par->dt[1]};
     cout << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
     /*
     cout << "electron Temp = " << Temp[0] << " K, electron Density = " << Density_e << " m^-3" << endl;
@@ -135,7 +135,7 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
     cout << "Cyclotron period = " << Tcyclotron << " s, Time for electron to move across 1 cell = " << Tv << " s" << endl;
     cout << "Time taken for electron at rest to accelerate across 1 cell due to E = " << TE << " s" << endl;
     cout << "electron thermal velocity = " << vel_e << endl;
-    cout << "dt = " << dt[0] << " s, Total time = " << dt[0] * ncalc[0] * ndatapoints * nc << ", s" << endl;
+    cout << "dt = " << par->dt[0] << " s, Total time = " << par->dt[0] * ncalc[0] * ndatapoints * nc << ", s" << endl;
     cout << "Debye Length = " << Debye_Length << " m, initial dimension = " << a0 << " m" << endl;
     cout << "number of particle per cell = " << n_partd / (n_space * n_space * n_space) * 8 << endl;
 */
@@ -182,17 +182,17 @@ void generate_rand_cylinder(float a0, float pos0x[2][n_partd], float pos0y[2][n_
             z = gsl_ran_flat(rng, -1.0, 1.0) * a0 * (n_space - 2) * 0.5;
             gsl_ran_dir_2d(rng, &x, &y);
             pos0x[p][n] = r * x;
-            pos1x[p][n] = pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * dt[p];
+            pos1x[p][n] = pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * par->dt[p];
             pos0y[p][n] = r * y;
-            pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * dt[p];
+            pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * par->dt[p];
             pos0z[p][n] = z;
-            pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * dt[p];
+            pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * par->dt[p];
             //           cout << pos1z[p][n] << " ";
-            //          if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << dt[p]<<endl;
+            //          if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << par->dt[p]<<endl;
             q[p][n] = qs[p];
             m[p][n] = mp[p];
-            //        nt[p] += q[p][n];
-        }
+        }     
+               //        nt[p] += q[p][n];
     }
     // #pragma omp barrier
     gsl_rng_free(rng); // dealloc the rng

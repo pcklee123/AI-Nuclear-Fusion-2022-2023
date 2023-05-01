@@ -138,8 +138,8 @@ auto *precalc_r2 = reinterpret_cast<fftwf_complex (&)[N2_c][N1][N0]>(*fftwf_allo
 int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
             float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
             float Ee[3][n_space_divz][n_space_divy][n_space_divx], float Be[3][n_space_divz][n_space_divy][n_space_divx],
-            float npt[n_space_divz][n_space_divy][n_space_divx], float jc[3][n_space_divz][n_space_divy][n_space_divx], float dd[3],
-            float Emax, float Bmax)
+            float npt[n_space_divz][n_space_divy][n_space_divx], float jc[3][n_space_divz][n_space_divy][n_space_divx],
+            par *par)
 // float precalc_r3[3][n_space_divz2][n_space_divy2][n_space_divx2],  float Aconst, float Vconst,
 {
     static int first = 1;
@@ -177,26 +177,26 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
         cout << "allocate done\n";
         float r3, rx, ry, rz, rx2, ry2, rz2;
         int i, j, k, loc_i, loc_j, loc_k;
-        posL2[0] = -dd[0] * ((float)n_space_divx - 0.5);
-        posL2[1] = -dd[1] * ((float)n_space_divy - 0.5);
-        posL2[2] = -dd[2] * ((float)n_space_divz - 0.5);
+        posL2[0] = -par->dd[0] * ((float)n_space_divx - 0.5);
+        posL2[1] = -par->dd[1] * ((float)n_space_divy - 0.5);
+        posL2[2] = -par->dd[2] * ((float)n_space_divz - 0.5);
         n_space_div2 = new unsigned int[3]{n_space_divx2, n_space_divy2, n_space_divz2};
         // precalculate 1/r^3 (field) and 1/r^2 (energy)
         for (k = -n_space_divz; k < n_space_divz; k++)
         {
             loc_k = k + (k < 0 ? n_space_divz2 : 0); // The "logical" array position
             // We wrap around values smaller than 0 to the other side of the array, since 0, 0, 0 is defined as the center of the convolution pattern an hence rz should be 0
-            rz = k * dd[2]; // The change in z coordinate for the k-th cell.
+            rz = k * par->dd[2]; // The change in z coordinate for the k-th cell.
             rz2 = rz * rz;
             for (j = -n_space_divy; j < n_space_divy; j++)
             {
                 loc_j = j + (j < 0 ? n_space_divy2 : 0);
-                ry = j * dd[1];
+                ry = j * par->dd[1];
                 ry2 = ry * ry + rz2;
                 for (i = -n_space_divx; i < n_space_divx; i++)
                 {
                     loc_i = i + (i < 0 ? n_space_divx2 : 0);
-                    rx = i * dd[0];
+                    rx = i * par->dd[0];
                     rx2 = rx * rx + ry2;
                     r3 = rx2 == 0 ? 0.f : powf(rx2, -1.5) / n_cells8;
                     precalc_r3_base[0][0][loc_k][loc_j][loc_i] = r3 * rx;
@@ -372,6 +372,10 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 #endif
 #endif
     first = 0;
-    int E_exceeds = checkInRange("E", E, Emax / 16, Emax / 4), B_exceeds = checkInRange("B", B, Bmax / 16, Bmax / 4);
-    return E_exceeds+B_exceeds*4;
+    //   int E_exceeds = checkInRange("E", E, par->Emax / 512, par->Emax / 128), B_exceeds = checkInRange("B", B, par->Bmax / 512, par->Bmax / 128);
+    int E_exceeds = checkInRange("E", E, par->Emax /f2 , par->Emax / f1), B_exceeds = checkInRange("B", B, par->Bmax / f2, par->Bmax / f1);
+    // if (E_exceeds == 3)
+    //   cout << "E_exceeds == 3";
+    //   cout << "calcEBV:returns " << (E_exceeds + (B_exceeds << 2));
+    return (E_exceeds + (B_exceeds << 2));
 }

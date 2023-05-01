@@ -1,6 +1,7 @@
 #include "include/traj.h"
 
-void id_to_cell(int id, int*x, int*y, int*z){
+void id_to_cell(int id, int *x, int *y, int *z)
+{
     constexpr size_t xy = n_space_divx * n_space_divy;
     *z = id / xy;
     id = id % xy;
@@ -8,18 +9,21 @@ void id_to_cell(int id, int*x, int*y, int*z){
     *x = id % n_space_divx;
 }
 
-void Time::mark(){
+void Time::mark()
+{
     marks.push_back(chrono::high_resolution_clock::now());
 }
 
-float Time::elapsed(){
+float Time::elapsed()
+{
     unsigned long long time = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - marks.back()).count();
     marks.pop_back();
     return (float)time * 1e-6;
 }
 
 // Get the same result as elapsed, but also insert the current time point back in
-float Time::replace(){
+float Time::replace()
+{
     auto now = chrono::high_resolution_clock::now();
     auto back = marks.back();
     unsigned long long time = chrono::duration_cast<chrono::microseconds>(now - back).count();
@@ -27,17 +31,23 @@ float Time::replace(){
     return (float)time * 1e-6;
 }
 
-Log::Log() { if(!log_file.is_open()) log_file.open("log.csv"); log_file << setprecision(5); }
+Log::Log()
+{
+    if (!log_file.is_open())
+        log_file.open("log.csv");
+    log_file << setprecision(5);
+}
 
-void Log::newline(){
+void Log::newline()
+{
     log_file << "\n";
     log_file.flush();
     firstEntry = true;
 }
-void Log::close(){
+void Log::close()
+{
     log_file.close();
 }
-
 
 void log_headers()
 {
@@ -59,23 +69,22 @@ void log_headers()
     logger.newline();
 }
 
-
-void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], float dt[2], double t, int nt[2], float KEtot[2], float U[2])
+void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par *par)
 {
     logger.write(i_time);
     logger.write(ntime);
     logger.write(cdt);
     logger.write(total_ncalc[0]);
     logger.write(total_ncalc[1]);
-    logger.write(dt[0]);
-    logger.write(dt[1]);
-    logger.write(t);
-    logger.write(nt[0]);
-    logger.write(nt[1]);
-    logger.write(KEtot[0]);
-    logger.write(KEtot[1]);
-    logger.write(U[0]);
-    logger.write(U[1]);
-    logger.write(KEtot[0] + KEtot[1] + U[0] + U[1]);
+    logger.write(par->dt[0]*1e15);//in fs
+    logger.write(par->dt[1]*1e15);
+    logger.write(t*1e12);//in ps
+    logger.write(par->nt[0]);
+    logger.write(par->nt[1]);
+    logger.write(par->KEtot[0]);
+    logger.write(par->KEtot[1]);
+    logger.write(par->UB);
+    logger.write(par->UE);
+    logger.write(par->KEtot[0] +par->KEtot[1] + par->UB + par->UE);
     logger.newline();
 }

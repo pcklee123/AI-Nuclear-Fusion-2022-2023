@@ -17,20 +17,20 @@ void add_build_option(string name, float param)
     cl_build_options << "-D" << name << "=" << param << "f ";
 }
 
-void cl_set_build_options(float posL[3], float posH[3], float dd[3])
+void cl_set_build_options(par *par)
 {
-    add_build_option("XLOW", posL[0]);
-    add_build_option("YLOW", posL[1]);
-    add_build_option("ZLOW", posL[2]);
-    add_build_option("XHIGH", posH[0]);
-    add_build_option("YHIGH", posH[1]);
-    add_build_option("ZHIGH", posH[2]);
-    add_build_option("DX", dd[0]);
-    add_build_option("DY", dd[1]);
-    add_build_option("DZ", dd[2]);
-    add_build_option("NX", n_space_divx);
-    add_build_option("NY", n_space_divy);
-    add_build_option("NZ", n_space_divz);
+    add_build_option("XLOW", par->posL[0]);
+    add_build_option("YLOW", par->posL[1]);
+    add_build_option("ZLOW", par->posL[2]);
+    add_build_option("XHIGH", par->posH[0]);
+    add_build_option("YHIGH", par->posH[1]);
+    add_build_option("ZHIGH", par->posH[2]);
+    add_build_option("DX", par->dd[0]);
+    add_build_option("DY", par->dd[1]);
+    add_build_option("DZ", par->dd[2]);
+    add_build_option("NX", (int)par->n_space_div[0]);
+    add_build_option("NY", (int)par->n_space_div[1]);
+    add_build_option("NZ", (int)par->n_space_div[2]);
     // add_build_option("NC", n_cells);
 }
 // void cl_start(cl::Context &context1, cl::Device &default_device1, cl::Program &program1)

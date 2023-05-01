@@ -2,9 +2,9 @@
 // calculate constants for each cell for trilinear interpolation
 void calc_trilin_constants(float E[3][n_space_divz][n_space_divy][n_space_divx],
                            float Ea[n_space_divz][n_space_divy][n_space_divx][3][ncoeff],
-                           float dd[3], float posL[3])
+                           par *par)
 {
-    float dV = -dd[0] * dd[1] * dd[2];
+    float dV = -par->dd[0] * par->dd[1] * par->dd[2];
     const float dV1 = 1 / dV;
     float *E_flat = &E[0][0][0][0];
     //const int c_skip = n_cells;
@@ -13,12 +13,12 @@ void calc_trilin_constants(float E[3][n_space_divz][n_space_divy][n_space_divx],
     int E_idx = 0;
     for (unsigned int k = 0; k < n_space_divz - 1; k++)
     {
-        const float z0 = k * dd[2] + posL[2];
-        const float z1 = z0 + dd[2];
+        const float z0 = k * par->dd[2] + par->posL[2];
+        const float z1 = z0 + par->dd[2];
         for (unsigned int j = 0; j < n_space_divy - 1; j++)
         {
-            const float y0 = j * dd[1] + posL[1];
-            const float y1 = y0 + dd[1];
+            const float y0 = j * par->dd[1] + par->posL[1];
+            const float y1 = y0 + par->dd[1];
             const float y0z0 = y0 * z0;
             const float y0z1 = y0 * z1;
             const float y1z0 = y1 * z0;
@@ -26,8 +26,8 @@ void calc_trilin_constants(float E[3][n_space_divz][n_space_divy][n_space_divx],
 //#pragma simd
             for (unsigned int i = 0; i < n_space_divx - 1; i++)
             {
-                const float x0 = i * dd[0] + posL[0];
-                const float x1 = x0 + dd[0];
+                const float x0 = i * par->dd[0] + par->posL[0];
+                const float x1 = x0 + par->dd[0];
                 const float x0y0z0 = x0 * y0z0;
                 const float x0y0z1 = x0 * y0z1;
                 const float x0y1z0 = x0 * y1z0;

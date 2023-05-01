@@ -208,15 +208,15 @@
         <Domain name="range" id="16402.NumberOfTableValues.range"/>
       </Property>
       <Property name="RGBPoints" id="16402.RGBPoints" number_of_elements="12">
-        <Element index="0" value="2.650421373383272"/>
+        <Element index="0" value="0.000005586765733427695"/>
         <Element index="1" value="0.231373"/>
         <Element index="2" value="0.298039"/>
         <Element index="3" value="0.752941"/>
-        <Element index="4" value="51.802364705555235"/>
+        <Element index="4" value="0.1704701931458138"/>
         <Element index="5" value="0.865003"/>
         <Element index="6" value="0.865003"/>
         <Element index="7" value="0.865003"/>
-        <Element index="8" value="100.95430803772719"/>
+        <Element index="8" value="0.34093479952589417"/>
         <Element index="9" value="0.705882"/>
         <Element index="10" value="0.0156863"/>
         <Element index="11" value="0.14902"/>
@@ -358,15 +358,15 @@
         <Domain name="range" id="16724.NumberOfTableValues.range"/>
       </Property>
       <Property name="RGBPoints" id="16724.RGBPoints" number_of_elements="12">
-        <Element index="0" value="1341957.5105047105"/>
+        <Element index="0" value="14781.7086824961"/>
         <Element index="1" value="0.231373"/>
         <Element index="2" value="0.298039"/>
         <Element index="3" value="0.752941"/>
-        <Element index="4" value="4945812407.729583"/>
+        <Element index="4" value="5857699495.616972"/>
         <Element index="5" value="0.865003"/>
         <Element index="6" value="0.865003"/>
         <Element index="7" value="0.865003"/>
-        <Element index="8" value="9890282857.948664"/>
+        <Element index="8" value="11715384209.525267"/>
         <Element index="9" value="0.705882"/>
         <Element index="10" value="0.0156863"/>
         <Element index="11" value="0.14902"/>
@@ -512,11 +512,11 @@
         <Element index="1" value="0.231373"/>
         <Element index="2" value="0.298039"/>
         <Element index="3" value="0.752941"/>
-        <Element index="4" value="6664802304"/>
+        <Element index="4" value="5364.67041015625"/>
         <Element index="5" value="0.865003"/>
         <Element index="6" value="0.865003"/>
         <Element index="7" value="0.865003"/>
-        <Element index="8" value="13329604608"/>
+        <Element index="8" value="10729.3408203125"/>
         <Element index="9" value="0.705882"/>
         <Element index="10" value="0.0156863"/>
         <Element index="11" value="0.14902"/>
@@ -658,11 +658,11 @@
         <Domain name="range" id="16080.NumberOfTableValues.range"/>
       </Property>
       <Property name="RGBPoints" id="16080.RGBPoints" number_of_elements="12">
-        <Element index="0" value="-1525.83544921875"/>
+        <Element index="0" value="-18067.384765625"/>
         <Element index="1" value="0.231373"/>
         <Element index="2" value="0.298039"/>
         <Element index="3" value="0.752941"/>
-        <Element index="4" value="-762.917724609375"/>
+        <Element index="4" value="-9033.6923828125"/>
         <Element index="5" value="0.865003"/>
         <Element index="6" value="0.865003"/>
         <Element index="7" value="0.865003"/>
@@ -887,11 +887,11 @@
         <Domain name="bool" id="16400.AllowDuplicateScalars.bool"/>
       </Property>
       <Property name="Points" id="16400.Points" number_of_elements="8">
-        <Element index="0" value="2.650421373383272"/>
+        <Element index="0" value="0.000005586765733427695"/>
         <Element index="1" value="0"/>
         <Element index="2" value="0.5"/>
         <Element index="3" value="0"/>
-        <Element index="4" value="100.95430803772719"/>
+        <Element index="4" value="0.34093479952589417"/>
         <Element index="5" value="1"/>
         <Element index="6" value="0.5"/>
         <Element index="7" value="0"/>
@@ -911,11 +911,11 @@
         <Domain name="bool" id="16722.AllowDuplicateScalars.bool"/>
       </Property>
       <Property name="Points" id="16722.Points" number_of_elements="8">
-        <Element index="0" value="1341957.5105047105"/>
+        <Element index="0" value="14781.7086824961"/>
         <Element index="1" value="0"/>
         <Element index="2" value="0.5"/>
         <Element index="3" value="0"/>
-        <Element index="4" value="9890282857.948664"/>
+        <Element index="4" value="11715384209.525267"/>
         <Element index="5" value="1"/>
         <Element index="6" value="0.5"/>
         <Element index="7" value="0"/>
@@ -939,7 +939,7 @@
         <Element index="1" value="0"/>
         <Element index="2" value="0.5"/>
         <Element index="3" value="0"/>
-        <Element index="4" value="13329604608"/>
+        <Element index="4" value="10729.3408203125"/>
         <Element index="5" value="1"/>
         <Element index="6" value="0.5"/>
         <Element index="7" value="0"/>
@@ -959,7 +959,7 @@
         <Domain name="bool" id="16078.AllowDuplicateScalars.bool"/>
       </Property>
       <Property name="Points" id="16078.Points" number_of_elements="8">
-        <Element index="0" value="-1525.83544921875"/>
+        <Element index="0" value="-18067.384765625"/>
         <Element index="1" value="0"/>
         <Element index="2" value="0.5"/>
         <Element index="3" value="0"/>
@@ -13421,7 +13421,7 @@
         <Domain name="bool" id="15140.SelectionVisibility.bool"/>
       </Property>
       <Property name="Visibility" id="15140.Visibility" number_of_elements="1">
-        <Element index="0" value="1"/>
+        <Element index="0" value="0"/>
         <Domain name="bool" id="15140.Visibility.bool"/>
       </Property>
       <Property name="Ambient" id="15140.Ambient" number_of_elements="1">
@@ -16487,7 +16487,7 @@
         <Domain name="bool" id="16472.SelectionVisibility.bool"/>
       </Property>
       <Property name="Visibility" id="16472.Visibility" number_of_elements="1">
-        <Element index="0" value="1"/>
+        <Element index="0" value="0"/>
         <Domain name="bool" id="16472.Visibility.bool"/>
       </Property>
       <Property name="Ambient" id="16472.Ambient" number_of_elements="1">
@@ -18544,7 +18544,9 @@
       </Property>
       <Property name="SelectionPointFieldDataArrayName" id="17122.SelectionPointFieldDataArrayName" number_of_elements="1">
         <Element index="0" value="je"/>
-        <Domain name="array_list" id="17122.SelectionPointFieldDataArrayName.array_list"/>
+        <Domain name="array_list" id="17122.SelectionPointFieldDataArrayName.array_list">
+          <String text="je"/>
+        </Domain>
       </Property>
       <Property name="SelectionVisibility" id="17122.SelectionVisibility" number_of_elements="1">
         <Element index="0" value="1"/>
@@ -18659,7 +18661,9 @@
         <Element index="2" value=""/>
         <Element index="3" value="0"/>
         <Element index="4" value="je"/>
-        <Domain name="array_list" id="17122.ColorArrayName.array_list"/>
+        <Domain name="array_list" id="17122.ColorArrayName.array_list">
+          <String text="je"/>
+        </Domain>
       </Property>
       <Property name="ColorByLODIndex" id="17122.ColorByLODIndex" number_of_elements="1">
         <Element index="0" value="0"/>
@@ -18762,6 +18766,7 @@
         <Element index="0" value="je"/>
         <Domain name="array_list" id="17122.GlyphTableIndexArray.array_list">
           <String text="None"/>
+          <String text="je"/>
         </Domain>
       </Property>
       <Property name="GlyphType" id="17122.GlyphType" number_of_elements="1">
@@ -19050,7 +19055,9 @@
       </Property>
       <Property name="OSPRayScaleArray" id="17122.OSPRayScaleArray" number_of_elements="1">
         <Element index="0" value="je"/>
-        <Domain name="array_list" id="17122.OSPRayScaleArray.array_list"/>
+        <Domain name="array_list" id="17122.OSPRayScaleArray.array_list">
+          <String text="je"/>
+        </Domain>
       </Property>
       <Property name="OSPRayScaleFunction" id="17122.OSPRayScaleFunction" number_of_elements="1">
         <Proxy value="17053"/>
@@ -19082,11 +19089,18 @@
         <Element index="2" value=""/>
         <Element index="3" value="0"/>
         <Element index="4" value="je"/>
-        <Domain name="array_list" id="17122.OpacityArray.array_list"/>
+        <Domain name="array_list" id="17122.OpacityArray.array_list">
+          <String text="je"/>
+        </Domain>
       </Property>
       <Property name="OpacityArrayComponent" id="17122.OpacityArrayComponent" number_of_elements="1">
         <Element index="0" value="0"/>
-        <Domain name="comps" id="17122.OpacityArrayComponent.comps"/>
+        <Domain name="comps" id="17122.OpacityArrayComponent.comps">
+          <Entry value="0" text="X"/>
+          <Entry value="1" text="Y"/>
+          <Entry value="2" text="Z"/>
+          <Entry value="3" text="Magnitude"/>
+        </Domain>
       </Property>
       <Property name="OpacityByArray" id="17122.OpacityByArray" number_of_elements="1">
         <Element index="0" value="0"/>
@@ -19160,7 +19174,12 @@
       </Property>
       <Property name="ScaleArrayComponent" id="17122.ScaleArrayComponent" number_of_elements="1">
         <Element index="0" value="0"/>
-        <Domain name="comps" id="17122.ScaleArrayComponent.comps"/>
+        <Domain name="comps" id="17122.ScaleArrayComponent.comps">
+          <Entry value="0" text="X"/>
+          <Entry value="1" text="Y"/>
+          <Entry value="2" text="Z"/>
+          <Entry value="3" text="Magnitude"/>
+        </Domain>
       </Property>
       <Property name="ScaleByArray" id="17122.ScaleByArray" number_of_elements="1">
         <Element index="0" value="0"/>
@@ -19204,7 +19223,9 @@
         <Element index="2" value=""/>
         <Element index="3" value="0"/>
         <Element index="4" value="je"/>
-        <Domain name="array_list" id="17122.SelectInputVectors.array_list"/>
+        <Domain name="array_list" id="17122.SelectInputVectors.array_list">
+          <String text="je"/>
+        </Domain>
       </Property>
       <Property name="SelectMaskArray" id="17122.SelectMaskArray" number_of_elements="1">
         <Element index="0" value=""/>
@@ -19213,18 +19234,21 @@
         <Element index="0" value="None"/>
         <Domain name="array_list" id="17122.SelectNormalArray.array_list">
           <String text="None"/>
+          <String text="je"/>
         </Domain>
       </Property>
       <Property name="SelectOrientationVectors" id="17122.SelectOrientationVectors" number_of_elements="1">
         <Element index="0" value="None"/>
         <Domain name="array_list" id="17122.SelectOrientationVectors.array_list">
           <String text="None"/>
+          <String text="je"/>
         </Domain>
       </Property>
       <Property name="SelectScaleArray" id="17122.SelectScaleArray" number_of_elements="1">
         <Element index="0" value="je"/>
         <Domain name="array_list" id="17122.SelectScaleArray.array_list">
           <String text="None"/>
+          <String text="je"/>
         </Domain>
       </Property>
       <Property name="SelectTCoordArray" id="17122.SelectTCoordArray" number_of_elements="1">
@@ -19237,6 +19261,7 @@
         <Element index="0" value="None"/>
         <Domain name="array_list" id="17122.SelectTangentArray.array_list">
           <String text="None"/>
+          <String text="je"/>
         </Domain>
       </Property>
       <Property name="SelectionCellLabelBold" id="17122.SelectionCellLabelBold" number_of_elements="1">
@@ -19385,7 +19410,9 @@
         <Element index="2" value=""/>
         <Element index="3" value="0"/>
         <Element index="4" value="je"/>
-        <Domain name="array_list" id="17122.SetScaleArray.array_list"/>
+        <Domain name="array_list" id="17122.SetScaleArray.array_list">
+          <String text="je"/>
+        </Domain>
       </Property>
       <Property name="ShaderPreset" id="17122.ShaderPreset" number_of_elements="1">
         <Element index="0" value="1"/>
@@ -21909,7 +21936,7 @@
         <Domain name="bool" id="15894.SelectionVisibility.bool"/>
       </Property>
       <Property name="Visibility" id="15894.Visibility" number_of_elements="1">
-        <Element index="0" value="1"/>
+        <Element index="0" value="0"/>
         <Domain name="bool" id="15894.Visibility.bool"/>
       </Property>
       <Property name="Ambient" id="15894.Ambient" number_of_elements="1">
@@ -24402,7 +24429,7 @@
         <Element index="0" value="0"/>
       </Property>
       <Property name="DataRangeMin" id="16166.DataRangeMin" number_of_elements="1">
-        <Element index="0" value="-1303.2266845703125"/>
+        <Element index="0" value="-6648.4326171875"/>
       </Property>
       <Property name="DrawAnnotations" id="16166.DrawAnnotations" number_of_elements="1">
         <Element index="0" value="1"/>
@@ -24674,10 +24701,10 @@
         <Element index="0" value="%-#6.1e"/>
       </Property>
       <Property name="DataRangeMax" id="16488.DataRangeMax" number_of_elements="1">
-        <Element index="0" value="100.5352096096557"/>
+        <Element index="0" value="NaN"/>
       </Property>
       <Property name="DataRangeMin" id="16488.DataRangeMin" number_of_elements="1">
-        <Element index="0" value="2.7739334925229864"/>
+        <Element index="0" value="NaN"/>
       </Property>
       <Property name="DrawAnnotations" id="16488.DrawAnnotations" number_of_elements="1">
         <Element index="0" value="1"/>
@@ -24875,7 +24902,7 @@
         <Domain name="bool" id="16488.UseCustomLabels.bool"/>
       </Property>
       <Property name="Visibility" id="16488.Visibility" number_of_elements="1">
-        <Element index="0" value="1"/>
+        <Element index="0" value="0"/>
         <Domain name="bool" id="16488.Visibility.bool"/>
       </Property>
       <Property name="WindowLocation" id="16488.WindowLocation" number_of_elements="1">
@@ -24949,10 +24976,10 @@
         <Element index="0" value="%-#6.1e"/>
       </Property>
       <Property name="DataRangeMax" id="16810.DataRangeMax" number_of_elements="1">
-        <Element index="0" value="9890282857.948664"/>
+        <Element index="0" value="11630525597.256033"/>
       </Property>
       <Property name="DataRangeMin" id="16810.DataRangeMin" number_of_elements="1">
-        <Element index="0" value="3782299.883394527"/>
+        <Element index="0" value="763115.7710464566"/>
       </Property>
       <Property name="DrawAnnotations" id="16810.DrawAnnotations" number_of_elements="1">
         <Element index="0" value="1"/>
@@ -25048,12 +25075,12 @@
         <Element index="0" value="0"/>
       </Property>
       <Property name="Position" id="16810.Position" number_of_elements="2">
-        <Element index="0" value="0.047942529549153984"/>
+        <Element index="0" value="0.21398497649047732"/>
         <Element index="1" value="0.02417302798982189"/>
         <Domain name="range" id="16810.Position.range"/>
       </Property>
       <Property name="PositionInfo" id="16810.PositionInfo" number_of_elements="2">
-        <Element index="0" value="0.047942529549153984"/>
+        <Element index="0" value="0.21398497649047732"/>
         <Element index="1" value="0.02417302798982189"/>
       </Property>
       <Property name="RangeLabelFormat" id="16810.RangeLabelFormat" number_of_elements="1">
@@ -25224,7 +25251,7 @@
         <Element index="0" value="%-#6.1e"/>
       </Property>
       <Property name="DataRangeMax" id="16816.DataRangeMax" number_of_elements="1">
-        <Element index="0" value="20442.056640625"/>
+        <Element index="0" value="10539.4853515625"/>
       </Property>
       <Property name="DataRangeMin" id="16816.DataRangeMin" number_of_elements="1">
         <Element index="0" value="0"/>
@@ -25450,7 +25477,8 @@
         <Element index="0" value="0"/>
         <Domain name="bool" id="17138.LockPosition.bool"/>
       </Property>
-      <Property name="StickyVisible" id="17138.StickyVisible">
+      <Property name="StickyVisible" id="17138.StickyVisible" number_of_elements="1">
+        <Element index="0" value="1"/>
         <Domain name="bool" id="17138.StickyVisible.bool"/>
       </Property>
       <Property name="UseNonCompositedRenderer" id="17138.UseNonCompositedRenderer" number_of_elements="1">
@@ -25880,7 +25908,7 @@
         <Domain name="files" id="14673.FileName.files"/>
       </Property>
       <Property name="FileNameInfo" id="14673.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="R:\Temp\out\B_88.vti"/>
+        <Element index="0" value="R:\Temp\out\B_89.vti"/>
       </Property>
       <Property name="TimestepValues" id="14673.TimestepValues" number_of_elements="90">
         <Element index="0" value="0"/>
@@ -26092,7 +26120,7 @@
         <Domain name="files" id="15407.FileName.files"/>
       </Property>
       <Property name="FileNameInfo" id="15407.FileNameInfo" number_of_elements="1">
-        <Element index="0" value="R:\Temp\out\E_89.vti"/>
+        <Element index="0" value="R:\Temp\out\E_82.vti"/>
       </Property>
       <Property name="TimestepValues" id="15407.TimestepValues" number_of_elements="90">
         <Element index="0" value="0"/>
@@ -26263,7 +26291,7 @@
         </Domain>
       </Property>
       <Property name="ScaleFactor" id="16264.ScaleFactor" number_of_elements="1">
-        <Element index="0" value="0.000001"/>
+        <Element index="0" value="0.001"/>
         <Domain name="bounds" id="16264.ScaleFactor.bounds"/>
         <Domain name="scalar_range" id="16264.ScaleFactor.scalar_range"/>
         <Domain name="vector_range" id="16264.ScaleFactor.vector_range"/>
@@ -26441,7 +26469,7 @@
         </Domain>
       </Property>
       <Property name="ScaleFactor" id="16914.ScaleFactor" number_of_elements="1">
-        <Element index="0" value="1e-12"/>
+        <Element index="0" value="1e-14"/>
         <Domain name="bounds" id="16914.ScaleFactor.bounds"/>
         <Domain name="scalar_range" id="16914.ScaleFactor.scalar_range"/>
         <Domain name="vector_range" id="16914.ScaleFactor.vector_range"/>
@@ -28056,7 +28084,7 @@
         <Domain name="bool" id="17424.LeftAxisLogScale.bool"/>
       </Property>
       <Property name="LeftAxisRangeMaximum" id="17424.LeftAxisRangeMaximum" number_of_elements="1">
-        <Element index="0" value="3162277.6601683795"/>
+        <Element index="0" value="31622776.60168379"/>
       </Property>
       <Property name="LeftAxisRangeMinimum" id="17424.LeftAxisRangeMinimum" number_of_elements="1">
         <Element index="0" value="1"/>
@@ -28416,7 +28444,7 @@
         <Domain name="bool" id="17424.UseCache.bool"/>
       </Property>
       <Property name="ViewSize" id="17424.ViewSize" number_of_elements="2">
-        <Element index="0" value="710"/>
+        <Element index="0" value="801"/>
         <Element index="1" value="786"/>
       </Property>
       <Property name="ViewTime" id="17424.ViewTime" number_of_elements="1">
@@ -28950,7 +28978,7 @@
         <Domain name="bool" id="17388.UseToneMapping.bool"/>
       </Property>
       <Property name="ViewSize" id="17388.ViewSize" number_of_elements="2">
-        <Element index="0" value="710"/>
+        <Element index="0" value="801"/>
         <Element index="1" value="786"/>
       </Property>
       <Property name="ViewTime" id="17388.ViewTime" number_of_elements="1">
@@ -28976,14 +29004,14 @@
         <Element index="0" value="0"/>
       </Property>
       <Property name="CameraFocalPoint" id="17388.CameraFocalPoint" number_of_elements="3">
-        <Element index="0" value="0.00001574307680130046"/>
-        <Element index="1" value="0.00016812980175018386"/>
-        <Element index="2" value="-0.00003947317600250168"/>
+        <Element index="0" value="0.000015743076801300208"/>
+        <Element index="1" value="0.00016812980175018175"/>
+        <Element index="2" value="-0.00003947317600250305"/>
       </Property>
       <Property name="CameraFocalPointInfo" id="17388.CameraFocalPointInfo" number_of_elements="3">
-        <Element index="0" value="0.00001574307680130046"/>
-        <Element index="1" value="0.00016812980175018386"/>
-        <Element index="2" value="-0.00003947317600250168"/>
+        <Element index="0" value="0.000015743076801300208"/>
+        <Element index="1" value="0.00016812980175018175"/>
+        <Element index="2" value="-0.00003947317600250305"/>
       </Property>
       <Property name="CameraParallelScale" id="17388.CameraParallelScale" number_of_elements="1">
         <Element index="0" value="0.29994964528359924"/>
@@ -28992,14 +29020,14 @@
         <Element index="0" value="0.29994964528359924"/>
       </Property>
       <Property name="CameraPosition" id="17388.CameraPosition" number_of_elements="3">
-        <Element index="0" value="-0.001226658140912514"/>
-        <Element index="1" value="-0.00005642502985589387"/>
-        <Element index="2" value="0.007970101423393269"/>
+        <Element index="0" value="0.00011778340444948179"/>
+        <Element index="1" value="0.00029335874249049164"/>
+        <Element index="2" value="-0.0021685672250630742"/>
       </Property>
       <Property name="CameraPositionInfo" id="17388.CameraPositionInfo" number_of_elements="3">
-        <Element index="0" value="-0.001226658140912514"/>
-        <Element index="1" value="-0.00005642502985589387"/>
-        <Element index="2" value="0.007970101423393269"/>
+        <Element index="0" value="0.00011778340444948179"/>
+        <Element index="1" value="0.00029335874249049164"/>
+        <Element index="2" value="-0.0021685672250630742"/>
       </Property>
       <Property name="CameraViewAngle" id="17388.CameraViewAngle" number_of_elements="1">
         <Element index="0" value="30"/>
@@ -29008,14 +29036,14 @@
         <Element index="0" value="30"/>
       </Property>
       <Property name="CameraViewUp" id="17388.CameraViewUp" number_of_elements="3">
-        <Element index="0" value="0.976883213581184"/>
-        <Element index="1" value="-0.15503741046299788"/>
-        <Element index="2" value="0.14718216053661806"/>
+        <Element index="0" value="0.9956107391741427"/>
+        <Element index="1" value="-0.08322006872496815"/>
+        <Element index="2" value="0.042821445591302985"/>
       </Property>
       <Property name="CameraViewUpInfo" id="17388.CameraViewUpInfo" number_of_elements="3">
-        <Element index="0" value="0.976883213581184"/>
-        <Element index="1" value="-0.15503741046299788"/>
-        <Element index="2" value="0.14718216053661806"/>
+        <Element index="0" value="0.9956107391741427"/>
+        <Element index="1" value="-0.08322006872496815"/>
+        <Element index="2" value="0.042821445591302985"/>
       </Property>
       <Property name="EyeAngle" id="17388.EyeAngle" number_of_elements="1">
         <Element index="0" value="2"/>

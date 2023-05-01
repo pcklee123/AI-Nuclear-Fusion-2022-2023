@@ -3,7 +3,7 @@ void sel_part_print(int n_part[3],
                     float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
                     float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                     float posp[2][n_output_part][3],float KE[2][n_output_part],
-                    int m[2][n_partd],float dt[2])
+                    int m[2][n_partd],par *par)
 {
     for (int p = 0; p < 2; p++)
     {
@@ -30,7 +30,7 @@ void sel_part_print(int n_part[3],
             dpos = (pos1z[p][n] - pos0z[p][n]);
             dpos *= dpos;
             dpos2 += dpos;
-            KE[p][nprt] = 0.5 * m[p][n] * (dpos2) / (e_charge_mass * dt[p] * dt[p]);
+            KE[p][nprt] = 0.5 * m[p][n] * (dpos2) / (e_charge_mass * par->dt[p] * par->dt[p]);
             // in units of eV
             posp[p][nprt][0] = pos0x[p][n];
             posp[p][nprt][1] = pos0y[p][n];

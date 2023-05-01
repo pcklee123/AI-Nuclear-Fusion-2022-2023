@@ -15,22 +15,21 @@ namespace
 void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
            float E[3][n_space_divz][n_space_divy][n_space_divz], float B[3][n_space_divz][n_space_divy][n_space_divx],
            float posx[2][n_partd], float posy[2][n_partd], float posz[2][n_partd],
-           float posL[3], float dd[3], int n_part[3], int q[2][n_partd], float out[2])
+           int q[2][n_partd], par *par)
 {
 
-    const float dd0 = 1 / dd[0], dd1 = 1 / dd[1], dd2 = 1 / dd[2];
+    const float dd0 = 1 / par->dd[0], dd1 = 1 / par->dd[1], dd2 = 1 / par->dd[2];
     float EUtot = 0.f;
     {
         // Calculate electrical potential energy, from get_densityfields.cpp
-
         for (int p = 0; p < 2; p++)
         {
-            for (int n = 0; n < n_part[p]; ++n)
+#pragma omp parallel for reduction(+ : EUtot)
+            for (int n = 0; n < par->n_part[p]; ++n)
             {
-
-                float dx = (posx[p][n] - posL[0]) * dd0; // Get the cell positions in decimal
-                float dy = (posy[p][n] - posL[1]) * dd1;
-                float dz = (posz[p][n] - posL[2]) * dd2;
+                float dx = (posx[p][n] - par->posL[0]) * dd0; // Get the cell positions in decimal
+                float dy = (posy[p][n] - par->posL[1]) * dd1;
+                float dz = (posz[p][n] - par->posL[2]) * dd2;
                 unsigned int i = roundf(dx), j = roundf(dy), k = roundf(dz); // Round away from 0
                 dx -= i;
                 dy -= k;
@@ -43,13 +42,6 @@ void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
                 float c11 = V[k + 1][j + 1][i] * dx1 + V[k + 1][j + 1][i + 1] * dx;
                 float c = (c00 * (1 - dy) + c10 * dy) * (1 - dz) + (c01 * (1 - dy) + c11 * dy) * dz;
                 EUtot += c * q[p][n];
-                /* 
-                if (isnanf(V[k][j][i]))
-                    cout << "V is NAN ";
-                if (isnanf(c))
-                    cout << "c is NAN ";
-                    */
-               
             }
         }
         EUtot *= 0.5f * e_charge;
@@ -128,7 +120,7 @@ void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
             float e = E_1d[i];
             E2tot += e * e; // Why can we do this? Because E^2 = Ex^2 + Ey^2 + Ez^2
         }
-        E2tot *= 0.5f * epsilon0 * (dd[0] * dd[1] * dd[2]); // dV
+        E2tot *= 0.5f * epsilon0 * (par->[0] * par->[1] * par->[2]); // dV
         EUtot += E2tot;
     }
 #endif
@@ -139,15 +131,16 @@ void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
     {
         float B2tot = 0;
         float *B_1d = reinterpret_cast<float *>(B);
+#pragma omp parallel for reduction(+ : B2tot)
         for (int i = 0; i < n_cells * 3; ++i)
         {
             float b = B_1d[i];
             B2tot += b * b;
         }
-        B2tot *= 0.5f / u0 * (dd[0] * dd[1] * dd[2]); // dV
+        B2tot *= 0.5f / u0 * (par->dd[0] * par->dd[1] * par->dd[2]); // dV
         BUtot += B2tot;
     }
 #endif
-    out[0] = EUtot / ev_to_j;
-    out[1] = BUtot / ev_to_j;
+    par->UE = EUtot / ev_to_j;
+    par->UB = BUtot / ev_to_j;
 }
