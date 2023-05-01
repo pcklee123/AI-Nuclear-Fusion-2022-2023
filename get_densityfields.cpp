@@ -47,7 +47,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
-#pragma omp parallel for simd num_threads(nthreads)
+//#pragma omp parallel for simd num_threads(nthreads)
         for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
         {
             if (pos1x[p][n] <= par->posL[0] + par->dd[0])
@@ -100,7 +100,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             }
 #endif
         }
-#pragma omp parallel for simd num_threads(nthreads)
+//#pragma omp parallel for simd num_threads(nthreads)
         for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
         {
             ii[p][0][n] = (int)roundf((pos1x[p][n] - par->posL[0]) * ddi[0]);
