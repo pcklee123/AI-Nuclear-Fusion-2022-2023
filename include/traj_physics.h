@@ -5,8 +5,8 @@
                    // #define cylinder //do hot rod problem
 #define Temp_e 1e7 // in Kelvin
 #define Temp_d 1e7 // in Kelvin
-constexpr float f1 = 8;
-constexpr float f2 = 64; 
+constexpr float f1 = 1;
+constexpr float f2 = 4; 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 11;   // in T
@@ -14,7 +14,7 @@ constexpr float Emax0 = 1e11; // 1e11V/m is approximately interatomic E field -e
 constexpr float nback = 128;  // background particles per cell - improves stability
 
 constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
-constexpr float target_part = 1e11; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e15; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n

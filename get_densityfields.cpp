@@ -50,18 +50,22 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp sections
         {
 #pragma omp section
-            {                                                     // #pragma omp parallel for simd
+            {
+#pragma omp parallel for simd
                 for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
                 {
                     if (pos1x[p][n] <= par->posL[0] + par->dd[0])
                     {
                         pos1x[p][n] = par->posL[0] + par->dd[0] * 1.5;
                         pos0x[p][n] = pos1x[p][n];
+                        q[p][n]=0;
                     }
                     else if (pos1x[p][n] >= par->posH[0] - par->dd[0])
                     {
                         pos1x[p][n] = par->posH[0] - par->dd[0] * 1.5;
                         pos0x[p][n] = pos1x[p][n];
+                        q[p][n]=0;
+
                     }
                 }
             }
@@ -74,11 +78,13 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                     {
                         pos1y[p][n] = par->posL[1] + par->dd[1] * 1.5;
                         pos0y[p][n] = pos1y[p][n];
+                        q[p][n]=0;
                     }
                     else if (pos1y[p][n] >= par->posH[1] - par->dd[1])
                     {
                         pos1y[p][n] = par->posH[1] - par->dd[1] * 1.5;
                         pos0y[p][n] = pos1y[p][n];
+                        q[p][n]=0;
                     }
                 }
             }
@@ -108,17 +114,20 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                     {
                         pos1z[p][n] = par->posL[2] + par->dd[2] * 1.5;
                         pos0z[p][n] = pos1z[p][n];
+                        q[p][n]=0;
                     }
                     else if (pos1z[p][n] >= par->posH[2] - par->dd[2])
                     {
                         pos1z[p][n] = par->posH[2] - par->dd[2] * 1.5;
                         pos0z[p][n] = pos1z[p][n];
+                        q[p][n]=0;
                     }
 #endif
                 }
             }
         }
     }
+#pragma omp barrier
 
 #pragma omp parallel num_threads(2)
     {
@@ -225,6 +234,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             }
         }
     }
+#pragma omp barrier
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
@@ -240,6 +250,8 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         par->nt[p] = nt;
     }
 #pragma omp barrier
+
+    cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
@@ -251,7 +263,6 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         }
     }
 #pragma omp barrier
-    cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
 #pragma omp parallel sections num_threads(nthreads)
     {
 #pragma omp section

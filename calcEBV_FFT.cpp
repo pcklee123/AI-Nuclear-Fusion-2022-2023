@@ -384,23 +384,22 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 #endif
 #endif
     first = 0;
-    //   int E_exceeds = checkInRange("E", E, par->Emax / 512, par->Emax / 128), B_exceeds = checkInRange("B", B, par->Bmax / 512, par->Bmax / 128);
-    //    int E_exceeds = checkInRange("E", E, par->Emax / f2, par->Emax / f1), B_exceeds = checkInRange("B", B, par->Bmax / f2, par->Bmax / f1);
     int E_exceeds = 0, B_exceeds = 0;
     par->Emax = maxval(E);
     par->Bmax = maxval(B);
-    float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * par->Bmax);
+    float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * (par->Bmax + 1e-5f));
     float acc_e = par->Emax * e_charge_mass;
     float vel_e = sqrt(kb * Temp_e / e_mass);
     float TE = sqrt(vel_e * vel_e / (acc_e * acc_e) + 2 * a0 / acc_e) - vel_e / acc_e;
     cout << "Tcyclotron=" << Tcyclotron << ",Bmax= " << par->Bmax << ", TE=" << TE << ",Emax= " << par->Emax << endl;
-    if (Tcyclotron < (par->dt[0] * 4 * ncalc0[0]))
-        B_exceeds = 4;
-    else if (Tcyclotron > (par->dt[0] * 32 * ncalc0[0]))
-        B_exceeds = 8;
-    if (TE < (par->dt[0] * 2 * ncalc0[0]))
+    if (TE < (par->dt[0] * 2 * f1 * ncalc0[0]))
         E_exceeds = 1;
-    else if (TE > (par->dt[0] * 16 * ncalc0[0]))
+    else if (TE > (par->dt[0] * 2 * f2 * ncalc0[0]))
         E_exceeds = 2;
+    if (Tcyclotron < (par->dt[0] * 4 * f1 * ncalc0[0]))
+        B_exceeds = 4;
+    else if (Tcyclotron > (par->dt[0] * 4 * f2 * ncalc0[0]))
+        B_exceeds = 8;
+
     return (E_exceeds + B_exceeds);
 }

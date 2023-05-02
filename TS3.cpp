@@ -187,8 +187,9 @@ int main()
             timer.mark(); // For timestep
             // Work out motion
             timer.mark();
-            for (int p = 0; p < 2; p++)
+#pragma omp parallel num_threads(2)
             {
+                int p = omp_get_thread_num();
 #ifdef BFon_
                 par->Bcoef = (float)qs[p] * e_charge_mass / (float)mp[p] * par->dt[p] * 0.5f;
 #else
@@ -205,6 +206,7 @@ int main()
                 tnp(Ea1, Ba1, pos0x[p], pos0y[p], pos0z[p], pos1x[p], pos1y[p], pos1z[p], par); //  calculate the next position ncalc[p] times
                 total_ncalc[p] += ncalc[p];
             }
+#pragma omp barrier
             cout << "motion: " << timer.elapsed() << "s, ";
             t += par->dt[0] * ncalc[0];
             //  find number of particle and current density fields
@@ -217,31 +219,47 @@ int main()
             // set externally applied fields this is inside time loop so we can set time varying E and B field
             // calcEeBe(Ee,Be,t);
             int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
-            changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt, par); /* change time step if E or B too big*/
-
-            // cout <<"cdt="<<cdt;
-
             cout << "EBV: " << timer.elapsed() << "s, ";
-
-#ifdef Uon_
-            // calculate the total potential energy U
-            //        cout << "calculate the total potential energy U\n";
-            timer.mark();
-
-            calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
-            cout << "U: " << timer.elapsed() << "s, ";
-#endif
 
             // calculate constants for each cell for trilinear interpolation
             timer.mark();
-            calc_trilin_constants(E, Ea, par);
-            calc_trilin_constants(B, Ba, par);
-            cout << "trilin const: " << timer.elapsed() << "s\n";
+#pragma omp sections
+            {
+#pragma omp section
+                {
+                    changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt, par); /* change time step if E or B too big*/
+                }
+#pragma omp section
+                {
+#ifdef Uon_
+                    // calculate the total potential energy U
+                    //        cout << "calculate the total potential energy U\n";
+                    //                  timer.mark();
+                    calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
+                    //                 cout << "U: " << timer.elapsed() << "s, ";
+#endif
+                }
+#pragma omp section
+                {
+                    calc_trilin_constants(E, Ea, par);
+                }
+
+#pragma omp section
+                {
+                    calc_trilin_constants(B, Ba, par);
+                }
+
+#pragma omp section
+                {
+                    log_entry(i_time, ntime, cdt, total_ncalc, t, par);
+                }
+            }
+#pragma omp barrier
+            cout << "trilin const &calcU :  " << timer.elapsed() << "s\n";
             cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
             // if (cdt)  cout << "dtchanged\n";
             //  cout << "dt = {" << par->dt[0] << " " << par->dt[1] << "}, t_sim = " << t << " s"<< ", ne = " << nt[0] << ", ni = " << nt[1];
             //  cout << "\nKEtot e = " << KEtot[0] << ", KEtot i = " << KEtot[1] << ", Eele = " << U[0] << ", Emag = " << U[1] << ", Etot = " << KEtot[0] + KEtot[1] + U[0] + U[1] << " eV\n";
-            log_entry(i_time, ntime, cdt ? 1 : 0, total_ncalc, t, par);
         }
 
         // print out all files for paraview

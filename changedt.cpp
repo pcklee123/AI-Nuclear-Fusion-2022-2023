@@ -2,69 +2,61 @@
 void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int n_part[3], int cdt, par *par)
 {
     int inc = 3;
+    cout << endl
+         << cdt << " ";
     switch (cdt)
     {
     case 0: // both OK
         break;
-    case 1: // E exceeded B OK decrease dt
+    case 1: //
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        // ncalc[0] *= 2;  ncalc[1] *= 2;
-        //     par->Emax *= 2;
-        //         par->Bmax *= 1.2;
-        cout << "dt decreased E too high \n";
+        cout << "dt decrease E high B OK \n";
         break;
-    case 2: // E too low B OK do nothing
-        cout << "dt  E too low B OK do nothing  dt\n";
+    case 2:
+        cout << "dt maintain E too low B OK\n";
         break;
     case 3: // impossible case E too high and too low ..
         inc = 3;
         cout << "dt impossible case E too high and too low .. dt\n";
         break;
-    case 4: // B exceeded E OK decrease dt
+    case 4:
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        //    par->Bmax *= 2;
-        cout << "dt B exceeded E OK decrease dt\n";
+        cout << "dt decrease B exceeded E OK\n";
         break;
-    case 5: // B exceeded and E exceeded decrease dt
+    case 5:
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        //     par->Emax *= 2;
-        //    par->Bmax *= 2;
-        cout << "dt B exceeded and E exceeded decrease dt\n";
+        cout << "dt decrease B exceeded and E exceeded\n";
         break;
-    case 6: // B exceeded and E too low decrease dt
+    case 6:
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        //     par->Emax /= 2;
-        //     par->Bmax *= 2;
-        cout << "dt  B exceeded and E too low decrease dt\n";
+        cout << "dt decrease B exceeded and E too low\n";
         break;
     case 7: // impossible case E too high and too low ..
         break;
-    case 8: // B too low E ok do nothing
-        cout << "dt  B too low E ok do nothing\n";
+    case 8:
+        cout << "dt maintain B too low E OK\n";
         break;
-    case 9: // B too low E too high decrease dt
+    case 9:
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        //       par->Emax *= 2;
-        //      par->Bmax /= 2;
-        cout << "dt  B too low E too high decrease\n";
+        cout << "dt decrease B too low E too high \n";
         break;
-    case 10: // B too low E too low increase dt
+    case 10:
         inc = 1;
         par->dt[0] *= 2;
         par->dt[1] *= 2;
-        //      par->Emax /= 2;
-        //     par->Bmax /= 2;
-        cout << "dt  B too low E too low increase dt\n";
+        cout << "dt: increase B too low E too low\n";
+        break;
+    default:
         break;
     }
     switch (inc)

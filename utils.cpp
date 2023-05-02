@@ -66,6 +66,8 @@ void log_headers()
     logger.write("Ele_pot");
     logger.write("Mag_pot");
     logger.write("E_tot");
+    logger.write("Emax");
+    logger.write("Bmax");
     logger.newline();
 }
 
@@ -76,15 +78,17 @@ void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par
     logger.write(cdt);
     logger.write(total_ncalc[0]);
     logger.write(total_ncalc[1]);
-    logger.write(par->dt[0]*1e15);//in fs
-    logger.write(par->dt[1]*1e15);
-    logger.write(t*1e12);//in ps
+    logger.write(par->dt[0] * 1e15); // in fs
+    logger.write(par->dt[1] * 1e15);
+    logger.write(t * 1e12); // in ps
     logger.write(par->nt[0]);
     logger.write(par->nt[1]);
     logger.write(par->KEtot[0]);
     logger.write(par->KEtot[1]);
     logger.write(par->UB);
     logger.write(par->UE);
-    logger.write(par->KEtot[0] +par->KEtot[1] + par->UB + par->UE);
+    logger.write(par->KEtot[0] + par->KEtot[1] + par->UB + par->UE);
+    logger.write(par->Emax);
+    logger.write(par->Bmax);
     logger.newline();
 }
