@@ -55,6 +55,18 @@ void vector_muls(fftwf_complex *dst, fftwf_complex *A, fftwf_complex *B, int n)
     // read result arrays from the device to main memory
     queue.enqueueReadBuffer(buffer_A, CL_TRUE, 0, sizeof(fftwf_complex) * n, dst);
 }
+float maxval(float data[3][n_space_divz][n_space_divy][n_space_divz])
+{
+   float max=0;
+    const float *data_1d = reinterpret_cast<float *>(data);
+    for (unsigned int i = 0; i < n_cells * 3; ++i)
+    {
+        fabs(data_1d[i]) < minval;
+    }
+
+
+    return 0;
+}
 
 int checkInRange(string name, float data[3][n_space_divz][n_space_divy][n_space_divz], float minval, float maxval)
 {
