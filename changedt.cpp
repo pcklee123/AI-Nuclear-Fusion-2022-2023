@@ -1,7 +1,7 @@
 #include "include/traj.h"
-void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int n_part[3], int cdt,par *par)
+void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int n_part[3], int cdt, par *par)
 {
-    int inc=3;
+    int inc = 3;
     switch (cdt)
     {
     case 0: // both OK
@@ -11,11 +11,11 @@ void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n
         par->dt[0] /= 2;
         par->dt[1] /= 2;
         // ncalc[0] *= 2;  ncalc[1] *= 2;
-        par->Emax *= 2;
+        //     par->Emax *= 2;
         //         par->Bmax *= 1.2;
         cout << "dt decreased E too high \n";
         break;
-    case 2: // E too low B OK do nothing 
+    case 2: // E too low B OK do nothing
         cout << "dt  E too low B OK do nothing  dt\n";
         break;
     case 3: // impossible case E too high and too low ..
@@ -26,23 +26,23 @@ void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        par->Bmax *= 2;
+        //    par->Bmax *= 2;
         cout << "dt B exceeded E OK decrease dt\n";
         break;
     case 5: // B exceeded and E exceeded decrease dt
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        par->Emax *= 2;
-        par->Bmax *= 2;
+        //     par->Emax *= 2;
+        //    par->Bmax *= 2;
         cout << "dt B exceeded and E exceeded decrease dt\n";
         break;
     case 6: // B exceeded and E too low decrease dt
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        par->Emax /= 2;
-        par->Bmax *= 2;
+        //     par->Emax /= 2;
+        //     par->Bmax *= 2;
         cout << "dt  B exceeded and E too low decrease dt\n";
         break;
     case 7: // impossible case E too high and too low ..
@@ -54,16 +54,16 @@ void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        par->Emax *= 2;
-        par->Bmax /= 2;
+        //       par->Emax *= 2;
+        //      par->Bmax /= 2;
         cout << "dt  B too low E too high decrease\n";
         break;
     case 10: // B too low E too low increase dt
         inc = 1;
         par->dt[0] *= 2;
         par->dt[1] *= 2;
-        par->Emax /= 2;
-        par->Bmax /= 2;
+        //      par->Emax /= 2;
+        //     par->Bmax /= 2;
         cout << "dt  B too low E too low increase dt\n";
         break;
     }

@@ -28,8 +28,8 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 8347) ? 8347 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 9; // total number of time steps to calculate
-constexpr int nc = 1;         // number of times to calculate E and B between printouts
+constexpr int ndatapoints = 90; // total number of time steps to calculate
+constexpr int nc = 10;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
@@ -37,10 +37,10 @@ constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the
 
 #define trilinon_
 //#define Uon_  // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
-//#define Eon_  // whether to calculate the electric (E) field
-//#define Bon_  // whether to calculate the magnetic (B) field
-//#define EFon_ // whether to apply electric force
-//#define BFon_ // whether to apply magnetic force
+#define Eon_  // whether to calculate the electric (E) field
+#define Bon_  // whether to calculate the magnetic (B) field
+#define EFon_ // whether to apply electric force
+#define BFon_ // whether to apply magnetic force
 #define printDensity
 #define printParticles
 // #define printV //print out V
