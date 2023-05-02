@@ -7,6 +7,8 @@ IDIR = include
 CC=g++
 #ucrt64
 CFLAGS= -g -I$(IDIR) -I /ucrt64/include/vtk -L /ucrt64/lib/vtk -fopenmp -fopenmp-simd -march=native -malign-double -std=c++2b 
+#CFLAGS= -g -I$(IDIR) -I /ucrt64/include/vtk -L /ucrt64/lib/vtk -march=native -malign-double -std=c++2b 
+
 CFLAGS+= -Ofast -ftree-parallelize-loops=8 
 CFLAGS+= -mavx -mavx2 -mfma -ffast-math -ftree-vectorize -fomit-frame-pointer
 #mingw64
