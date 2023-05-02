@@ -9,7 +9,7 @@ constexpr float f1 = 8;
 constexpr float f2 = 64; 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 10;   // in T
+constexpr float Bmax0 = 11;   // in T
 constexpr float Emax0 = 1e11; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback = 128;  // background particles per cell - improves stability
 

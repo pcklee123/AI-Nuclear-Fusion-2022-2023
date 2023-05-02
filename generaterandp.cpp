@@ -1,7 +1,7 @@
 #include "traj.h"
 void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                           float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                          int q[2][n_partd], int m[2][n_partd],par *par)
+                          int q[2][n_partd], int m[2][n_partd], par *par)
 {
     // spherical plasma set plasma parameters
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
@@ -20,14 +20,15 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
-    float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass));
-    float Tv = a0 / vel_e; // time for electron to move across 1 cell
+    float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass)+v0[0][0]*v0[0][0]+v0[0][1]*v0[0][1]+v0[0][2]*v0[0][2]);
+   // float Tv = a0 / vel_e; // time for electron to move across 1 cell if E=0
     float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * Bmax0);
     float TDebye = Debye_Length / vel_e;
-    float TE = sqrt(2 * a0 / e_charge_mass / Emax0);
+    float acc_e = e_charge_mass * Emax0;
+    float TE = sqrt(vel_e * vel_e / (acc_e * acc_e) + 2 * a0 / acc_e) - vel_e / acc_e; // time for electron to move across 1 cell
     // set time step to allow electrons to gyrate if there is B field or to allow electrons to move slowly throughout the plasma distance
-
-    par->dt[0] = 4 * min(min(min(TDebye, min(Tv / md_me, Tcyclotron) / 4), plasma_period / ncalc0[0] / 4), TE / ncalc0[0]) / 2; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
+    cout << "Tdebye=" << TDebye << ", Tcycloton/4=" << Tcyclotron / 4 << ", plasma period/3=" << plasma_period / 4 << ",TE/2=" << TE/2 << endl;
+    par->dt[0] =  min(min(min(TDebye, Tcyclotron / 4), plasma_period /  4), TE / 2)/ncalc0[0]; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
     par->dt[1] = par->dt[0] * md_me;
     //  float mu0_4pidt[2]= {mu0_4pi/par->dt[0],mu0_4pi/par->dt[1]};
     cout << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
@@ -191,8 +192,8 @@ void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], fl
             //          if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << par->dt[p]<<endl;
             q[p][n] = qs[p];
             m[p][n] = mp[p];
-        }     
-               //        nt[p] += q[p][n];
+        }
+        //        nt[p] += q[p][n];
     }
     // #pragma omp barrier
     gsl_rng_free(rng); // dealloc the rng

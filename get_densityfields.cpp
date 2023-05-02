@@ -47,60 +47,79 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
-        // #pragma omp parallel for simd num_threads(nthreads)
-        for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+#pragma omp sections
         {
-            if (pos1x[p][n] <= par->posL[0] + par->dd[0])
-            {
-                pos1x[p][n] = par->posL[0] + par->dd[0] * 1.5;
-                pos0x[p][n] = pos1x[p][n];
+#pragma omp section
+            {                                                     // #pragma omp parallel for simd
+                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+                {
+                    if (pos1x[p][n] <= par->posL[0] + par->dd[0])
+                    {
+                        pos1x[p][n] = par->posL[0] + par->dd[0] * 1.5;
+                        pos0x[p][n] = pos1x[p][n];
+                    }
+                    else if (pos1x[p][n] >= par->posH[0] - par->dd[0])
+                    {
+                        pos1x[p][n] = par->posH[0] - par->dd[0] * 1.5;
+                        pos0x[p][n] = pos1x[p][n];
+                    }
+                }
             }
-            if (pos1x[p][n] >= par->posH[0] - par->dd[0])
+#pragma omp section
             {
-                pos1x[p][n] = par->posH[0] - par->dd[0] * 1.5;
-                pos0x[p][n] = pos1x[p][n];
+#pragma omp parallel for simd
+                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+                {
+                    if (pos1y[p][n] <= par->posL[1] + par->dd[1])
+                    {
+                        pos1y[p][n] = par->posL[1] + par->dd[1] * 1.5;
+                        pos0y[p][n] = pos1y[p][n];
+                    }
+                    else if (pos1y[p][n] >= par->posH[1] - par->dd[1])
+                    {
+                        pos1y[p][n] = par->posH[1] - par->dd[1] * 1.5;
+                        pos0y[p][n] = pos1y[p][n];
+                    }
+                }
             }
-            if (pos1y[p][n] <= par->posL[1] + par->dd[1])
+#pragma omp section
             {
-                pos1y[p][n] = par->posL[1] + par->dd[1] * 1.5;
-                pos0y[p][n] = pos1y[p][n];
-            }
-            if (pos1y[p][n] >= par->posH[1] - par->dd[1])
-            {
-                pos1y[p][n] = par->posH[1] - par->dd[1] * 1.5;
-                pos0y[p][n] = pos1y[p][n];
-            }
+#pragma omp parallel for simd
+                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+                {
 #ifdef cylinder // rollover particles in z direction
-            if (ii[p][2][n] == 0)
-            {
-                pos1z[p][n] += (n_space_divz - 2) * par->dd[2];
-                pos0z[p][n] += (n_space_divz - 2) * par->dd[2];
-                ii[p][2][n] = n_space_divz - 2;
-                ;
-            }
-            if (ii[p][2][n] >= n_space_divz - 1)
-            {
-                pos1z[p][n] -= (n_space_divz - 2) * par->dd[2];
-                pos0z[p][n] -= (n_space_divz - 2) * par->dd[2];
-                ii[p][2][n] = n_space_divz - 2;
-            }
-
+                    if (ii[p][2][n] == 0)
+                    {
+                        pos1z[p][n] += (n_space_divz - 2) * par->dd[2];
+                        pos0z[p][n] += (n_space_divz - 2) * par->dd[2];
+                        ii[p][2][n] = n_space_divz - 2;
+                        ;
+                    }
+                    else if (ii[p][2][n] >= n_space_divz - 1)
+                    {
+                        pos1z[p][n] -= (n_space_divz - 2) * par->dd[2];
+                        pos0z[p][n] -= (n_space_divz - 2) * par->dd[2];
+                        ii[p][2][n] = n_space_divz - 2;
+                    }
 #endif
 #ifdef sphere
-            // hit wall replace with stationary particle
-            if (pos1z[p][n] <= par->posL[2] + par->dd[2])
-            {
-                pos1z[p][n] = par->posL[2] + par->dd[2] * 1.5;
-                pos0z[p][n] = pos1z[p][n];
-            }
-            if (pos1z[p][n] >= par->posH[2] - par->dd[2])
-            {
-                pos1z[p][n] = par->posH[2] - par->dd[2] * 1.5;
-                pos0z[p][n] = pos1z[p][n];
-            }
+                    // hit wall replace with stationary particle
+                    if (pos1z[p][n] <= par->posL[2] + par->dd[2])
+                    {
+                        pos1z[p][n] = par->posL[2] + par->dd[2] * 1.5;
+                        pos0z[p][n] = pos1z[p][n];
+                    }
+                    else if (pos1z[p][n] >= par->posH[2] - par->dd[2])
+                    {
+                        pos1z[p][n] = par->posH[2] - par->dd[2] * 1.5;
+                        pos0z[p][n] = pos1z[p][n];
+                    }
 #endif
+                }
+            }
         }
     }
+
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
