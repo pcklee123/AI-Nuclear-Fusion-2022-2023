@@ -104,16 +104,35 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
-        // #pragma omp parallel for simd num_threads(nthreads)
-        for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+#pragma omp sections
         {
-            ii[p][0][n] = (int)roundf((pos1x[p][n] - par->posL[0]) * ddi[0]);
-            ii[p][1][n] = (int)roundf((pos1y[p][n] - par->posL[1]) * ddi[1]);
-            ii[p][2][n] = (int)roundf((pos1z[p][n] - par->posL[2]) * ddi[2]);
-
-            offset[p][0][n] = (pos1x[p][n] - par->posL[0]) * ddi[0] - (float)(ii[p][0][n]);
-            offset[p][1][n] = (pos1y[p][n] - par->posL[1]) * ddi[1] - (float)(ii[p][1][n]);
-            offset[p][2][n] = (pos1z[p][n] - par->posL[2]) * ddi[2] - (float)(ii[p][2][n]);
+#pragma omp section
+            {
+#pragma omp parallel for simd
+                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+                {
+                    ii[p][0][n] = (int)roundf((pos1x[p][n] - par->posL[0]) * ddi[0]);
+                    offset[p][0][n] = (pos1x[p][n] - par->posL[0]) * ddi[0] - (float)(ii[p][0][n]);
+                }
+            }
+#pragma omp section
+            {
+#pragma omp parallel for simd
+                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+                {
+                    ii[p][1][n] = (int)roundf((pos1y[p][n] - par->posL[1]) * ddi[1]);
+                    offset[p][1][n] = (pos1y[p][n] - par->posL[1]) * ddi[1] - (float)(ii[p][1][n]);
+                }
+            }
+#pragma omp section
+            {
+#pragma omp parallel for simd
+                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
+                {
+                    ii[p][2][n] = (int)roundf((pos1z[p][n] - par->posL[2]) * ddi[2]);
+                    offset[p][2][n] = (pos1z[p][n] - par->posL[2]) * ddi[2] - (float)(ii[p][2][n]);
+                }
+            }
         }
     }
 #pragma omp barrier
@@ -165,12 +184,26 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
-        // #pragma omp parallel for simd num_threads(nthreads)
-        for (int n = 0; n < par->n_part[p]; ++n)
+#pragma omp parallel sections num_threads(nthreads)
         {
-            v[p][0][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
-            v[p][1][n] = (pos1y[p][n] - pos0y[p][n]) * dti[p];
-            v[p][2][n] = (pos1z[p][n] - pos0z[p][n]) * dti[p];
+#pragma omp section
+            {
+#pragma omp parallel for simd
+                for (int n = 0; n < par->n_part[p]; ++n)
+                    v[p][0][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
+            }
+#pragma omp section
+            {
+#pragma omp parallel for simd
+                for (int n = 0; n < par->n_part[p]; ++n)
+                    v[p][1][n] = (pos1y[p][n] - pos0y[p][n]) * dti[p];
+            }
+#pragma omp section
+            {
+#pragma omp parallel for simd
+                for (int n = 0; n < par->n_part[p]; ++n)
+                    v[p][2][n] = (pos1z[p][n] - pos0z[p][n]) * dti[p];
+            }
         }
     }
 #pragma omp parallel num_threads(2)
