@@ -203,7 +203,7 @@ int main()
                 par->ncalcp = ncalc[p];
                 par->n_partp = n_part[p];
                 // cout << p << " Bconst=" <<par->Bcoef  << ", Econst=" << par->Ecoef << endl;
-                tnp(Ea1, Ba1, pos0x[p], pos0y[p], pos0z[p], pos1x[p], pos1y[p], pos1z[p], par); //  calculate the next position ncalc[p] times
+                tnp(Ea1, Ba1, pos0x[p], pos0y[p], pos0z[p], pos1x[p], pos1y[p], pos1z[p],p, par); //  calculate the next position ncalc[p] times
                 total_ncalc[p] += ncalc[p];
             }
 #pragma omp barrier
@@ -223,7 +223,7 @@ int main()
 
             // calculate constants for each cell for trilinear interpolation
             timer.mark();
-#pragma omp sections
+#pragma omp parallel sections
             {
 #pragma omp section
                 {

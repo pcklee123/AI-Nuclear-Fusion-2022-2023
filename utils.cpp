@@ -92,3 +92,15 @@ void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par
     logger.write(par->Bmax);
     logger.newline();
 }
+float maxvalf(float *data_1d,int n)
+{
+    float max = 0;
+#pragma omp parallel for reduction(max : max)
+    for (unsigned int i = 0; i < n; ++i)
+    {
+        float absVal = fabs(data_1d[i]);
+        max = (absVal > max) ? absVal : max; // use the ternary operator to update the maximum
+    }
+    return max;
+}
+

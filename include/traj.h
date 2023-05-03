@@ -102,7 +102,7 @@ void set_initial_pos_vel(int n_part_types, int n_particles, float *pos0, float *
 void cl_start();
 void cl_set_build_options(par *par);
 
-void tnp(float *Ea1, float *Ba1, float *pos0x, float *pos0y, float *pos0z, float *pos1x, float *pos1y, float *pos1z,
+void tnp(float *Ea1, float *Ba1, float *pos0x, float *pos0y, float *pos0z, float *pos1x, float *pos1y, float *pos1z, int p,
          par *par);
 // void get_precalc_r3(float precalc_r3[3][n_space_divz2][n_space_divy2][n_space_divx2], float dd[3]);
 int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
@@ -115,7 +115,7 @@ void save_files(int i_time, double t,
                 float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
                 float V[n_space_divz][n_space_divy][n_space_divx],
                 float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
-                float KE[2][n_output_part], float posp[2][n_output_part][3],par *par);
+                float KE[2][n_output_part], float posp[2][n_output_part][3], par *par);
 void sel_part_print(int n_part[3],
                     float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
                     float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
@@ -153,6 +153,7 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
 void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                             float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
                             int q[2][n_partd], int m[2][n_partd], par *par);
-void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],
+void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],float ftemp[n_space_divz][n_space_divy][n_space_divx],
                        float fc[n_space_divz][n_space_divy][n_space_divx][3], int s);
+float maxvalf(float *data_1d, int n);
 #endif // TRAJ_H_INCLUDED

@@ -55,18 +55,7 @@ void vector_muls(fftwf_complex *dst, fftwf_complex *A, fftwf_complex *B, int n)
     // read result arrays from the device to main memory
     queue.enqueueReadBuffer(buffer_A, CL_TRUE, 0, sizeof(fftwf_complex) * n, dst);
 }
-float maxval(float data[3][n_space_divz][n_space_divy][n_space_divz])
-{
-    float max = 0;
-    const float *data_1d = reinterpret_cast<float *>(data);
-#pragma omp parallel for reduction(max : max)
-    for (unsigned int i = 0; i < n_cells * 3; ++i)
-    {
-        float absVal = fabs(data_1d[i]);
-        max = (absVal > max) ? absVal : max; // use the ternary operator to update the maximum
-    }
-    return max;
-}
+
 
 int checkInRange(string name, float data[3][n_space_divz][n_space_divy][n_space_divz], float minval, float maxval)
 {
@@ -385,8 +374,8 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 #endif
     first = 0;
     int E_exceeds = 0, B_exceeds = 0;
-    par->Emax = maxval(E);
-    par->Bmax = maxval(B);
+    par->Emax = maxvalf(reinterpret_cast<float *>(E),n_cells*3);
+    par->Bmax = maxvalf(reinterpret_cast<float *>(B),n_cells*3);
     float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * (par->Bmax + 1e-5f));
     float acc_e = par->Emax * e_charge_mass;
     float vel_e = sqrt(kb * Temp_e / e_mass);

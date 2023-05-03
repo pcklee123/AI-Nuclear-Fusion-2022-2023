@@ -2,7 +2,7 @@
 void tnp(float *Ea, float *Ba,
          float *pos0x, float *pos0y, float *pos0z,
          float *pos1x, float *pos1y, float *pos1z,
-         par *par)
+         int p, par *par)
 {
    unsigned int n = n_partd;               // ci[0];
    unsigned int nc = n_cells * ncoeff * 3; // trilin constatnts have 8 coefficients 3 components
@@ -39,7 +39,7 @@ void tnp(float *Ea, float *Ba,
    // write input arrays to the device
    if (fastIO)
    { // is mapping required? // Yes we might need to map because OpenCL does not guarantee that the data will be shared, alternatively use SVM
-      // auto * mapped_buffer_C = (float *)queue.enqueueMapBuffer(buffer_C, CL_TRUE, CL_MAP_WRITE, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buffer_C, mapped_buffer_C);
+     // auto * mapped_buffer_C = (float *)queue.enqueueMapBuffer(buffer_C, CL_TRUE, CL_MAP_WRITE, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buffer_C, mapped_buffer_C);
    }
    else
    {
@@ -54,16 +54,16 @@ void tnp(float *Ea, float *Ba,
    }
    // return;
    //  set arguments to be fed into the kernel program
-   kernel_add.setArg(0, buffer_A);                  // the 1st argument to the kernel program Ea
-   kernel_add.setArg(1, buffer_B);                  // Ba
-   kernel_add.setArg(2, buffer_C);                  // x0
-   kernel_add.setArg(3, buffer_D);                  // y0
-   kernel_add.setArg(4, buffer_E);                  // z0
-   kernel_add.setArg(5, buffer_F);                  // x1
-   kernel_add.setArg(6, buffer_G);                  // y1
-   kernel_add.setArg(7, buffer_H);                  // z1
-   kernel_add.setArg(8, sizeof(float), &par->Bcoef); // Bconst
-   kernel_add.setArg(9, sizeof(float), &par->Ecoef); // Econst
+   kernel_add.setArg(0, buffer_A);                      // the 1st argument to the kernel program Ea
+   kernel_add.setArg(1, buffer_B);                      // Ba
+   kernel_add.setArg(2, buffer_C);                      // x0
+   kernel_add.setArg(3, buffer_D);                      // y0
+   kernel_add.setArg(4, buffer_E);                      // z0
+   kernel_add.setArg(5, buffer_F);                      // x1
+   kernel_add.setArg(6, buffer_G);                      // y1
+   kernel_add.setArg(7, buffer_H);                      // z1
+   kernel_add.setArg(8, sizeof(float), &par->Bcoef);  // Bconst
+   kernel_add.setArg(9, sizeof(float), &par->Ecoef);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp); // npart
    kernel_add.setArg(11, sizeof(int), &par->ncalcp);  // ncalc
 
@@ -73,7 +73,7 @@ void tnp(float *Ea, float *Ba,
    // read result arrays from the device to main memory
    if (fastIO)
    { // is mapping required?
-      // mapped_buffer_C = (float *)queue.enqueueMapBuffer(buffer_C, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buffer_C, mapped_buffer_C);
+     // mapped_buffer_C = (float *)queue.enqueueMapBuffer(buffer_C, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buffer_C, mapped_buffer_C);
    }
    else
    {
