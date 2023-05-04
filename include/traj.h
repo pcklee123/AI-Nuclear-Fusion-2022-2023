@@ -20,6 +20,7 @@
 #include <vtk/vtkFloatArray.h>
 #include <vtk/vtkDoubleArray.h>
 #include <vtk/vtkPolyData.h>
+#include <vtkCellData.h>
 #include <vtk/vtkInformation.h>
 #include <vtk/vtkTable.h>
 

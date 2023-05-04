@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 0
+#define cldevice 1
 #define sphere     // do hot spot  problem
                    // #define cylinder //do hot rod problem
 #define Temp_e 1e7 // in Kelvin
@@ -28,8 +28,8 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 8347) ? 8347 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = 100;         // number of times to calculate E and B between printouts
+constexpr int ndatapoints = 9; // total number of time steps to calculate
+constexpr int nc = 30;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024

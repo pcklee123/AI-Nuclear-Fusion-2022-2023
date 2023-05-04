@@ -159,6 +159,7 @@ int main()
             //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
             sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
+            save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
             save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
         }
 #pragma omp section
@@ -177,8 +178,8 @@ int main()
 
         for (int ntime = 0; ntime < nc; ntime++)
         {
-            timer.mark(); // For timestep         
-            timer.mark();// Work out motion
+            timer.mark();                                                                      // For timestep
+            timer.mark();                                                                      // Work out motion
             tnp(Ea1, Ba1, pos0x[0], pos0y[0], pos0z[0], pos1x[0], pos1y[0], pos1z[0], 0, par); //  calculate the next position par->ncalcp[p] times
             for (int p = 0; p < 2; ++p)
                 total_ncalc[p] += par->ncalcp[p];
@@ -210,21 +211,21 @@ int main()
                     calcU(V, E, B, pos1x, pos1y, pos1z, q, par); // calculate the total potential energy U
                                                                  //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
+                    
                 }
 #pragma omp section
                 calc_trilin_constants(E, Ea, par);
 #pragma omp section
                 calc_trilin_constants(B, Ba, par);
 #pragma omp section
+                sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
                 log_entry(i_time, ntime, cdt, total_ncalc, t, par);
                 save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
-                sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
             }
 #pragma omp barrier
-            cout << "trilin const, calcU ... :  " << timer.elapsed() << "s\n";
+            cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";
             cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
         }
-
         // print out all files for paraview
         timer.mark();
         save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
