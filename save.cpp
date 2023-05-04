@@ -94,7 +94,17 @@ void save_vti_c(string filename, int i,
   int nx = par->n_space_div[0] / xi;
   int ny = par->n_space_div[1] / yj;
   int nz = par->n_space_div[2] / zk;
-  // vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+    // Create a polydata object
+  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+  // Add the FieldData to the PolyData
+  vtkSmartPointer<vtkFieldData> fieldData = polyData->GetFieldData();
+  vtkSmartPointer<vtkDoubleArray> timeArray = vtkSmartPointer<vtkDoubleArray>::New();
+  timeArray->SetName("TimeValue");
+  timeArray->SetNumberOfTuples(1);
+  timeArray->SetValue(0, t);
+  fieldData->AddArray(timeArray);
+  //vtkSmartPointer<vtkImageData> imageData = polyData->Get
+  
   vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New(); // Create the vtkImageData object
   imageData->SetDimensions(nx, ny, nz);                                           // Set the dimensions of the image data
   imageData->SetSpacing(par->dd[0] * xi, par->dd[1] * yj, par->dd[2] * zk);
@@ -115,7 +125,7 @@ void save_vti_c(string filename, int i,
   // writer->SetCompressorTypeToLZ4();
   writer->SetCompressorTypeToZLib(); // Enable compression
   writer->SetCompressionLevel(9);    // Set the level of compression (0-9)
-  writer->SetInputData(imageData);   // Set the input image data
+  writer->SetInputData(polyData);   // Set the input image data
                                      // Set the time step value
   writer->UpdateTimeStep(t);
   writer->Write(); // Write the output file
@@ -123,6 +133,16 @@ void save_vti_c(string filename, int i,
 
 void save_vtp(string filename, int i, uint64_t num, int n, double t, float data[2][n_output_part], float points1[2][n_output_part][3])
 {
+    // Create a polydata object
+  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+  // Add the FieldData to the PolyData
+  vtkSmartPointer<vtkFieldData> fieldData = polyData->GetFieldData();
+  vtkSmartPointer<vtkDoubleArray> timeArray = vtkSmartPointer<vtkDoubleArray>::New();
+  timeArray->SetName("TimeValue");
+  timeArray->SetNumberOfTuples(1);
+  timeArray->SetValue(0, t);
+  fieldData->AddArray(timeArray);
+
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkFloatArray> kineticEnergy = vtkSmartPointer<vtkFloatArray>::New();
   kineticEnergy->SetName("KE");
@@ -131,7 +151,7 @@ void save_vtp(string filename, int i, uint64_t num, int n, double t, float data[
     points->InsertNextPoint(points1[n][i][0], points1[n][i][1], points1[n][i][2]);
     kineticEnergy->InsertNextValue(data[n][i]);
   }
-  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New(); // Create the VTK poly data object
+
   polyData->SetPoints(points);
   polyData->GetPointData()->AddArray(kineticEnergy);
   // Write the output file
