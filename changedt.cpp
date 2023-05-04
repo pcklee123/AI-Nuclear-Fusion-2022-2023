@@ -2,8 +2,7 @@
 void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int cdt, par *par)
 {
     int inc = 3;
-    cout << endl
-         << cdt << " ";
+ //   cout << endl<< cdt << " ";
     switch (cdt)
     {
     case 0: // both OK
@@ -12,26 +11,26 @@ void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        cout << "dt decrease E high B OK \n";
+   //     cout << "dt decrease E high B OK \n";
         break;
     case 2:
-        cout << "dt maintain E too low B OK\n";
+  //      cout << "dt maintain E too low B OK\n";
         break;
     case 3: // impossible case E too high and too low ..
         inc = 3;
-        cout << "dt impossible case E too high and too low .. dt\n";
+  //      cout << "dt impossible case E too high and too low .. dt\n";
         break;
     case 4:
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        cout << "dt decrease B exceeded E OK\n";
+ //       cout << "dt decrease B exceeded E OK\n";
         break;
     case 5:
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        cout << "dt decrease B exceeded and E exceeded\n";
+   //     cout << "dt decrease B exceeded and E exceeded\n";
         break;
     case 6:
         inc = 0;
@@ -42,19 +41,19 @@ void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n
     case 7: // impossible case E too high and too low ..
         break;
     case 8:
-        cout << "dt maintain B too low E OK\n";
+  //      cout << "dt maintain B too low E OK\n";
         break;
     case 9:
         inc = 0;
         par->dt[0] /= 2;
         par->dt[1] /= 2;
-        cout << "dt decrease B too low E too high \n";
+    //    cout << "dt decrease B too low E too high \n";
         break;
     case 10:
         inc = 1;
         par->dt[0] *= 2;
         par->dt[1] *= 2;
-        cout << "dt: increase B too low E too low\n";
+    //    cout << "dt: increase B too low E too low\n";
         break;
     default:
         break;

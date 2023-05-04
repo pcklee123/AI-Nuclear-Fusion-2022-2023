@@ -56,9 +56,9 @@ void log_headers()
     logger.write("dt_ch");
     logger.write("nc_ele");
     logger.write("nc_deut");
-    logger.write("dt_ele");
-    logger.write("dt_deut");
-    logger.write("t_sim");
+    logger.write("dt_ele_fs");
+    logger.write("dt_deut_fs");
+    logger.write("t_sim_ps");
     logger.write("ne");
     logger.write("ni");
     logger.write("KEt_e");

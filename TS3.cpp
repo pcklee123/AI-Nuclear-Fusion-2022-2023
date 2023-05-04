@@ -177,25 +177,18 @@ int main()
 
         for (int ntime = 0; ntime < nc; ntime++)
         {
-
-            timer.mark(); // For timestep
-            // Work out motion
-            timer.mark();
-
-            //         cout << p << " Bconst=" << par->Bcoef << ", Econst=" << par->Ecoef << endl;
+            timer.mark(); // For timestep         
+            timer.mark();// Work out motion
             tnp(Ea1, Ba1, pos0x[0], pos0y[0], pos0z[0], pos1x[0], pos1y[0], pos1z[0], 0, par); //  calculate the next position par->ncalcp[p] times
             for (int p = 0; p < 2; ++p)
-            {
                 total_ncalc[p] += par->ncalcp[p];
-            }
-#pragma omp barrier
             cout << "motion: " << timer.elapsed() << "s, ";
             t += par->dt[0] * par->ncalcp[0];
             //  find number of particle and current density fields
             timer.mark();
             get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
             cout << "density: " << timer.elapsed() << "s, ";
-            save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
+
             // find E field must work out every i,j,k depends on charge in every other cell
             timer.mark();
             // set externally applied fields this is inside time loop so we can set time varying E and B field
@@ -212,11 +205,10 @@ int main()
 #pragma omp section
                 {
 #ifdef Uon_
-                    // calculate the total potential energy U
                     //        cout << "calculate the total potential energy U\n";
                     //                  timer.mark();
-                    calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
-                    //                 cout << "U: " << timer.elapsed() << "s, ";
+                    calcU(V, E, B, pos1x, pos1y, pos1z, q, par); // calculate the total potential energy U
+                                                                 //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
                 }
 #pragma omp section
@@ -225,18 +217,16 @@ int main()
                 calc_trilin_constants(B, Ba, par);
 #pragma omp section
                 log_entry(i_time, ntime, cdt, total_ncalc, t, par);
+                save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
+                sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
             }
 #pragma omp barrier
-            cout << "trilin const &calcU :  " << timer.elapsed() << "s\n";
+            cout << "trilin const, calcU ... :  " << timer.elapsed() << "s\n";
             cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
-            // if (cdt)  cout << "dtchanged\n";
-            //  cout << "dt = {" << par->dt[0] << " " << par->dt[1] << "}, t_sim = " << t << " s"<< ", ne = " << nt[0] << ", ni = " << nt[1];
-            //  cout << "\nKEtot e = " << KEtot[0] << ", KEtot i = " << KEtot[1] << ", Eele = " << U[0] << ", Emag = " << U[1] << ", Etot = " << KEtot[0] + KEtot[1] + U[0] + U[1] << " eV\n";
         }
 
         // print out all files for paraview
         timer.mark();
-        sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
         save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
     }

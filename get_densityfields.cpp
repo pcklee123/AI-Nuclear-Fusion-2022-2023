@@ -256,7 +256,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     }
 #pragma omp barrier
 
-    cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
+  //  cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
 
 #pragma omp parallel num_threads(2)
     {

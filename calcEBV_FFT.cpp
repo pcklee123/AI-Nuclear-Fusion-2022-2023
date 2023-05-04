@@ -380,8 +380,8 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
     float acc_e = par->Emax * e_charge_mass;
     float vel_e = sqrt(kb * Temp_e / e_mass);
     float TE = sqrt(vel_e * vel_e / (acc_e * acc_e) + 2 * a0 / acc_e) - vel_e / acc_e;
-    cout << "Tcyclotron=" << Tcyclotron << ",Bmax= " << par->Bmax << ", TE=" << TE << ",Emax= " << par->Emax << endl;
-    if (TE < (par->dt[0] * 2 * f1 * ncalc0[0]))
+   // cout << "Tcyclotron=" << Tcyclotron << ",Bmax= " << par->Bmax << ", TE=" << TE << ",Emax= " << par->Emax << endl;
+    if (TE < (par->dt[0] * 2 * f1 * ncalc0[0])) //if ideal time step is lower than actual timestep 
         E_exceeds = 1;
     else if (TE > (par->dt[0] * 2 * f2 * ncalc0[0]))
         E_exceeds = 2;

@@ -5,20 +5,20 @@
                    // #define cylinder //do hot rod problem
 #define Temp_e 1e7 // in Kelvin
 #define Temp_d 1e7 // in Kelvin
-constexpr float f1 = 1;
-constexpr float f2 = 4; 
+constexpr float f1 = 16; //make bigger to make smaller time steps
+constexpr float f2 = f1*8; 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 10;   // in T
-constexpr float Emax0 = 1e13; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
-constexpr float nback = 128;  // background particles per cell - improves stability
+constexpr float Emax0 = 1e7; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float nback =8;  // background particles per cell - improves stability
 
 constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
-constexpr float target_part = 1e13; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n
-constexpr int n_partd = n_space * n_space * n_space * nback * 4; // must be 2 to power of n
+constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
 // a sphere 0.4 mm radius with 1e24*4/3*pi()*0.4^3 *1.6e-19C E on surface =2.4e12Vm-1 if all electrons have left.
@@ -29,7 +29,7 @@ constexpr int n_output_part = (n_partd > 8347) ? 8347 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = 1;         // number of times to calculate E and B between printouts
+constexpr int nc = 100;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
