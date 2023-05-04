@@ -152,5 +152,5 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],float f
     //     cout << "smoothfield copy back" << endl;
     memcpy(reinterpret_cast<float *>(f), reinterpret_cast<float *>(ftemp), n_cells * sizeof(float));
 
-      _aligned_free(ftemp);
+//      _aligned_free(ftemp);
 }

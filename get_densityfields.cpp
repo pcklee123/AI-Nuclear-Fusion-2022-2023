@@ -23,16 +23,16 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     // temp space
     static auto *ftemp = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(8 * n_cells * sizeof(float), alignment));
     // center of charge field arrays [2-particle type][3 pos][z][y][x]
-    static auto *np_center = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 3 * n_cells* sizeof(float), alignment));
+    static auto *np_center = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 3 * n_cells * sizeof(float), alignment));
     // center of current field arrays [2][3-pos][3-current component][z][y][x]
     static auto *jc2 = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 2 * 3 * n_cells * sizeof(float), alignment));
-    static auto *jc_center = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 2 * 3 * 3 * n_cells* sizeof(float), alignment));
+    static auto *jc_center = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 2 * 3 * 3 * n_cells * sizeof(float), alignment));
     //   static auto *jc_center = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 3 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
 
     // set fields=0 in preparation// Could split into threads
     fill(reinterpret_cast<float *>(np), reinterpret_cast<float *>(np) + n_cells, 0.f);
     //   fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
-    //fill(reinterpret_cast<float *>(ftemp), reinterpret_cast<float *>(ftemp) + n_cells*8, 0.f);
+    // fill(reinterpret_cast<float *>(ftemp), reinterpret_cast<float *>(ftemp) + n_cells*8, 0.f);
     fill(reinterpret_cast<float *>(np_center), reinterpret_cast<float *>(np_center) + n_cells * 3 * 2, 0.f);
     fill(reinterpret_cast<float *>(jc2), reinterpret_cast<float *>(jc2) + n_cells * 2 * 2 * 3, 0.f);
     fill(reinterpret_cast<float *>(jc_center), reinterpret_cast<float *>(jc_center) + n_cells * 2 * 2 * 3 * 3, 0.f);
@@ -281,11 +281,11 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     }
 #pragma omp barrier
 
-#pragma omp sections
+#pragma omp parallel sections
     {
 #pragma omp section
         int p = 0; //
-        cout << "np0 :" << omp_get_thread_num() << endl;
+ //       cout << "np0 :" << omp_get_thread_num() << endl;
         for (int n = 0; n < par->n_part[p]; ++n)
         {
             unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
@@ -294,11 +294,12 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
             np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
         }
-        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+        //   cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
         smoothscalarfield(np[p], ftemp[0], np_center[p], 0); // n
-        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
-        p = 1;
-        cout << "np1 :" << omp_get_thread_num() << endl;
+//  cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+#pragma omp section
+        int p = 1;
+   //     cout << "np1 :" << omp_get_thread_num() << endl;
         for (int n = 0; n < par->n_part[p]; ++n)
         {
             unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
@@ -307,9 +308,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
             np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
         }
-        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+      //  cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
         smoothscalarfield(np[p], ftemp[1], np_center[p], 1); // p
-        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+   //     cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
 
 #pragma omp section
         int p = 0;
@@ -409,8 +410,8 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         smoothscalarfield(jc2[p][1][c], ftemp[6], jc_center[p][1][c], 13); // n
     }
 #pragma omp barrier
-    cout << "Max Np0" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
-    cout << "Max Np1" << maxvalf(reinterpret_cast<float *>(np[1]), n_cells) << endl;
+  //  cout << "Max Np0" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
+  //  cout << "Max Np1" << maxvalf(reinterpret_cast<float *>(np[1]), n_cells) << endl;
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -433,7 +434,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         }
     }
 #pragma omp barrier
-    cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
+ //   cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
 #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells * 3; i++)
         (reinterpret_cast<float *>(jc))[i] = (reinterpret_cast<float *>(currentj[0]))[i] + (reinterpret_cast<float *>(currentj[1]))[i];

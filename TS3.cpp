@@ -120,21 +120,7 @@ int main()
     generateField(Ee, Be);
 
     cout << "Set initial random positions: " << timer.replace() << "s\n";
-    /*
-    float posL[3], posH[3], posL2[3], dd[3];
-    // set spacing between cells
-    for (int c = 0; c < 3; c++)
-        dd[c] = a0;
-    // set position of centers of the cells at extreme ends
 
-    for (int c = 0; c < 3; c++)
-    {
-        posL[c] = -dd[c] * (n_space_div[c] - 1.0) / 2.0;
-        posH[c] = dd[c] * (n_space_div[c] - 1.0) / 2.0;
-        posL2[c] = -dd[c] * (n_space_div[c]);
-        cout << posL[c] << "," << posH[c] << "," << dd[c] << endl;
-    }
-*/
     unsigned int ci[2] = {n_partd, 0};
     float cf[2] = {0, 0};
     fftwf_init_threads();
@@ -188,9 +174,10 @@ int main()
             timer.mark(); // For timestep
             // Work out motion
             timer.mark();
-#pragma omp parallel num_threads(2)
+            // #pragma omp parallel num_threads(2)
+            // {int p = omp_get_thread_num();
+            for (int p = 0; p < 2; ++p)
             {
-                int p = omp_get_thread_num();
 #ifdef BFon_
                 par->Bcoef = (float)qs[p] * e_charge_mass / (float)mp[p] * par->dt[p] * 0.5f;
 #else
@@ -204,7 +191,7 @@ int main()
                 par->ncalcp = ncalc[p];
                 par->n_partp = n_part[p];
                 // cout << p << " Bconst=" <<par->Bcoef  << ", Econst=" << par->Ecoef << endl;
-                tnp(Ea1, Ba1, pos0x[p], pos0y[p], pos0z[p], pos1x[p], pos1y[p], pos1z[p],p, par); //  calculate the next position ncalc[p] times
+                tnp(Ea1, Ba1, pos0x[p], pos0y[p], pos0z[p], pos1x[p], pos1y[p], pos1z[p], p, par); //  calculate the next position ncalc[p] times
                 total_ncalc[p] += ncalc[p];
             }
 #pragma omp barrier
