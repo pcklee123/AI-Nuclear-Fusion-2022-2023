@@ -13,6 +13,7 @@ par *par = &par1;
 string outpath;
 int main()
 {
+    omp_set_nested(true);
     // Fast printing
     cin.tie(NULL);
     // ios_base::sync_with_stdio(false);

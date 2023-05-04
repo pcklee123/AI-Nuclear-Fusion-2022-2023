@@ -20,18 +20,19 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     static auto *v = static_cast<float(*)[3][n_parte]>(_aligned_malloc(2 * 3 * n_parte * sizeof(float), alignment));
     // particle offsets array [2][3][n_parte]
     static auto *offset = static_cast<float(*)[3][n_parte]>(_aligned_malloc(2 * 3 * n_parte * sizeof(float), alignment));
-
+    // temp space
+    static auto *ftemp = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(8 * n_cells * sizeof(float), alignment));
     // center of charge field arrays [2-particle type][3 pos][z][y][x]
-    static auto *np_center = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
+    static auto *np_center = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 3 * n_cells* sizeof(float), alignment));
     // center of current field arrays [2][3-pos][3-current component][z][y][x]
-    static auto *jc2 = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 2 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
-    static auto *jc_center = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 2 * 3 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
+    static auto *jc2 = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 2 * 3 * n_cells * sizeof(float), alignment));
+    static auto *jc_center = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 2 * 3 * 3 * n_cells* sizeof(float), alignment));
     //   static auto *jc_center = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 3 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
 
     // set fields=0 in preparation// Could split into threads
-    fill(reinterpret_cast<float *>(np), reinterpret_cast<float *>(np) + n_cells * 2, 0.f);
+    fill(reinterpret_cast<float *>(np), reinterpret_cast<float *>(np) + n_cells, 0.f);
     //   fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
-
+    //fill(reinterpret_cast<float *>(ftemp), reinterpret_cast<float *>(ftemp) + n_cells*8, 0.f);
     fill(reinterpret_cast<float *>(np_center), reinterpret_cast<float *>(np_center) + n_cells * 3 * 2, 0.f);
     fill(reinterpret_cast<float *>(jc2), reinterpret_cast<float *>(jc2) + n_cells * 2 * 2 * 3, 0.f);
     fill(reinterpret_cast<float *>(jc_center), reinterpret_cast<float *>(jc_center) + n_cells * 2 * 2 * 3 * 3, 0.f);
@@ -69,7 +70,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                         nxp++;
                     }
                 }
-    //            cout << "nxm " << nxm << " nxp " << nxp << endl;
+                //            cout << "nxm " << nxm << " nxp " << nxp << endl;
             }
 #pragma omp section
             {
@@ -92,7 +93,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                         nyp++;
                     }
                 }
-    //            cout << "nym " << nym << " nyp " << nyp << endl;
+                //            cout << "nym " << nym << " nyp " << nyp << endl;
             }
 #pragma omp section
             {
@@ -132,7 +133,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                     }
 #endif
                 }
-          //      cout << "nzm " << nzm << " nzp " << nzp << endl;
+                //      cout << "nzm " << nzm << " nzp " << nzp << endl;
             }
         }
     }
@@ -224,23 +225,17 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel sections
         {
 #pragma omp section
-            {
 #pragma omp parallel for simd
-                for (int n = 0; n < par->n_part[p]; ++n)
-                    v[p][0][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
-            }
+            for (int n = 0; n < par->n_part[p]; ++n)
+                v[p][0][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
 #pragma omp section
-            {
 #pragma omp parallel for simd
-                for (int n = 0; n < par->n_part[p]; ++n)
-                    v[p][1][n] = (pos1y[p][n] - pos0y[p][n]) * dti[p];
-            }
+            for (int n = 0; n < par->n_part[p]; ++n)
+                v[p][1][n] = (pos1y[p][n] - pos0y[p][n]) * dti[p];
 #pragma omp section
-            {
 #pragma omp parallel for simd
-                for (int n = 0; n < par->n_part[p]; ++n)
-                    v[p][2][n] = (pos1z[p][n] - pos0z[p][n]) * dti[p];
-            }
+            for (int n = 0; n < par->n_part[p]; ++n)
+                v[p][2][n] = (pos1z[p][n] - pos0z[p][n]) * dti[p];
         }
     }
 #pragma omp barrier
@@ -266,183 +261,181 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel num_threads(2)
     {
         int p = omp_get_thread_num();
-        for (int n = 0; n < par->n_part[p]; ++n)
+#pragma omp parallel sections
         {
-            v[p][0][n] *= (float)q[p][n];
-            v[p][1][n] *= (float)q[p][n];
-            v[p][2][n] *= (float)q[p][n];
+#pragma omp section
+#pragma omp parallel for simd
+            for (int n = 0; n < par->n_part[p]; ++n)
+                v[p][0][n] *= (float)q[p][n];
+
+#pragma omp section
+#pragma omp parallel for simd
+            for (int n = 0; n < par->n_part[p]; ++n)
+                v[p][1][n] *= (float)q[p][n];
+
+#pragma omp section
+#pragma omp parallel for simd
+            for (int n = 0; n < par->n_part[p]; ++n)
+                v[p][2][n] *= (float)q[p][n];
         }
     }
 #pragma omp barrier
 
-#pragma omp  sections
+#pragma omp sections
     {
 #pragma omp section
-        {           // 1st
-         int p = 0; //    //  cout << "np0 :" << omp_get_thread_num() << endl;
-float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        np[p][k][j][i] += (float)q[p][n];
-        np_center[p][k][j][i][0] += (float)q[p][n] * offset[p][0][n];
-        np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
-        np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
-    }
-    //  cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
-    smoothscalarfield(np[p],ftemp, np_center[p], 0); // n
-                                               // cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
-}
+        int p = 0; //
+        cout << "np0 :" << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            np[p][k][j][i] += (float)q[p][n];
+            np_center[p][k][j][i][0] += (float)q[p][n] * offset[p][0][n];
+            np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
+            np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
+        }
+        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+        smoothscalarfield(np[p], ftemp[0], np_center[p], 0); // n
+        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+        p = 1;
+        cout << "np1 :" << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            np[p][k][j][i] += (float)q[p][n];
+            np_center[p][k][j][i][0] += (float)q[p][n] * offset[p][0][n];
+            np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
+            np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
+        }
+        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+        smoothscalarfield(np[p], ftemp[1], np_center[p], 1); // p
+        cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
 
 #pragma omp section
-{
-    int p = 1;
-    float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    cout << "np1 :" << omp_get_thread_num() << endl;
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        np[p][k][j][i] += (float)q[p][n];
-        np_center[p][k][j][i][0] += (float)q[p][n] * offset[p][0][n];
-        np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
-        np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
-    }
-    smoothscalarfield(np[p],ftemp, np_center[p], 1); // p
-}
+        int p = 0;
+        int c = 0;
+        //  float ftemp[n_space_divz][n_space_divy][n_space_divx];
+        //          cout << "jx :" << p << " " << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            int s(v[p][c][n] > 0);
+            jc2[p][s][c][k][j][i] += v[p][c][n];
+            jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
+            jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
+            jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
+        }
+        smoothscalarfield(jc2[p][0][c], ftemp[1], jc_center[p][0][c], 2); // jxp
+        smoothscalarfield(jc2[p][1][c], ftemp[1], jc_center[p][1][c], 3); // jxn
 
 #pragma omp section
-{
-    int p = 0;
-    int c = 0;
-    float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    //          cout << "jx :" << p << " " << omp_get_thread_num() << endl;
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        int s(v[p][c][n] > 0);
-        jc2[p][s][c][k][j][i] += v[p][c][n];
-        jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
-        jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
-        jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
-    }
-    smoothscalarfield(jc2[p][0][c],ftemp, jc_center[p][0][c], 2); // jxp
-    smoothscalarfield(jc2[p][1][c],ftemp, jc_center[p][1][c], 3); // jxn
-}
+        int p = 1;
+        int c = 0;
+        /// float ftemp[n_space_divz][n_space_divy][n_space_divx];
+        // cout << "jx :" << p << " " << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            int s(v[p][c][n] > 0);
+            jc2[p][s][c][k][j][i] += v[p][c][n];
+            jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
+            jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
+            jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
+        }
+        smoothscalarfield(jc2[p][0][c], ftemp[2], jc_center[p][0][c], 4); // jxp
+        smoothscalarfield(jc2[p][1][c], ftemp[2], jc_center[p][1][c], 5); // jxn
 #pragma omp section
-{ //          cout << "jx :" << p << " " << omp_get_thread_num() << endl;
-    int p = 1;
-    int c = 0;
-    float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        int s(v[p][c][n] > 0);
-        jc2[p][s][c][k][j][i] += v[p][c][n];
-        jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
-        jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
-        jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
-    }
-    smoothscalarfield(jc2[p][0][c], ftemp,jc_center[p][0][c], 4); // jxp
-    smoothscalarfield(jc2[p][1][c], ftemp,jc_center[p][1][c], 5); // jxn
-}
+        int p = 0;
+        int c = 1;
+        //  float ftemp[n_space_divz][n_space_divy][n_space_divx]; //      cout << "jy :" << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            int s(v[p][c][n] > 0);
+            jc2[p][s][c][k][j][i] += v[p][c][n];
+            jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
+            jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
+            jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
+        }
+        smoothscalarfield(jc2[p][0][c], ftemp[3], jc_center[p][0][c], 6); // p
+        smoothscalarfield(jc2[p][1][c], ftemp[3], jc_center[p][1][c], 7); // n
 #pragma omp section
-{ //      cout << "jy :" << omp_get_thread_num() << endl;
-    int p = 0;
-    int c = 1;
-    float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        int s(v[p][c][n] > 0);
-        jc2[p][s][c][k][j][i] += v[p][c][n];
-        jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
-        jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
-        jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
-    }
-    smoothscalarfield(jc2[p][0][c],ftemp, jc_center[p][0][c], 6); // p
-    smoothscalarfield(jc2[p][1][c],ftemp, jc_center[p][1][c], 7); // n
-}
-#pragma omp section
-{ //    cout << "jy :" << omp_get_thread_num() << endl;
-    int p = 1;
-    int c = 1;
-    float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        int s(v[p][c][n] > 0);
-        jc2[p][s][c][k][j][i] += v[p][c][n];
-        jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
-        jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
-        jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
-    }
-    smoothscalarfield(jc2[p][0][c],ftemp, jc_center[p][0][c], 8); // p
-    smoothscalarfield(jc2[p][1][c],ftemp, jc_center[p][1][c], 9); // n
-}
+        int p = 1;
+        int c = 1;
+        // float ftemp[n_space_divz][n_space_divy][n_space_divx]; //    cout << "jy :" << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            int s(v[p][c][n] > 0);
+            jc2[p][s][c][k][j][i] += v[p][c][n];
+            jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
+            jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
+            jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
+        }
+        smoothscalarfield(jc2[p][0][c], ftemp[4], jc_center[p][0][c], 8); // p
+        smoothscalarfield(jc2[p][1][c], ftemp[4], jc_center[p][1][c], 9); // n
 
 #pragma omp section
-{ //    cout << "jz :" << omp_get_thread_num() << endl;
-    int p = 0;
-    int c = 2;
-    float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        int s(v[p][c][n] > 0);
-        jc2[p][s][c][k][j][i] += v[p][c][n];
-        jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
-        jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
-        jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
-    }
-    smoothscalarfield(jc2[p][0][c],ftemp, jc_center[p][0][c], 10); // p
-    smoothscalarfield(jc2[p][1][c],ftemp, jc_center[p][1][c], 11); // n
-}
+
+        int p = 0;
+        int c = 2;
+        // float ftemp[n_space_divz][n_space_divy][n_space_divx]; // cout << "jz :" << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            int s(v[p][c][n] > 0);
+            jc2[p][s][c][k][j][i] += v[p][c][n];
+            jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
+            jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
+            jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
+        }
+        smoothscalarfield(jc2[p][0][c], ftemp[5], jc_center[p][0][c], 10); // p
+        smoothscalarfield(jc2[p][1][c], ftemp[5], jc_center[p][1][c], 11); // n
 
 #pragma omp section
-{ //   cout << "jz :" << omp_get_thread_num() << endl;
-    int p = 1;
-    int c = 2;
-    float ftemp[n_space_divz][n_space_divy][n_space_divx];
-    for (int n = 0; n < par->n_part[p]; ++n)
-    {
-        unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-        int s(v[p][c][n] > 0);
-        jc2[p][s][c][k][j][i] += v[p][c][n];
-        jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
-        jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
-        jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
+        int p = 1;
+        int c = 2;
+        // float ftemp[n_space_divz][n_space_divy][n_space_divx]; //   cout << "jz :" << omp_get_thread_num() << endl;
+        for (int n = 0; n < par->n_part[p]; ++n)
+        {
+            unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
+            int s(v[p][c][n] > 0);
+            jc2[p][s][c][k][j][i] += v[p][c][n];
+            jc_center[p][s][c][k][j][i][0] += v[p][c][n] * offset[p][0][n];
+            jc_center[p][s][c][k][j][i][1] += v[p][c][n] * offset[p][1][n];
+            jc_center[p][s][c][k][j][i][2] += v[p][c][n] * offset[p][2][n];
+        }
+        smoothscalarfield(jc2[p][0][c], ftemp[6], jc_center[p][0][c], 12); // p
+        smoothscalarfield(jc2[p][1][c], ftemp[6], jc_center[p][1][c], 13); // n
     }
-    smoothscalarfield(jc2[p][0][c],ftemp, jc_center[p][0][c], 12); // p
-    smoothscalarfield(jc2[p][1][c],ftemp, jc_center[p][1][c], 13); // n
-}
-}
 #pragma omp barrier
-
+    cout << "Max Np0" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
+    cout << "Max Np1" << maxvalf(reinterpret_cast<float *>(np[1]), n_cells) << endl;
 #pragma omp parallel sections
-{
-#pragma omp section
     {
-#pragma omp parallel for simd
-        for (unsigned int i = 0; i < n_cells * 3; i++)
-            (reinterpret_cast<float *>(currentj[0]))[i] = (reinterpret_cast<float *>(jc2[0][0]))[i] + (reinterpret_cast<float *>(jc2[0][1]))[i];
-    }
 #pragma omp section
-    {
+        {
 #pragma omp parallel for simd
-        for (unsigned int i = 0; i < n_cells * 3; i++)
-            (reinterpret_cast<float *>(currentj[1]))[i] = (reinterpret_cast<float *>(jc2[1][0]))[i] + (reinterpret_cast<float *>(jc2[1][1]))[i];
-    }
+            for (unsigned int i = 0; i < n_cells * 3; i++)
+                (reinterpret_cast<float *>(currentj[0]))[i] = (reinterpret_cast<float *>(jc2[0][0]))[i] + (reinterpret_cast<float *>(jc2[0][1]))[i];
+        }
 #pragma omp section
-    {
+        {
 #pragma omp parallel for simd
-        for (unsigned int i = 0; i < n_cells; i++)
-            (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
+            for (unsigned int i = 0; i < n_cells * 3; i++)
+                (reinterpret_cast<float *>(currentj[1]))[i] = (reinterpret_cast<float *>(jc2[1][0]))[i] + (reinterpret_cast<float *>(jc2[1][1]))[i];
+        }
+#pragma omp section
+        {
+#pragma omp parallel for simd
+            for (unsigned int i = 0; i < n_cells; i++)
+                (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
+        }
     }
-}
 #pragma omp barrier
-cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
+    cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
 #pragma omp parallel for simd num_threads(nthreads)
-for (unsigned int i = 0; i < n_cells * 3; i++)
-    (reinterpret_cast<float *>(jc))[i] = (reinterpret_cast<float *>(currentj[0]))[i] + (reinterpret_cast<float *>(currentj[1]))[i];
+    for (unsigned int i = 0; i < n_cells * 3; i++)
+        (reinterpret_cast<float *>(jc))[i] = (reinterpret_cast<float *>(currentj[0]))[i] + (reinterpret_cast<float *>(currentj[1]))[i];
 #pragma omp barrier
 }
