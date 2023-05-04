@@ -156,4 +156,5 @@ void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], fl
 void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx], float ftemp[n_space_divz][n_space_divy][n_space_divx],
                        float fc[n_space_divz][n_space_divy][n_space_divx][3], int s);
 float maxvalf(float *data_1d, int n);
+void info(par *par);
 #endif // TRAJ_H_INCLUDED

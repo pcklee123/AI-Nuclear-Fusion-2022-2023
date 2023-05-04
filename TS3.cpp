@@ -83,22 +83,14 @@ int main()
     auto *currentj = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
     auto *jc = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(3 * n_space_divz * n_space_divy * n_space_divx * sizeof(float), alignment));
 
-    // float U[2] = {0, 0}; //{Electric PE, magnetic PE}
-
-    ofstream E_file, B_file;
-
     log_headers();
 
     cout << std::scientific;
     cout.precision(1);
     cerr << std::scientific;
     cerr.precision(3);
-    cout << "float size=" << sizeof(float) << ", "
-         << "int32_t size=" << sizeof(int32_t) << ", "
-         << "int size=" << sizeof(int) << endl;
-    // const float coef = (float)qs[p] * e_charge_mass / (float)mp[p] * dt[p] * 0.5f;
+    // cout << "float size=" << sizeof(float) << ", " << "int32_t size=" << sizeof(int32_t) << ", " << "int size=" << sizeof(int) << endl;
     int total_ncalc[2] = {0, 0}; // particle 0 - electron, particle 1 deuteron
-                                 //   float dt[2];
     cout << "Start up time = " << timer.replace() << "s\n";
 #define generateRandom
 #ifdef generateRandom
@@ -110,7 +102,6 @@ int main()
 #endif // cylinder
 #else
     generateParticles(a0, r0, qs, mp, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, nt);
-
 #endif
     cout << "dt = {" << par->dt[0] << ", " << par->dt[1] << "}\n";
     // get limits and spacing of Field cells
@@ -118,29 +109,11 @@ int main()
 
     cout << "Set initial random positions: " << timer.replace() << "s\n";
 
-    unsigned int ci[2] = {n_partd, 0};
-    float cf[2] = {0, 0};
+    //   unsigned int ci[2] = {n_partd, 0};
+    //  float cf[2] = {0, 0};
     fftwf_init_threads();
     cl_set_build_options(par);
     cl_start();
-
-    // print initial conditions
-    {
-        E_file.open("info.csv");
-        E_file << "Data Origin," << par->posL[0] << "," << par->posL[1] << "," << par->posL[0] << endl;
-        E_file << "Data Spacing," << par->dd[0] << "," << par->dd[1] << "," << par->dd[2] << endl;
-        E_file << "Data extent x, 0," << n_space - 1 << endl;
-        E_file << "Data extent y, 0," << n_space - 1 << endl;
-        E_file << "Data extent z, 0," << n_space - 1 << endl;
-        //       E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
-        E_file << "Maximum expected B = ," << par->Bmax << endl;
-        E_file << "time step between prints = ," << par->dt[0] * par->ncalcp[0] * nc << ",s" << endl;
-        E_file << "time step between EBcalc = ," << par->dt[0] * par->ncalcp[0] << ",s" << endl;
-        E_file << "dt =," << par->dt[0] << ",s" << endl;
-        E_file << "cell size =," << a0 << ",m" << endl;
-        E_file << "number of particles per cell = ," << n_partd / (n_space * n_space * n_space) << endl;
-        E_file.close();
-    }
 
     int i_time = 0;
     get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
@@ -170,7 +143,7 @@ int main()
         log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
     }
 #pragma omp barrier
-
+    info(par); // printout initial info.csv file
     cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << 0 << ")\n";
 
     for (i_time = 1; i_time < ndatapoints; i_time++)
@@ -211,7 +184,6 @@ int main()
                     calcU(V, E, B, pos1x, pos1y, pos1z, q, par); // calculate the total potential energy U
                                                                  //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
-                    
                 }
 #pragma omp section
                 calc_trilin_constants(E, Ea, par);

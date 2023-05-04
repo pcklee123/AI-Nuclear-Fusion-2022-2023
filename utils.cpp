@@ -92,7 +92,7 @@ void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par
     logger.write(par->Bmax);
     logger.newline();
 }
-float maxvalf(float *data_1d,int n)
+float maxvalf(float *data_1d, int n)
 {
     float max = 0;
 #pragma omp parallel for reduction(max : max)
@@ -104,3 +104,24 @@ float maxvalf(float *data_1d,int n)
     return max;
 }
 
+void info(par *par)
+{
+    // print initial conditions
+    {
+        ofstream E_file;
+        E_file.open("info.csv");
+        E_file << "Data Origin," << par->posL[0] << "," << par->posL[1] << "," << par->posL[0] << endl;
+        E_file << "Data Spacing," << par->dd[0] << "," << par->dd[1] << "," << par->dd[2] << endl;
+        E_file << "Data extent x, 0," << n_space - 1 << endl;
+        E_file << "Data extent y, 0," << n_space - 1 << endl;
+        E_file << "Data extent z, 0," << n_space - 1 << endl;
+        //       E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
+        E_file << "Maximum expected B = ," << par->Bmax << endl;
+        E_file << "time step between prints = ," << par->dt[0] * par->ncalcp[0] * nc << ",s" << endl;
+        E_file << "time step between EBcalc = ," << par->dt[0] * par->ncalcp[0] << ",s" << endl;
+        E_file << "dt =," << par->dt[0] << ",s" << endl;
+        E_file << "cell size =," << a0 << ",m" << endl;
+        E_file << "number of particles per cell = ," << n_partd / (n_space * n_space * n_space) << endl;
+        E_file.close();
+    }
+}

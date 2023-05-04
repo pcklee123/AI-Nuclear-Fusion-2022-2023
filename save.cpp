@@ -71,10 +71,10 @@ void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_p
   // Fill the points array with data
   for (int i = 0; i < Hist_n; ++i)
   {
-    double x = ((double)(i + 0.5) * (double)Hist_max) / (double)(Hist_n); // Calculate the center of the i-th bin
-    points->InsertNextPoint(x, 0.0, 0.0);                                 // Set the i-th point to the center of the i-th bin
-    ecounts->InsertNextValue((double)(KEhist[0][i] + 1));
-    icounts->InsertNextValue((double)(KEhist[1][i] + 1));
+    double z = ((double)(i + 0.5) * (double)Hist_max) / (double)(Hist_n); // Calculate the center of the i-th bin
+    points->InsertNextPoint(0.0, 0.0, z);                                 // Set the i-th point to the center of the i-th bin
+    ecounts->InsertNextValue((double)(log(KEhist[0][i] + 1)));
+    icounts->InsertNextValue((double)(log(KEhist[1][i] + 1)));
   }
 
   // Set the arrays as the data for the polyData object
