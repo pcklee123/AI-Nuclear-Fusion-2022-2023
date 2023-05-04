@@ -1,19 +1,19 @@
 #include "include/traj.h"
-void sel_part_print(int n_part[3],
-                    float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
+void sel_part_print(float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
                     float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
-                    float posp[2][n_output_part][3],float KE[2][n_output_part],
-                    int m[2][n_partd],par *par)
+                    float posp[2][n_output_part][3], float KE[2][n_output_part],
+                    int m[2][n_partd], par *par)
 {
     for (int p = 0; p < 2; p++)
     {
-#pragma omp  parallel for simd
-//#pragma omp distribute parallel for simd
+#pragma omp parallel for simd
+        // #pragma omp distribute parallel for simd
         for (int nprt = 0; nprt < n_output_part; nprt++)
         {
-            int nprtd = floor(n_part[p] / n_output_part);
+            int nprtd = floor(par->n_part[p] / n_output_part);
             int n = nprt * max(nprtd, 1);
-            if (nprtd == 0 && n >= n_part[p]){
+            if (nprtd == 0 && n >= par->n_part[p])
+            {
                 KE[p][nprt] = 0;
                 posp[p][nprt][0] = 0;
                 posp[p][nprt][1] = 0;

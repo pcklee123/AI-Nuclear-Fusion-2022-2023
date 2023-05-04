@@ -4,8 +4,7 @@ For settings (as to what to calculate, eg. E / B field, E / B force) go to the d
 */
 #include "include/traj.h"
 // sphere
-int ncalc[2] = {md_me * 1, 1};
-int n_part[3] = {n_parte, n_partd, n_parte + n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
+// 0,number of "super" electrons, electron +deuteriom ions, total
 unsigned int n_space_div[3] = {n_space_divx, n_space_divy, n_space_divz};
 unsigned int n_space_div2[3] = {n_space_divx2, n_space_divy2, n_space_divz2};
 par par1;
@@ -111,9 +110,7 @@ int main()
 #endif // cylinder
 #else
     generateParticles(a0, r0, qs, mp, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, nt);
-    n_part[0] = abs(nt[0]);
-    n_part[1] = abs(nt[1]);
-    n_part[2] = n_part[0] + n_part[1];
+
 #endif
     cout << "dt = {" << par->dt[0] << ", " << par->dt[1] << "}\n";
     // get limits and spacing of Field cells
@@ -137,8 +134,8 @@ int main()
         E_file << "Data extent z, 0," << n_space - 1 << endl;
         //       E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
         E_file << "Maximum expected B = ," << par->Bmax << endl;
-        E_file << "time step between prints = ," << par->dt[0] * ncalc[0] * nc << ",s" << endl;
-        E_file << "time step between EBcalc = ," << par->dt[0] * ncalc[0] << ",s" << endl;
+        E_file << "time step between prints = ," << par->dt[0] * par->ncalcp[0] * nc << ",s" << endl;
+        E_file << "time step between EBcalc = ," << par->dt[0] * par->ncalcp[0] << ",s" << endl;
         E_file << "dt =," << par->dt[0] << ",s" << endl;
         E_file << "cell size =," << a0 << ",m" << endl;
         E_file << "number of particles per cell = ," << n_partd / (n_space * n_space * n_space) << endl;
@@ -152,7 +149,7 @@ int main()
 #pragma omp parallel sections
     {
 #pragma omp section
-        changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt, par); /* change time step if E or B too big*/
+        changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par); /* change time step if E or B too big*/
 #pragma omp section
         {
 #ifdef Uon_
@@ -161,7 +158,7 @@ int main()
             calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
             //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
-            sel_part_print(n_part, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
+            sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
             save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
         }
 #pragma omp section
@@ -184,20 +181,16 @@ int main()
             timer.mark(); // For timestep
             // Work out motion
             timer.mark();
-            for (int p = 0; p < 2; ++p)
-            {
-                par->ncalcp[p] = ncalc[p];
-                par->n_partp[p] = n_part[p];
-            }
+
             //         cout << p << " Bconst=" << par->Bcoef << ", Econst=" << par->Ecoef << endl;
-            tnp(Ea1, Ba1, pos0x[0], pos0y[0], pos0z[0], pos1x[0], pos1y[0], pos1z[0], 0, par); //  calculate the next position ncalc[p] times
+            tnp(Ea1, Ba1, pos0x[0], pos0y[0], pos0z[0], pos1x[0], pos1y[0], pos1z[0], 0, par); //  calculate the next position par->ncalcp[p] times
             for (int p = 0; p < 2; ++p)
             {
-                total_ncalc[p] += ncalc[p];
+                total_ncalc[p] += par->ncalcp[p];
             }
 #pragma omp barrier
             cout << "motion: " << timer.elapsed() << "s, ";
-            t += par->dt[0] * ncalc[0];
+            t += par->dt[0] * par->ncalcp[0];
             //  find number of particle and current density fields
             timer.mark();
             get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
@@ -215,7 +208,7 @@ int main()
 #pragma omp parallel sections
             {
 #pragma omp section
-                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt, par); /* change time step if E or B too big*/
+                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par); /* change time step if E or B too big*/
 #pragma omp section
                 {
 #ifdef Uon_
@@ -243,7 +236,7 @@ int main()
 
         // print out all files for paraview
         timer.mark();
-        sel_part_print(n_part, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
+        sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
         save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
     }

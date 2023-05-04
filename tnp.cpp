@@ -17,7 +17,7 @@ void tnp(float *Ea, float *Ba,
       default_device_g.getInfo(CL_DEVICE_HOST_UNIFIED_MEMORY, &temp);
       cout << "Using unified memory: " << temp << " ";
       fastIO = temp;
-       fastIO = false;
+      fastIO = false;
       first = false;
    }
 #ifdef BFon_
@@ -32,6 +32,7 @@ void tnp(float *Ea, float *Ba,
 #else
    par->Ecoef = 0;
 #endif
+   cout << " Bconst=" << par->Bcoef[0] << ", Econst=" << par->Ecoef[0] << endl;
    // create buffers on the device
    /** IMPORTANT: do not use CL_MEM_USE_HOST_PTR if on dGPU **/
    /** HOST_PTR is only used so that memory is not copied, but instead shared between CPU and iGPU in RAM**/
@@ -40,19 +41,20 @@ void tnp(float *Ea, float *Ba,
    // Assume buffers A, B, I, J (Ea, Ba, ci, cf) will always be the same. Then we save a bit of time.
    static cl::Buffer buffer_A(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? Ea : NULL);
    static cl::Buffer buffer_B(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? Ba : NULL);
-   cl::Buffer buffer_C(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0x : NULL);             // x0
-   cl::Buffer buffer_D(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0y : NULL);             // y0
-   cl::Buffer buffer_E(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0z : NULL);             // z0
-   cl::Buffer buffer_F(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos1x : NULL);             // x1
-   cl::Buffer buffer_G(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos1y : NULL);             // y1
-   cl::Buffer buffer_H(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos1z : NULL);             // z1
-   cl::Buffer buffer_C_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0x + n1 : NULL); // x0
-   cl::Buffer buffer_D_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0x + n1 : NULL); // x0
-   cl::Buffer buffer_E_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0x + n1 : NULL); // x0
-   cl::Buffer buffer_F_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0x + n1 : NULL); // x0
-   cl::Buffer buffer_G_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0x + n1 : NULL); // x0
-   cl::Buffer buffer_H_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n, fastIO ? pos0x + n1 : NULL); // x0
-
+   cl::Buffer buffer_C(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0x : NULL); // x0
+   cl::Buffer buffer_D(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0y : NULL); // y0
+   cl::Buffer buffer_E(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0z : NULL); // z0
+   cl::Buffer buffer_F(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos1x : NULL); // x1
+   cl::Buffer buffer_G(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos1y : NULL); // y1
+   cl::Buffer buffer_H(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos1z : NULL); // z1
+   cout << "offsets" << endl;
+   cl::Buffer buffer_C_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0x + n1 : NULL); // x0
+   cl::Buffer buffer_D_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0x + n1 : NULL); // x0
+   cl::Buffer buffer_E_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0x + n1 : NULL); // x0
+   cl::Buffer buffer_F_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0x + n1 : NULL); // x0
+   cl::Buffer buffer_G_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0x + n1 : NULL); // x0
+   cl::Buffer buffer_H_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * n0, fastIO ? pos0x + n1 : NULL); // x0
+   cout << "command q" << endl;
    // create queue to which we will push commands for the device.
    static cl::CommandQueue queue(context_g, default_device_g);
    cl::Kernel kernel_add = cl::Kernel(program_g, "tnp_k_implicit"); // select the kernel program to run
@@ -63,6 +65,7 @@ void tnp(float *Ea, float *Ba,
    }
    else
    {
+         cout << "write buffer" << endl;
       queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * nc, Ea);
       queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(float) * nc, Ba);
       queue.enqueueWriteBuffer(buffer_C, CL_TRUE, 0, sizeof(float) * n, pos0x);
@@ -74,6 +77,7 @@ void tnp(float *Ea, float *Ba,
    }
    // return;
    //  set arguments to be fed into the kernel program
+      cout << "kernel arguments for electron" << endl;
    kernel_add.setArg(0, buffer_A);                       // the 1st argument to the kernel program Ea
    kernel_add.setArg(1, buffer_B);                       // Ba
    kernel_add.setArg(2, buffer_C);                       // x0
@@ -86,7 +90,7 @@ void tnp(float *Ea, float *Ba,
    kernel_add.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp[0]); // npart
    kernel_add.setArg(11, sizeof(int), &par->ncalcp[0]);  // ncalc
-
+   cout << "run kernel for electron" << endl;
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
 
@@ -118,7 +122,7 @@ void tnp(float *Ea, float *Ba,
    }
    else
    {
-      queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(float) * n, pos0x + n_partd);
+      queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(float) * n, pos0x);
       queue.enqueueReadBuffer(buffer_D, CL_TRUE, 0, sizeof(float) * n, pos0y);
       queue.enqueueReadBuffer(buffer_E, CL_TRUE, 0, sizeof(float) * n, pos0z);
       queue.enqueueReadBuffer(buffer_F, CL_TRUE, 0, sizeof(float) * n, pos1x);

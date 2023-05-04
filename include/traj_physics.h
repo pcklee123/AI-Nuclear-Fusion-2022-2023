@@ -105,6 +105,6 @@ struct par // useful parameters
     // for tnp
     float Ecoef[2] = {0,0};
     float Bcoef[2] = {0,0};
-    unsigned int ncalcp[2] = {0,0};
-    unsigned int n_partp[2] = {0,0}; // 0,number of "super" electrons, electron +deuteriom ions, total
+    unsigned int ncalcp[2] = {md_me,1};
+    unsigned int n_partp[2] = {n_parte,n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
 };
