@@ -24,7 +24,75 @@ void save_files(int i_time, double t,
   save_vtp("d", i_time, n_output_part, 1, t, KE, posp);
 #endif
 }
+
 void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
+{
+  long KEhist[2][Hist_n];
+  memset(KEhist, 0, sizeof(KEhist));
+  float coef[2];
+  for (int p = 0; p < 2; ++p)
+  {
+    coef[p] = 0.5 * (float)mp[p] * (float)Hist_n / (e_charge_mass * par->dt[p] * par->dt[p] * (float)Hist_max);
+    for (int i = 0; i < par->n_part[p]; ++i)
+    {
+      float dx = pos1x[p][i] - pos0x[p][i];
+      float dy = pos1y[p][i] - pos0y[p][i];
+      float dz = pos1z[p][i] - pos0z[p][i];
+      unsigned int index = (int)floor(coef[p] * (dx * dx + dy * dy + dz * dz));
+      if (index < Hist_n)
+        //        index = Hist_n - 1;
+        //   if (index < 0)
+        //     cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * par->dt[p] * par->dt[p]*(float)Hist_max))<< endl;
+        KEhist[p][index]++;
+    }
+  }
+  // Create a vtkPolyData object
+  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+
+  // Add the FieldData to the PolyData
+  vtkSmartPointer<vtkFieldData> fieldData = polyData->GetFieldData();
+  vtkSmartPointer<vtkDoubleArray> timevalue = vtkSmartPointer<vtkDoubleArray>::New();
+  timevalue->SetName("TimeValue");
+  timevalue->InsertNextValue(t);
+  fieldData->AddArray(timevalue);
+
+  // Create a vtkPoints object to store the bin centers
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+
+  // Create a vtkDoubleArray object to store the bin counts
+  vtkSmartPointer<vtkDoubleArray> ecounts = vtkSmartPointer<vtkDoubleArray>::New();
+  ecounts->SetName("ecounts");
+  // ecounts->SetNumberOfComponents(1);
+
+  vtkSmartPointer<vtkDoubleArray> icounts = vtkSmartPointer<vtkDoubleArray>::New();
+  icounts->SetName("icounts");
+  // icounts->SetNumberOfComponents(1);
+
+  // Fill the points array with data
+  for (int i = 0; i < Hist_n; ++i)
+  {
+    double x = ((double)(i + 0.5) * (double)Hist_max) / (double)(Hist_n); // Calculate the center of the i-th bin
+    points->InsertNextPoint(x, 0.0, 0.0);                                 // Set the i-th point to the center of the i-th bin
+    ecounts->InsertNextValue((double)(KEhist[0][i] + 1));
+    icounts->InsertNextValue((double)(KEhist[1][i] + 1));
+  }
+
+  // Set the arrays as the data for the polyData object
+  polyData->SetPoints(points);
+  polyData->GetPointData()->AddArray(ecounts);
+  polyData->GetPointData()->AddArray(icounts);
+
+  // Write the polyData object to a file using VTK's XML file format
+  vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+  writer->SetFileName((outpath + "KEhist_" + to_string(i_time) + ".vtp").c_str());
+  writer->SetDataModeToBinary();
+  writer->SetCompressorTypeToZLib(); // Enable compression
+  writer->SetCompressionLevel(9);    // Set the level of compression (0-9)
+  writer->SetInputData(polyData);
+  writer->Write();
+}
+
+void save_hist1(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
 {
   // Create the vtkTable object
   vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
@@ -35,6 +103,17 @@ void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_p
   electronHistArray->SetName("Electron KE Histogram");
   vtkSmartPointer<vtkDoubleArray> ionHistArray = vtkSmartPointer<vtkDoubleArray>::New();
   ionHistArray->SetName("Ion KE Histogram");
+
+  // Create a polydata object
+  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+
+  // Add the FieldData to the PolyData
+  vtkSmartPointer<vtkFieldData> fieldData = polyData->GetFieldData();
+  vtkSmartPointer<vtkDoubleArray> timevalue = vtkSmartPointer<vtkDoubleArray>::New();
+  timevalue->SetName("TimeValue");
+  timevalue->SetNumberOfTuples(1);
+  timevalue->InsertNextValue(t);
+  fieldData->AddArray(timevalue);
 
   long KEhist[2][Hist_n];
   memset(KEhist, 0, sizeof(KEhist));
@@ -67,12 +146,12 @@ void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_p
   table->AddColumn(energyArray);
   table->AddColumn(electronHistArray);
   table->AddColumn(ionHistArray);
+  // table->AddColumn(timevalue);
 
   // Write the table to a file
   vtkSmartPointer<vtkDelimitedTextWriter> writer = vtkSmartPointer<vtkDelimitedTextWriter>::New();
   writer->SetFileName((outpath + "KEhist_" + to_string(i_time) + ".csv").c_str());
   writer->SetInputData(table);
-  writer->UpdateTimeStep(t);
   writer->Write();
 }
 
@@ -94,17 +173,7 @@ void save_vti_c(string filename, int i,
   int nx = par->n_space_div[0] / xi;
   int ny = par->n_space_div[1] / yj;
   int nz = par->n_space_div[2] / zk;
-    // Create a polydata object
-  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
-  // Add the FieldData to the PolyData
-  vtkSmartPointer<vtkFieldData> fieldData = polyData->GetFieldData();
-  vtkSmartPointer<vtkDoubleArray> timeArray = vtkSmartPointer<vtkDoubleArray>::New();
-  timeArray->SetName("TimeValue");
-  timeArray->SetNumberOfTuples(1);
-  timeArray->SetValue(0, t);
-  fieldData->AddArray(timeArray);
-  //vtkSmartPointer<vtkImageData> imageData = polyData->Get
-  
+
   vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New(); // Create the vtkImageData object
   imageData->SetDimensions(nx, ny, nz);                                           // Set the dimensions of the image data
   imageData->SetSpacing(par->dd[0] * xi, par->dd[1] * yj, par->dd[2] * zk);
@@ -119,21 +188,30 @@ void save_vti_c(string filename, int i,
         for (int c = 0; c < ncomponents; ++c)
           data2[(k * ny + j) * nx * ncomponents + i * ncomponents + c] = data1[c][k * zk][j * yj][i * xi];
 
+  // Create a vtkDoubleArray to hold the field data
+  vtkSmartPointer<vtkDoubleArray> timeArray = vtkSmartPointer<vtkDoubleArray>::New();
+  timeArray->SetName("TimeValue");
+  timeArray->SetNumberOfTuples(1);
+  timeArray->SetValue(0, t);
+
+  // Add the field data to the image data
+  vtkSmartPointer<vtkFieldData> fieldData = imageData->GetFieldData();
+  fieldData->AddArray(timeArray);
+
   vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New(); // Create the vtkXMLImageDataWriter object
   writer->SetFileName((outpath + filename + "_" + to_string(i) + ".vti").c_str());               // Set the output file name                                                                     // Set the time value
   writer->SetDataModeToBinary();
   // writer->SetCompressorTypeToLZ4();
   writer->SetCompressorTypeToZLib(); // Enable compression
   writer->SetCompressionLevel(9);    // Set the level of compression (0-9)
-  writer->SetInputData(polyData);   // Set the input image data
+  writer->SetInputData(imageData);   // Set the input image data
                                      // Set the time step value
-  writer->UpdateTimeStep(t);
-  writer->Write(); // Write the output file
+  writer->Write();                   // Write the output file
 }
 
 void save_vtp(string filename, int i, uint64_t num, int n, double t, float data[2][n_output_part], float points1[2][n_output_part][3])
 {
-    // Create a polydata object
+  // Create a polydata object
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
   // Add the FieldData to the PolyData
   vtkSmartPointer<vtkFieldData> fieldData = polyData->GetFieldData();
@@ -161,6 +239,5 @@ void save_vtp(string filename, int i, uint64_t num, int n, double t, float data[
   writer->SetCompressorTypeToZLib(); // Enable compression
   writer->SetCompressionLevel(9);    // Set the level of compression (0-9)
   writer->SetInputData(polyData);
-  writer->UpdateTimeStep(t);
   writer->Write();
 }
