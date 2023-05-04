@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 1
+#define cldevice 0
 #define sphere     // do hot spot  problem
                    // #define cylinder //do hot rod problem
 #define Temp_e 1e7 // in Kelvin
@@ -103,8 +103,8 @@ struct par // useful parameters
     float UE = 0;
     float UB = 0;
     // for tnp
-    float Ecoef = 0;
-    float Bcoef = 0;
-    unsigned int ncalcp = 0;
-    unsigned int n_partp = 0; // 0,number of "super" electrons, electron +deuteriom ions, total
+    float Ecoef[2] = {0,0};
+    float Bcoef[2] = {0,0};
+    unsigned int ncalcp[2] = {0,0};
+    unsigned int n_partp[2] = {0,0}; // 0,number of "super" electrons, electron +deuteriom ions, total
 };

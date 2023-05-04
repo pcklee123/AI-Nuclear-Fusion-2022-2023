@@ -148,22 +148,32 @@ int main()
     int i_time = 0;
     get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
     calcEBV(V, E, B, Ee, Be, npt, jc, par);
-    //   cout << "calc trilin constants\n";
-    calc_trilin_constants(E, Ea, par);
-    calc_trilin_constants(B, Ba, par);
+    int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
+#pragma omp parallel sections
+    {
+#pragma omp section
+        changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt, par); /* change time step if E or B too big*/
+#pragma omp section
+        {
 #ifdef Uon_
-    //   cout << "calcU\n";
-    calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
+            // cout << "calculate the total potential energy U\n";
+            //                  timer.mark();
+            calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
+            //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
-    //    cout << i_time << "." << 0 << " (compute_time = " << timer.elapsed() << "s): ";
-    //    cout << "dt = {" << par->dt[0] << " " << par->dt[1] << "}, t_sim = " << t << " s" << ", ne = " << nt[0] << ", ni = " << nt[1];
-    //    cout << "KEtot e = " << KEtot[0] << ", KEtot i = " << KEtot[1] << ", Eele = " << U[0] << ", Emag = " << U[1] << ", Etot = " << KEtot[0] + KEtot[1] + U[0] + U[1] << " eV\n";
-    sel_part_print(n_part, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
-    save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
-    cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << 0 << ")\n";
+            sel_part_print(n_part, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
+            save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
+        }
+#pragma omp section
+        calc_trilin_constants(E, Ea, par);
+#pragma omp section
+        calc_trilin_constants(B, Ba, par);
+#pragma omp section
+        log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
+    }
+#pragma omp barrier
 
-    // Write everything to log
-    log_entry(i_time, 0, 0, total_ncalc, t, par);
+    cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << 0 << ")\n";
 
     for (i_time = 1; i_time < ndatapoints; i_time++)
     {
@@ -174,24 +184,15 @@ int main()
             timer.mark(); // For timestep
             // Work out motion
             timer.mark();
-            // #pragma omp parallel num_threads(2)
-            // {int p = omp_get_thread_num();
             for (int p = 0; p < 2; ++p)
             {
-#ifdef BFon_
-                par->Bcoef = (float)qs[p] * e_charge_mass / (float)mp[p] * par->dt[p] * 0.5f;
-#else
-                par->Bcoef = 0;
-#endif
-#ifdef EFon_
-                par->Ecoef = par->Bcoef * par->dt[p]; // multiply by dt because of the later portion of cl code
-#else
-                par->Ecoef = 0;
-#endif
-                par->ncalcp = ncalc[p];
-                par->n_partp = n_part[p];
-                // cout << p << " Bconst=" <<par->Bcoef  << ", Econst=" << par->Ecoef << endl;
-                tnp(Ea1, Ba1, pos0x[p], pos0y[p], pos0z[p], pos1x[p], pos1y[p], pos1z[p], p, par); //  calculate the next position ncalc[p] times
+                par->ncalcp[p] = ncalc[p];
+                par->n_partp[p] = n_part[p];
+            }
+            //         cout << p << " Bconst=" << par->Bcoef << ", Econst=" << par->Ecoef << endl;
+            tnp(Ea1, Ba1, pos0x[0], pos0y[0], pos0z[0], pos1x[0], pos1y[0], pos1z[0], 0, par); //  calculate the next position ncalc[p] times
+            for (int p = 0; p < 2; ++p)
+            {
                 total_ncalc[p] += ncalc[p];
             }
 #pragma omp barrier
@@ -214,9 +215,7 @@ int main()
 #pragma omp parallel sections
             {
 #pragma omp section
-                {
-                    changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt, par); /* change time step if E or B too big*/
-                }
+                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, n_part, cdt, par); /* change time step if E or B too big*/
 #pragma omp section
                 {
 #ifdef Uon_
@@ -228,19 +227,11 @@ int main()
 #endif
                 }
 #pragma omp section
-                {
-                    calc_trilin_constants(E, Ea, par);
-                }
-
+                calc_trilin_constants(E, Ea, par);
 #pragma omp section
-                {
-                    calc_trilin_constants(B, Ba, par);
-                }
-
+                calc_trilin_constants(B, Ba, par);
 #pragma omp section
-                {
-                    log_entry(i_time, ntime, cdt, total_ncalc, t, par);
-                }
+                log_entry(i_time, ntime, cdt, total_ncalc, t, par);
             }
 #pragma omp barrier
             cout << "trilin const &calcU :  " << timer.elapsed() << "s\n";
