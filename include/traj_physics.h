@@ -25,11 +25,11 @@ constexpr int n_parte = n_partd;
 // r0=8*a0 Te 1e7,Td 1e7,B 100,E 1e10,nback 64, a0 1e-3,part 1e15,nspace 64 npartd *4 cylinder
 constexpr unsigned int ncoeff = 8;
 
-constexpr int n_output_part = (n_partd > 8347) ? 8347 : n_partd; // maximum number of particles to output to file
+constexpr int n_output_part = (n_partd > 50000) ? 50000 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = 1000;         // number of times to calculate E and B between printouts
+constexpr int nc = 10;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
