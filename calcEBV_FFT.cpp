@@ -244,16 +244,16 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     rx2 = rx * rx + ry2;
                     float r = pi * sqrt(rx2) / R_s;
                     float w = powf(cos(r), 2);
-                    precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
-                    precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
-                    precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= r > pi/2 ? 0.f : w;
+                    precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= r > pi/2 ? 0.f : w;
+                    precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= r > pi/2 ? 0.f : w;
                     // precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
                     // precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
                     // precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
 
-                    precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-                    precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-                    precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
+                    precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
+                    precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
                     // precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
                     // precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
                     // precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
