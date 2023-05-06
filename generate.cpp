@@ -169,7 +169,7 @@ void generateEmptyField(float Ee[3][n_space_divz][n_space_divy][n_space_divx], f
 
                 Be[0][k][j][i] = 0; // z/sqrt(x*x+y*y);
                 Be[1][k][j][i] = 0; // z/sqrt(x*x+y*y);
-                Be[2][k][j][i] = 10; // 1*z*z+1;
+                Be[2][k][j][i] = 1000; // 1*z*z+1;
             }
         }
     }

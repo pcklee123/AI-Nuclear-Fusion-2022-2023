@@ -70,7 +70,8 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
 #pragma omp parallel for ordered
         for (int n = na; n < n_partd; n++)
         {
-            float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.3333333333);
+           // float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.3333333333);
+             float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.5);
             double x, y, z;
             gsl_ran_dir_3d(rng, &x, &y, &z);
             pos0x[p][n] = r * x;
