@@ -6,23 +6,33 @@ void save_files(int i_time, double t,
                 float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
                 float KE[2][n_output_part], float posp[2][n_output_part][3], par *par)
 {
+#pragma omp parallel sections
+  {
 #ifdef printDensity
-  save_vti_c("Ne", i_time, 1, t, &np[0], "Float32", sizeof(float), par);
-  save_vti_c("je", i_time, 3, t, currentj[0], "Float32", sizeof(float), par);
+#pragma omp section
+    save_vti_c("Ne", i_time, 1, t, &np[0], par);
+#pragma omp section
+    save_vti_c("je", i_time, 3, t, currentj[0], par);
 #endif
 #ifdef printV
-  save_vti_c("V", i_time, n_space_div, posL, dd, n_cells, 1, t, V, "Float32", sizeof(float));
+#pragma omp section
+    save_vti_c("V", i_time, 1, t, V, par);
 #endif
 #ifdef printE
-  save_vti_c("E", i_time, 3, t, E, "Float32", sizeof(float), par);
+#pragma omp section
+    save_vti_c("E", i_time, 3, t, E, par);
 #endif
 #ifdef printB
-  save_vti_c("B", i_time, 3, t, B, "Float32", sizeof(float), par);
+#pragma omp section
+    save_vti_c("B", i_time, 3, t, B, par);
 #endif
 #ifdef printParticles
-  save_vtp("e", i_time, n_output_part, 0, t, KE, posp);
-  save_vtp("d", i_time, n_output_part, 1, t, KE, posp);
+#pragma omp section
+    save_vtp("e", i_time, n_output_part, t, KE[0], posp[0]);
+#pragma omp section
+    save_vtp("d", i_time, n_output_part, t, KE[1], posp[1]);
 #endif
+  }
 }
 
 void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
@@ -39,11 +49,10 @@ void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_p
       float dy = pos1y[p][i] - pos0y[p][i];
       float dz = pos1z[p][i] - pos0z[p][i];
       unsigned int index = (int)floor(coef[p] * (dx * dx + dy * dy + dz * dz));
-      if (index < Hist_n)
-        //        index = Hist_n - 1;
-        //   if (index < 0)
-        //     cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * par->dt[p] * par->dt[p]*(float)Hist_max))<< endl;
-        KEhist[p][index]++;
+      if (index >= Hist_n)
+        index = Hist_n - 1;
+      //   if (index < 0) cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * par->dt[p] * par->dt[p]*(float)Hist_max))<< endl;
+      KEhist[p][index]++;
     }
   }
   // Create a vtkPolyData object
@@ -160,7 +169,7 @@ void save_hist1(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_
  */
 void save_vti_c(string filename, int i,
                 int ncomponents, double t,
-                float data1[][n_space_divz][n_space_divy][n_space_divz], string typeofdata, int bytesperdata, par *par)
+                float data1[][n_space_divz][n_space_divy][n_space_divz], par *par)
 {
   if (ncomponents > 3)
   {
@@ -209,7 +218,7 @@ void save_vti_c(string filename, int i,
   writer->Write();                   // Write the output file
 }
 
-void save_vtp(string filename, int i, uint64_t num, int n, double t, float data[2][n_output_part], float points1[2][n_output_part][3])
+void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points1[n_output_part][3])
 {
   // Create a polydata object
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
@@ -226,8 +235,8 @@ void save_vtp(string filename, int i, uint64_t num, int n, double t, float data[
   kineticEnergy->SetName("KE");
   for (int i = 0; i < num; ++i)
   {
-    points->InsertNextPoint(points1[n][i][0], points1[n][i][1], points1[n][i][2]);
-    kineticEnergy->InsertNextValue(data[n][i]);
+    points->InsertNextPoint(points1[i][0], points1[i][1], points1[i][2]);
+    kineticEnergy->InsertNextValue(data[i]);
   }
 
   polyData->SetPoints(points);

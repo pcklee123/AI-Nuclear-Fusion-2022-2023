@@ -6,15 +6,17 @@
 #define Temp_e 1e7 // in Kelvin
 #define Temp_d 1e7 // in Kelvin
 constexpr float f1 = 16; //make bigger to make smaller time steps
-constexpr float f2 = f1*8; 
+constexpr float f2 = f1*2;
+constexpr float incf = 1.2; //increment
+constexpr float decf = 0.8; //decrement factor 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 10;   // in T
+constexpr float Bmax0 = 20;   // in T
 constexpr float Emax0 = 1e7; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback =8;  // background particles per cell - improves stability
 
 constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
-constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e8; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n
@@ -25,11 +27,11 @@ constexpr int n_parte = n_partd;
 // r0=8*a0 Te 1e7,Td 1e7,B 100,E 1e10,nback 64, a0 1e-3,part 1e15,nspace 64 npartd *4 cylinder
 constexpr unsigned int ncoeff = 8;
 
-constexpr int n_output_part = (n_partd > 50000) ? 50000 : n_partd; // maximum number of particles to output to file
+constexpr int n_output_part = (n_partd > 59369) ? 59369 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = 10;         // number of times to calculate E and B between printouts
+constexpr int nc = 100;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
@@ -46,22 +48,10 @@ constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the
 // #define printV //print out V
 #define printB // print out B field
 #define printE // print out E field
+// #define FileIn //whether to load from input file (unused)
 
 constexpr float r_part_spart = target_part / n_partd; // 1e12 / n_partd; // ratio of particles per tracked "super" particle
 // ie. the field of N particles will be multiplied by (1e12/N), as if there were 1e12 particles
-
-#define trilinon_
-#define Uon_  // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
-#define Eon_  // whether to calculate the electric (E) field
-//#define Bon_  // whether to calculate the magnetic (B) field
-#define EFon_ // whether to apply electric force
-//#define BFon_ // whether to apply magnetic force
-#define printDensity
-#define printParticles
-// #define printV //print out V
-#define printB // print out B field
-#define printE // print out E field
-// #define FileIn //whether to load from input file (unused)
 
 constexpr int n_space_divx = n_space;
 constexpr int n_space_divy = n_space;

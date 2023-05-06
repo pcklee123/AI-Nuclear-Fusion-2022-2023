@@ -199,7 +199,7 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     loc_i = i + (i < 0 ? n_space_divx2 : 0);
                     rx = i * par->dd[0];
                     rx2 = rx * rx + ry2;
-                    r3 = rx2 == 0 ? 0.f : powf(rx2, -1.5) / n_cells8;
+                    r3 = rx2 == 0 ? 0.f : powf(rx2, -1.5) ;
                     precalc_r3_base[0][0][loc_k][loc_j][loc_i] = r3 * rx;
                     precalc_r3_base[0][1][loc_k][loc_j][loc_i] = r3 * ry;
                     precalc_r3_base[0][2][loc_k][loc_j][loc_i] = r3 * rz;
@@ -207,14 +207,14 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     precalc_r3_base[1][1][loc_k][loc_j][loc_i] = precalc_r3_base[0][1][loc_k][loc_j][loc_i];
                     precalc_r3_base[1][2][loc_k][loc_j][loc_i] = precalc_r3_base[0][2][loc_k][loc_j][loc_i];
 #ifdef Uon_
-                    precalc_r2_base[loc_k][loc_j][loc_i] = rx2 == 0 ? 0.f : powf(rx2, -0.5) / n_cells8;
+                    precalc_r2_base[loc_k][loc_j][loc_i] = rx2 == 0 ? 0.f : powf(rx2, -0.5) ;
 #endif
                 }
             }
         }
         // Multiply by the respective constants here, since it is faster to parallelize it
-        const float Vconst = kc * e_charge * r_part_spart;
-        const float Aconst = 1e-7 * e_charge * r_part_spart;
+        const float Vconst = kc * e_charge * r_part_spart/ n_cells8;;
+        const float Aconst = 1e-7 * e_charge * r_part_spart/ n_cells8;
 
         vector_muls(reinterpret_cast<float *>(precalc_r3_base[0]), Vconst, n_cells8 * 3);
         vector_muls(reinterpret_cast<float *>(precalc_r3_base[1]), Aconst, n_cells8 * 3);

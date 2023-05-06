@@ -13,6 +13,7 @@ string outpath;
 int main()
 {
     omp_set_nested(true);
+    nthreads = omp_get_max_threads(); // omp_set_num_threads(nthreads);
     // Fast printing
     cin.tie(NULL);
     // ios_base::sync_with_stdio(false);
@@ -42,8 +43,6 @@ int main()
     timer.mark(); // The second is for compute_d_time
     timer.mark(); // The third is for start up dt
 
-    // omp_set_num_threads(nthreads);
-    nthreads = omp_get_max_threads();
     double t = 0;
 
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
@@ -89,7 +88,7 @@ int main()
     cout.precision(1);
     cerr << std::scientific;
     cerr.precision(3);
-    // cout << "float size=" << sizeof(float) << ", " << "int32_t size=" << sizeof(int32_t) << ", " << "int size=" << sizeof(int) << endl;
+
     int total_ncalc[2] = {0, 0}; // particle 0 - electron, particle 1 deuteron
     cout << "Start up time = " << timer.replace() << "s\n";
 #define generateRandom
@@ -103,14 +102,12 @@ int main()
 #else
     generateParticles(a0, r0, qs, mp, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, nt);
 #endif
-    cout << "dt = {" << par->dt[0] << ", " << par->dt[1] << "}\n";
+
     // get limits and spacing of Field cells
     generateField(Ee, Be);
 
     cout << "Set initial random positions: " << timer.replace() << "s\n";
 
-    //   unsigned int ci[2] = {n_partd, 0};
-    //  float cf[2] = {0, 0};
     fftwf_init_threads();
     cl_set_build_options(par);
     cl_start();
@@ -148,7 +145,6 @@ int main()
 
     for (i_time = 1; i_time < ndatapoints; i_time++)
     {
-
         for (int ntime = 0; ntime < nc; ntime++)
         {
             timer.mark();                                                                      // For timestep
@@ -162,11 +158,10 @@ int main()
             timer.mark();
             get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
             cout << "density: " << timer.elapsed() << "s, ";
-
-            // find E field must work out every i,j,k depends on charge in every other cell
+           
             timer.mark();
             // set externally applied fields this is inside time loop so we can set time varying E and B field
-            // calcEeBe(Ee,Be,t);
+            // calcEeBe(Ee,Be,t); // find E field must work out every i,j,k depends on charge in every other cell
             int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
             cout << "EBV: " << timer.elapsed() << "s, ";
 
@@ -176,13 +171,14 @@ int main()
             {
 #pragma omp section
                 changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par); /* change time step if E or B too big*/
+                //cout<<"changedt done"<<endl;
 #pragma omp section
                 {
 #ifdef Uon_
-                    //        cout << "calculate the total potential energy U\n";
-                    //                  timer.mark();
-                    calcU(V, E, B, pos1x, pos1y, pos1z, q, par); // calculate the total potential energy U
-                                                                 //                 cout << "U: " << timer.elapsed() << "s, ";
+                    // cout << "calculate the total potential energy U\n";
+                    // timer.mark();// calculate the total potential energy U
+                    calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
+                    // cout << "U: " << timer.elapsed() << "s, ";
 #endif
                 }
 #pragma omp section
@@ -191,8 +187,11 @@ int main()
                 calc_trilin_constants(B, Ba, par);
 #pragma omp section
                 sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
+                // cout<<"sel_part_print done"<<endl;
                 log_entry(i_time, ntime, cdt, total_ncalc, t, par);
+                // cout<<"log entry done"<<endl;
                 save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
+                // cout<<"save hist done"<<endl;
             }
 #pragma omp barrier
             cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";

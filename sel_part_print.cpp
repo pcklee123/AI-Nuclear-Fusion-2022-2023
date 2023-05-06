@@ -4,14 +4,15 @@ void sel_part_print(float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1
                     float posp[2][n_output_part][3], float KE[2][n_output_part],
                     int m[2][n_partd], par *par)
 {
-    for (int p = 0; p < 2; p++)
+#pragma omp parallel num_threads(2)
     {
+        int p = omp_get_thread_num();
+        int nprtd = floor(par->n_part[p] / n_output_part);
 #pragma omp parallel for simd
         // #pragma omp distribute parallel for simd
         for (int nprt = 0; nprt < n_output_part; nprt++)
         {
-            int nprtd = floor(par->n_part[p] / n_output_part);
-            int n = nprt * max(nprtd, 1);
+            int n = nprt * nprtd + rand() % nprtd;
             if (nprtd == 0 && n >= par->n_part[p])
             {
                 KE[p][nprt] = 0;

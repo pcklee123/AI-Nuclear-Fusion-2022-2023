@@ -89,22 +89,17 @@ static Log logger;
 
 void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par *par);
 void log_headers();
-void save_vti_c2(string filename, int i,
-                 int ncomponents, double t,
-                 float data1[3][n_space_divz2][n_space_divy2][n_space_divz2], string typeofdata, int bytesperdata, par *par);
-void save_vti_c(string filename, int i,
-                int ncomponents, double t,
-                float data1[][n_space_divz][n_space_divy][n_space_divz], string typeofdata, int bytesperdata, par *par);
+//void save_vti_c2(string filename, int i, int ncomponents, double t,float data1[3][n_space_divz2][n_space_divy2][n_space_divz2], par *par);
+void save_vti_c(string filename, int i, int ncomponents, double t, float data1[][n_space_divz][n_space_divy][n_space_divz], par *par);
 // void save_vti(string filename, int i, unsigned int n_space_div[3], float posl[3], float dd[3], uint64_t num, int ncomponents, double t, float data[n_space_divz][n_space_divy][n_space_divz], string typeofdata, int sizeofdata);
-void save_pvd(string filename, int ndatapoints);
+// void save_pvd(string filename, int ndatapoints);
 // void save_vtp(string filename, int i, uint64_t num, int ncomponents, double t, const char *data, const char *points);
-void save_vtp(string filename, int i, uint64_t num, int ncomponents, double t, float data[2][n_output_part], float points[2][n_output_part][3]);
+void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points[n_output_part][3]);
 void set_initial_pos_vel(int n_part_types, int n_particles, float *pos0, float *pos1, float *sigma, int *q, int *m, int *nt);
 void cl_start();
 void cl_set_build_options(par *par);
 
-void tnp(float *Ea1, float *Ba1, float *pos0x, float *pos0y, float *pos0z, float *pos1x, float *pos1y, float *pos1z, int p,
-         par *par);
+void tnp(float *Ea1, float *Ba1, float *pos0x, float *pos0y, float *pos0z, float *pos1x, float *pos1y, float *pos1z, int p, par *par);
 // void get_precalc_r3(float precalc_r3[3][n_space_divz2][n_space_divy2][n_space_divx2], float dd[3]);
 int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
             float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
