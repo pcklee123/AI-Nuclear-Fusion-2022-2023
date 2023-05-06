@@ -14,9 +14,9 @@ int main()
 {
     omp_set_nested(true);
     nthreads = omp_get_max_threads(); // omp_set_num_threads(nthreads);
-    // Fast printing
-    cin.tie(NULL);
-    // ios_base::sync_with_stdio(false);
+   
+    cin.tie(NULL); // Fast printing
+    ios_base::sync_with_stdio(false);
     try
     {
         if (!std::filesystem::create_directory(outpath1))

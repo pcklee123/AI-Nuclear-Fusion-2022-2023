@@ -9,6 +9,7 @@ constexpr float f1 = 16; //make bigger to make smaller time steps
 constexpr float f2 = f1*2;
 constexpr float incf = 1.2; //increment
 constexpr float decf = 0.8; //decrement factor 
+constexpr float R_s = 8; //LPF smoothing radius
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 20;   // in T
@@ -38,7 +39,7 @@ constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the
 #define Hist_max Temp_e / 11600 * 60 // in eV Kelvin to eV is divide by 11600
 
 #define trilinon_
-//#define Uon_  // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
+#define Uon_  // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
 #define Eon_  // whether to calculate the electric (E) field
 #define Bon_  // whether to calculate the magnetic (B) field
 #define EFon_ // whether to apply electric force

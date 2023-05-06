@@ -110,20 +110,24 @@ void info(par *par)
     {
         ofstream E_file;
         E_file.open("info.csv");
-        // cout << "float size=" << sizeof(float) << ", " << "int32_t size=" << sizeof(int32_t) << ", " << "int size=" << sizeof(int) << endl;
+        E_file << "float size=" << sizeof(float) << ", "
+               << "int32_t size=" << sizeof(int32_t) << ", "
+               << "int size=" << sizeof(int) << endl;
+        E_file << "omp_get_max_threads()= " << omp_get_max_threads() << endl;
         E_file << "Data Origin," << par->posL[0] << "," << par->posL[1] << "," << par->posL[0] << endl;
         E_file << "Data Spacing," << par->dd[0] << "," << par->dd[1] << "," << par->dd[2] << endl;
         E_file << "Data extent x, 0," << n_space - 1 << endl;
         E_file << "Data extent y, 0," << n_space - 1 << endl;
         E_file << "Data extent z, 0," << n_space - 1 << endl;
-        //       E_file << "electron Temp = ," << Temp[0] << ",K" << endl;
+        E_file << "electron Temp+e = ," << Temp_e << ",K" << endl;
         E_file << "Maximum expected B = ," << par->Bmax << endl;
         E_file << "time step between prints = ," << par->dt[0] * par->ncalcp[0] * nc << ",s" << endl;
         E_file << "time step between EBcalc = ," << par->dt[0] * par->ncalcp[0] << ",s" << endl;
-        E_file << "dt =," << par->dt[0] << ",s" << endl;
-        cout << "dt = {" << par->dt[0] << ", " << par->dt[1] << "}\n";
+        E_file << "dt_e = ," << par->dt[0] << ",s" << endl;
+        E_file << "dt_i = ," << par->dt[1] << ",s" << endl;
         E_file << "cell size =," << a0 << ",m" << endl;
         E_file << "number of particles per cell = ," << n_partd / (n_space * n_space * n_space) << endl;
+
         E_file.close();
     }
 }

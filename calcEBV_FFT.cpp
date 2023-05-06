@@ -56,7 +56,6 @@ void vector_muls(fftwf_complex *dst, fftwf_complex *A, fftwf_complex *B, int n)
     queue.enqueueReadBuffer(buffer_A, CL_TRUE, 0, sizeof(fftwf_complex) * n, dst);
 }
 
-
 int checkInRange(string name, float data[3][n_space_divz][n_space_divy][n_space_divz], float minval, float maxval)
 {
     bool toolow = true, toohigh = false;
@@ -157,8 +156,7 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 
         // Create fftw plans
         cout << "omp_get_max_threads " << omp_get_max_threads() << endl;
-        fftwf_plan_with_nthreads(omp_get_max_threads() * 2);
-        // fftwf_plan_with_nthreads(8);
+        fftwf_plan_with_nthreads(omp_get_max_threads() * 1);
 
         fftwf_plan planfor_k = fftwf_plan_many_dft_r2c(3, dims, 6, reinterpret_cast<float *>(precalc_r3_base[0][0]), NULL, 1, n_cells8, reinterpret_cast<fftwf_complex *>(precalc_r3[0][0]), NULL, 1, n_cells4, FFTW_ESTIMATE);
         planforE = fftwf_plan_dft_r2c_3d(N0, N1, N2, fft_real[0], fft_complex[3], FFTW_MEASURE);
@@ -168,14 +166,12 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 #else
         // Perform ifft on the entire array; the first 3/4 is used for E while the last 1/4 is used for V
         planbacE = fftwf_plan_many_dft_c2r(3, dims, 4, fft_complex[0], NULL, 1, n_cells4, fft_real[0], NULL, 1, n_cells8, FFTW_MEASURE);
+        fftwf_plan planfor_k2 = fftwf_plan_dft_r2c_3d(N0, N1, N2, reinterpret_cast<float *>(precalc_r2_base), reinterpret_cast<fftwf_complex *>(precalc_r2), FFTW_ESTIMATE);
 #endif
         planforB = fftwf_plan_many_dft_r2c(3, dims, 3, fft_real[0], NULL, 1, n_cells8, fft_complex[0], NULL, 1, n_cells4, FFTW_MEASURE);
         planbacB = fftwf_plan_many_dft_c2r(3, dims, 3, fft_complex[0], NULL, 1, n_cells4, fft_real[0], NULL, 1, n_cells8, FFTW_MEASURE);
 
-#ifdef Uon_
-        fftwf_plan planfor_k2 = fftwf_plan_dft_r2c_3d(N0, N1, N2, reinterpret_cast<float *>(precalc_r2_base), reinterpret_cast<fftwf_complex *>(precalc_r2), FFTW_ESTIMATE);
-#endif
-        cout << "allocate done\n";
+        //        cout << "allocate done\n";
         float r3, rx, ry, rz, rx2, ry2, rz2;
         int i, j, k, loc_i, loc_j, loc_k;
         posL2[0] = -par->dd[0] * ((float)n_space_divx - 0.5);
@@ -199,7 +195,7 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     loc_i = i + (i < 0 ? n_space_divx2 : 0);
                     rx = i * par->dd[0];
                     rx2 = rx * rx + ry2;
-                    r3 = rx2 == 0 ? 0.f : powf(rx2, -1.5) ;
+                    r3 = rx2 == 0 ? 0.f : powf(rx2, -1.5);
                     precalc_r3_base[0][0][loc_k][loc_j][loc_i] = r3 * rx;
                     precalc_r3_base[0][1][loc_k][loc_j][loc_i] = r3 * ry;
                     precalc_r3_base[0][2][loc_k][loc_j][loc_i] = r3 * rz;
@@ -207,14 +203,15 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     precalc_r3_base[1][1][loc_k][loc_j][loc_i] = precalc_r3_base[0][1][loc_k][loc_j][loc_i];
                     precalc_r3_base[1][2][loc_k][loc_j][loc_i] = precalc_r3_base[0][2][loc_k][loc_j][loc_i];
 #ifdef Uon_
-                    precalc_r2_base[loc_k][loc_j][loc_i] = rx2 == 0 ? 0.f : powf(rx2, -0.5) ;
+                    precalc_r2_base[loc_k][loc_j][loc_i] = rx2 == 0 ? 0.f : powf(rx2, -0.5);
 #endif
                 }
             }
         }
         // Multiply by the respective constants here, since it is faster to parallelize it
-        const float Vconst = kc * e_charge * r_part_spart/ n_cells8;;
-        const float Aconst = 1e-7 * e_charge * r_part_spart/ n_cells8;
+        const float Vconst = kc * e_charge * r_part_spart / n_cells8;
+        ;
+        const float Aconst = 1e-7 * e_charge * r_part_spart / n_cells8;
 
         vector_muls(reinterpret_cast<float *>(precalc_r3_base[0]), Vconst, n_cells8 * 3);
         vector_muls(reinterpret_cast<float *>(precalc_r3_base[1]), Aconst, n_cells8 * 3);
@@ -226,9 +223,52 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 
         fftwf_execute(planfor_k); // fft of kernel arr3=fft(arr)
         fftwf_destroy_plan(planfor_k);
+
+        cout << "filter" << endl; // filter
+        for (k = -n_space_divz; k < n_space_divz; k++)
+        {
+            loc_k = k + (k < 0 ? n_space_divz2 : 0); // The "logical" array position
+            cout << loc_k << " ";
+            // We wrap around values smaller than 0 to the other side of the array, since 0, 0, 0 is defined as the center of the convolution pattern an hence rz should be 0
+            rz = k; // The change in z coordinate for the k-th cell.
+            rz2 = rz * rz;
+            for (j = -n_space_divy; j < n_space_divy; j++)
+            {
+                loc_j = j + (j < 0 ? n_space_divy2 : 0);
+                ry = j;
+                ry2 = ry * ry + rz2;
+                for (i = -n_space_divx; i < n_space_divx; i++)
+                {
+                    loc_i = i + (i < 0 ? n_space_divx2 : 0);
+                    rx = i;
+                    rx2 = rx * rx + ry2;
+                    float r = pi * sqrt(rx2) / R_s;
+                    float w = powf(cos(r), 2);
+                    precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    //       precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    //        precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    //        precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+
+                    precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    //       precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    //         precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    //       precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+#ifdef Uon_
+ //                   precalc_r2[loc_k][loc_j][loc_i][0] = r > pi ? 0.f : w;
+                    //precalc_r2[loc_k][loc_j][loc_i][1] = r > pi ? 0.f : w;
+#endif
+                }
+            }
+        }
         delete[] precalc_r3_base;
         delete[] precalc_r2_base;
+        first = 0;
     }
+
 #ifdef Eon_
     // #pragma omp parallel sections
     {
@@ -372,16 +412,22 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
     }
 #endif
 #endif
-    first = 0;
+
     int E_exceeds = 0, B_exceeds = 0;
-    par->Emax = maxvalf(reinterpret_cast<float *>(E),n_cells*3);
-    par->Bmax = maxvalf(reinterpret_cast<float *>(B),n_cells*3);
+#pragma omp parallel sections
+    {
+#pragma omp section
+        par->Emax = maxvalf(reinterpret_cast<float *>(E), n_cells * 3);
+#pragma omp section
+        par->Bmax = maxvalf(reinterpret_cast<float *>(B), n_cells * 3);
+    }
+
     float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * (par->Bmax + 1e-5f));
     float acc_e = par->Emax * e_charge_mass;
     float vel_e = sqrt(kb * Temp_e / e_mass);
     float TE = sqrt(vel_e * vel_e / (acc_e * acc_e) + 2 * a0 / acc_e) - vel_e / acc_e;
-   // cout << "Tcyclotron=" << Tcyclotron << ",Bmax= " << par->Bmax << ", TE=" << TE << ",Emax= " << par->Emax << endl;
-    if (TE < (par->dt[0] * 2 * f1 * ncalc0[0])) //if ideal time step is lower than actual timestep 
+    // cout << "Tcyclotron=" << Tcyclotron << ",Bmax= " << par->Bmax << ", TE=" << TE << ",Emax= " << par->Emax << endl;
+    if (TE < (par->dt[0] * 2 * f1 * ncalc0[0])) // if ideal time step is lower than actual timestep
         E_exceeds = 1;
     else if (TE > (par->dt[0] * 2 * f2 * ncalc0[0]))
         E_exceeds = 2;
