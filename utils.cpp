@@ -127,7 +127,8 @@ void info(par *par)
         E_file << "dt_i = ," << par->dt[1] << ",s" << endl;
         E_file << "cell size =," << a0 << ",m" << endl;
         E_file << "number of particles per cell = ," << n_partd / (n_space * n_space * n_space) << endl;
-
+        E_file << "time for electrons to leave box = ," << n_space*a0/sqrt(2*kb*Temp_e/e_mass) << ",K" << endl;
+         E_file << "time for ions to leave box = ," << n_space*a0*md_me/sqrt(2*kb*Temp_d/e_mass) << ",K" << endl;
         E_file.close();
     }
 }
