@@ -247,19 +247,19 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
                     precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
                     precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
-                    //       precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
-                    //        precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
-                    //        precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    // precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    // precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    // precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
 
                     precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
                     precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
                     precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-                    //       precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-                    //         precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-                    //       precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    // precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    // precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+                    // precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
 #ifdef Uon_
- //                   precalc_r2[loc_k][loc_j][loc_i][0] = r > pi ? 0.f : w;
-                    //precalc_r2[loc_k][loc_j][loc_i][1] = r > pi ? 0.f : w;
+                    // precalc_r2[loc_k][loc_j][loc_i][0] = r > pi ? 0.f : w;
+                    // precalc_r2[loc_k][loc_j][loc_i][1] = r > pi ? 0.f : w;
 #endif
                 }
             }
