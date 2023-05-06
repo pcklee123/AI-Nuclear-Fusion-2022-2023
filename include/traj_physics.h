@@ -14,10 +14,10 @@ constexpr float R_s = 8; //LPF smoothing radius
 //  maximum expected magnetic field
 constexpr float Bmax0 = 20;   // in T
 constexpr float Emax0 = 1e7; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
-constexpr float nback =8;  // background particles per cell - improves stability
+constexpr float nback =32;  // background particles per cell - improves stability
 
 constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
-constexpr float target_part = 1e8; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n
@@ -31,8 +31,8 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 59369) ? 59369 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc = 1000;         // number of times to calculate E and B between printouts
+constexpr int ndatapoints = 30; // total number of time steps to calculate
+constexpr int nc = 100;         // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024

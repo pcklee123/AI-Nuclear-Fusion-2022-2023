@@ -225,10 +225,10 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
         fftwf_destroy_plan(planfor_k);
 
         cout << "filter" << endl; // filter
-        for (k = -n_space_divz; k < n_space_divz; k++)
+        for (k = 0; k < n_space_divz; k++)
         {
             loc_k = k + (k < 0 ? n_space_divz2 : 0); // The "logical" array position
-            cout << loc_k << " ";
+       //     cout << loc_k << " ";
             // We wrap around values smaller than 0 to the other side of the array, since 0, 0, 0 is defined as the center of the convolution pattern an hence rz should be 0
             rz = k; // The change in z coordinate for the k-th cell.
             rz2 = rz * rz;
@@ -243,20 +243,21 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     rx = i;
                     rx2 = rx * rx + ry2;
                     float r = pi * sqrt(rx2) / R_s;
-                    float w = powf(cos(r), 2);
-                    precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= r > pi/2 ? 0.f : w;
-                    precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= r > pi/2 ? 0.f : w;
-                    precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= r > pi/2 ? 0.f : w;
-                    // precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
-                    // precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
-                    // precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= r > pi ? 0.f : w;
+                    float w = r > pi / 2 ? 0.f : cos(r);
+                    w *= w;
+                    precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= w;
+                    precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= w;
+                    precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= w;
+                    precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= w;
+                    precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= w;
+                    precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= w;
 
-                    precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
-                    precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
-                    precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
-                    // precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-                    // precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-                    // precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+// precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
+// precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
+// precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
+//  precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+//  precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
+//  precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
 #ifdef Uon_
                     // precalc_r2[loc_k][loc_j][loc_i][0] = r > pi ? 0.f : w;
                     // precalc_r2[loc_k][loc_j][loc_i][1] = r > pi ? 0.f : w;
