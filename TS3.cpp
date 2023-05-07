@@ -14,7 +14,7 @@ int main()
 {
     omp_set_nested(true);
     nthreads = omp_get_max_threads(); // omp_set_num_threads(nthreads);
-   
+
     cin.tie(NULL); // Fast printing
     ios_base::sync_with_stdio(false);
     try
@@ -158,7 +158,7 @@ int main()
             timer.mark();
             get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
             cout << "density: " << timer.elapsed() << "s, ";
-           
+
             timer.mark();
             // set externally applied fields this is inside time loop so we can set time varying E and B field
             // calcEeBe(Ee,Be,t); // find E field must work out every i,j,k depends on charge in every other cell
@@ -170,8 +170,13 @@ int main()
 #pragma omp parallel sections
             {
 #pragma omp section
-                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par); /* change time step if E or B too big*/
-                //cout<<"changedt done"<<endl;
+                save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
+                // cout<<"save hist done"<<endl;
+                /* change time step if E or B too big*/
+                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par);
+                // cout<<"changedt done"<<endl;
+                log_entry(i_time, ntime, cdt, total_ncalc, t, par);
+                // cout<<"log entry done"<<endl;
 #pragma omp section
                 {
 #ifdef Uon_
@@ -188,10 +193,6 @@ int main()
 #pragma omp section
                 sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
                 // cout<<"sel_part_print done"<<endl;
-                log_entry(i_time, ntime, cdt, total_ncalc, t, par);
-                // cout<<"log entry done"<<endl;
-                save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
-                // cout<<"save hist done"<<endl;
             }
 #pragma omp barrier
             cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";
