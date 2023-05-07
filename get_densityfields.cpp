@@ -132,24 +132,13 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp barrier
     //  cout << "get_density_checked out of bounds\n";
 
-#pragma omp parallel num_threads(2)
+#pragma omp parallel for num_threads(6)
+    for (int pc = 0; pc < 6; ++pc)
     {
-        int p = omp_get_thread_num();
-#pragma omp parallel sections
-        {
-#pragma omp section
+        int p = pc / 3, c = pc % 3;
 #pragma omp parallel for simd
-            for (int n = 0; n < par->n_part[p]; ++n)
-                v[p][0][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
-#pragma omp section
-#pragma omp parallel for simd
-            for (int n = 0; n < par->n_part[p]; ++n)
-                v[p][1][n] = (pos1y[p][n] - pos0y[p][n]) * dti[p];
-#pragma omp section
-#pragma omp parallel for simd
-            for (int n = 0; n < par->n_part[p]; ++n)
-                v[p][2][n] = (pos1z[p][n] - pos0z[p][n]) * dti[p];
-        }
+        for (int n = 0; n < par->n_part[p]; ++n)
+            v[p][c][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
     }
 #pragma omp barrier
 
@@ -220,26 +209,15 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 }
                 smoothscalarfield(jc2[p][0][c], ftemp[pc2], jc_center[p][0][c], te);
                 smoothscalarfield(jc2[p][1][c], ftemp[pc2], jc_center[p][1][c], te + 1);
-                memcpy(reinterpret_cast<float *>(currentj[p]), reinterpret_cast<float *>(ftemp[pc2]]), n_cells * sizeof(float));
-            }
-#pragma omp parallel sections
-            {
-#pragma omp section
-#pragma omp parallel for simd
-                for (unsigned int i = 0; i < n_cells * 3; i++)
-                    (reinterpret_cast<float *>(currentj[0]))[i] = (reinterpret_cast<float *>(jc2[0][0]))[i] + (reinterpret_cast<float *>(jc2[0][1]))[i];
-#pragma omp section
-#pragma omp parallel for simd
-                for (unsigned int i = 0; i < n_cells * 3; i++)
-                    (reinterpret_cast<float *>(currentj[1]))[i] = (reinterpret_cast<float *>(jc2[1][0]))[i] + (reinterpret_cast<float *>(jc2[1][1]))[i];
+                memcpy(reinterpret_cast<float *>(currentj[p][c]), reinterpret_cast<float *>(ftemp[pc2]), n_cells * sizeof(float));
             }
         }
     }
 #pragma omp barrier
 
-    //  cout << "Max Np0" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
-    //  cout << "Max Np1" << maxvalf(reinterpret_cast<float *>(np[1]), n_cells) << endl;
-    //   cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
+//cout << "Max Np0" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
+//cout << "Max Np1" << maxvalf(reinterpret_cast<float *>(np[1]), n_cells) << endl;
+//cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
 #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells * 3; i++)
         (reinterpret_cast<float *>(jc))[i] = (reinterpret_cast<float *>(currentj[0]))[i] + (reinterpret_cast<float *>(currentj[1]))[i];
