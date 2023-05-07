@@ -1,26 +1,26 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
 #define cldevice 1
-#define sphere     // do hot spot  problem
-                   // #define cylinder //do hot rod problem
-#define Temp_e 1e7 // in Kelvin
-#define Temp_d 1e7 // in Kelvin
-constexpr float f1 = 16; //make bigger to make smaller time steps
-constexpr float f2 = f1*2;
-constexpr float incf = 1.2; //increment
-constexpr float decf = 0.8; //decrement factor 
-constexpr float R_s = 8; //LPF smoothing radius
+#define sphere           // do hot spot  problem
+                         // #define cylinder //do hot rod problem
+#define Temp_e 1e7       // in Kelvin
+#define Temp_d 1e7       // in Kelvin
+constexpr float f1 = 16; // make bigger to make smaller time steps
+constexpr float f2 = f1 * 2;
+constexpr float incf = 1.2; // increment
+constexpr float decf = 0.8; // decrement factor
+constexpr float R_s = 8;    // LPF smoothing radius
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 20;   // in T
-constexpr float Emax0 = 1e7; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
-constexpr float nback =8;  // background particles per cell - improves stability
+constexpr float Bmax0 = 20;  // in T
+constexpr float Emax0 = 1e6; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float nback = 8;   // background particles per cell - improves stability
 
-constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
-constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float a0 = 0.1e-3;       // typical dimensions of a cell in m
+constexpr float target_part = 1e7; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
-constexpr int n_space = 64;                                      // must be 2 to power of n
+constexpr int n_space = 32;                                      // must be 2 to power of n
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
@@ -32,8 +32,8 @@ constexpr int n_output_part = (n_partd > 59369) ? 59369 : n_partd; // maximum nu
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc = 100;         // number of times to calculate E and B between printouts
-constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
+constexpr int nc = 1;            // number of times to calculate E and B between printouts
+constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
 #define Hist_max Temp_e / 11600 * 60 // in eV Kelvin to eV is divide by 11600
@@ -81,10 +81,15 @@ struct par // useful parameters
     float dt[2]; // time step electron,deuteron
     float Emax = Emax0;
     float Bmax = Bmax0;
-    int nt[2];                                                                                                            // total number of particles
-    float KEtot[2];                                                                                                       // Total KE of particles
-    float posL[3] = {-a0 * (n_space_divx - 1.0) / 2.0, -a0 *(n_space_divy - 1.0) / 2.0, -a0 *(n_space_divz - 1.0) / 2.0}; // Lowest position of cells (x,y,z)
-    float posH[3] = {a0 * (n_space_divx - 1.0) / 2.0, a0 *(n_space_divy - 1.0) / 2.0, a0 *(n_space_divz - 1.0) / 2.0};    // Highes position of cells (x,y,z)
+    int nt[2];                                                                                                             // total number of particles
+    float KEtot[2];                                                                                                        // Total KE of particles
+    float posL[3] = {-a0 * (n_space_divx - 1) / 2.0f, -a0 *(n_space_divy - 1.0) / 2.0, -a0 *(n_space_divz - 1.0) / 2.0};  // Lowest position of cells (x,y,z)
+    float posH[3] = {a0 * (n_space_divx - 1) / 2.0f, a0 *(n_space_divy - 1.0) / 2.0, a0 *(n_space_divz - 1.0) / 2.0};     // Highes position of cells (x,y,z)
+    float posL_1[3] = {-a0 * (n_space_divx - 3) / 2.0f, -a0 *(n_space_divy - 3.0) / 2.0, -a0 *(n_space_divz - 3.0) / 2.0}; // Lowest position of cells (x,y,z)
+    float posH_1[3] = {a0 * (n_space_divx - 3) / 2.0f, a0 *(n_space_divy - 3.0) / 2.0, a0 *(n_space_divz - 3.0) / 2.0};    // Highes position of cells (x,y,z)
+    float posL_15[3] = {-a0 * (n_space_divx - 4) / 2.0f, -a0 *(n_space_divy - 4.0) / 2.0, -a0 *(n_space_divz - 4.0) / 2.0}; // Lowest position of cells (x,y,z)
+    float posH_15[3] = {a0 * (n_space_divx - 4) / 2.0f, a0 *(n_space_divy - 4.0) / 2.0, a0 *(n_space_divz - 4.0) / 2.0};    // Highes position of cells (x,y,z)
+
     float posL2[3] = {-a0 * n_space_divx, -a0 *n_space_divy, a0 *n_space_divz};
     float dd[3] = {a0, a0, a0}; // cell spacing (x,y,z)
 
@@ -94,8 +99,8 @@ struct par // useful parameters
     float UE = 0;
     float UB = 0;
     // for tnp
-    float Ecoef[2] = {0,0};
-    float Bcoef[2] = {0,0};
-    unsigned int ncalcp[2] = {md_me,1};
-    unsigned int n_partp[2] = {n_parte,n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
+    float Ecoef[2] = {0, 0};
+    float Bcoef[2] = {0, 0};
+    unsigned int ncalcp[2] = {md_me, 1};
+    unsigned int n_partp[2] = {n_parte, n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
 };

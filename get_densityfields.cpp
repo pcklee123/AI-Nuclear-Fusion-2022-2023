@@ -50,90 +50,46 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel sections
         {
 #pragma omp section
-            {
-                int nxm = 0, nxp = 0;
 #pragma omp parallel for simd
-                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
-                {
-                    if (pos1x[p][n] <= par->posL[0] + par->dd[0])
-                    {
-                        pos1x[p][n] = par->posL[0] + par->dd[0] * 1.5;
-                        pos0x[p][n] = pos1x[p][n];
-                        q[p][n] = 0;
-                        nxm++;
-                    }
-                    else if (pos1x[p][n] >= par->posH[0] - par->dd[0])
-                    {
-                        pos1x[p][n] = par->posH[0] - par->dd[0] * 1.5;
-                        pos0x[p][n] = pos1x[p][n];
-                        q[p][n] = 0;
-                        nxp++;
-                    }
-                }
-                //            cout << "nxm " << nxm << " nxp " << nxp << endl;
+            for (unsigned int n = 0; n < par->n_part[p]; ++n)
+            {
+                bool toolow = pos1x[p][n] <= par->posL_1[0], toohigh = pos1x[p][n] >= par->posH_1[0];
+                pos1x[p][n] = toolow ? par->posL_15[0] : (toohigh ? par->posH_15[0] : pos1x[p][n]);
+                pos0x[p][n] = (toolow || toohigh) ? pos1x[p][n] : pos0x[p][n];
+                q[p][n] = (toolow || toohigh) ? 0 : q[p][n];
             }
 #pragma omp section
-            {
-                int nym = 0, nyp = 0;
 #pragma omp parallel for simd
-                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
-                {
-                    if (pos1y[p][n] <= par->posL[1] + par->dd[1])
-                    {
-                        pos1y[p][n] = par->posL[1] + par->dd[1] * 1.5;
-                        pos0y[p][n] = pos1y[p][n];
-                        q[p][n] = 0;
-                        nym++;
-                    }
-                    else if (pos1y[p][n] >= par->posH[1] - par->dd[1])
-                    {
-                        pos1y[p][n] = par->posH[1] - par->dd[1] * 1.5;
-                        pos0y[p][n] = pos1y[p][n];
-                        q[p][n] = 0;
-                        nyp++;
-                    }
-                }
-                //            cout << "nym " << nym << " nyp " << nyp << endl;
+            for (unsigned int n = 0; n < par->n_part[p]; ++n)
+            {
+                bool toolow = pos1x[p][n] <= par->posL_1[0], toohigh = pos1x[p][n] >= par->posH_1[0];
+                pos1x[p][n] = toolow ? par->posL_15[0] : (toohigh ? par->posH_15[0] : pos1x[p][n]);
+                pos0x[p][n] = (toolow || toohigh) ? pos1x[p][n] : pos0x[p][n];
+                q[p][n] = (toolow || toohigh) ? 0 : q[p][n];
             }
 #pragma omp section
+            for (unsigned int n = 0; n < par->n_part[p]; ++n)
             {
-                int nzm = 0, nzp = 0;
-#pragma omp parallel for simd
-                for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
-                {
-#ifdef cylinder // rollover particles in z direction
-                    if (ii[p][2][n] == 0)
-                    {
-                        pos1z[p][n] += (n_space_divz - 2) * par->dd[2];
-                        pos0z[p][n] += (n_space_divz - 2) * par->dd[2];
-                        nzm++;
-                    }
-                    else if (ii[p][2][n] >= n_space_divz - 1)
-                    {
-                        pos1z[p][n] -= (n_space_divz - 2) * par->dd[2];
-                        pos0z[p][n] -= (n_space_divz - 2) * par->dd[2];
-                        nzp++;
-                    }
-#endif
 #ifdef sphere
-                    // hit wall replace with stationary particle
-                    if (pos1z[p][n] <= par->posL[2] + par->dd[2])
-                    {
-                        pos1z[p][n] = par->posL[2] + par->dd[2] * 1.5;
-                        pos0z[p][n] = pos1z[p][n];
-                        q[p][n] = 0;
-                        nzm++;
-                    }
-                    else if (pos1z[p][n] >= par->posH[2] - par->dd[2])
-                    {
-                        pos1z[p][n] = par->posH[2] - par->dd[2] * 1.5;
-                        pos0z[p][n] = pos1z[p][n];
-                        q[p][n] = 0;
-                        nzp++;
-                    }
+                bool toolow = pos1x[p][n] <= par->posL_1[0], toohigh = pos1x[p][n] >= par->posH_1[0];
+                pos1x[p][n] = toolow ? par->posL_15[0] : (toohigh ? par->posH_15[0] : pos1x[p][n]);
+                pos0x[p][n] = (toolow || toohigh) ? pos1x[p][n] : pos0x[p][n];
+                q[p][n] = (toolow || toohigh) ? 0 : q[p][n];
 #endif
+#ifdef cylinder // rollover particles in z direction
+                if (ii[p][2][n] == 0)
+                {
+                    pos1z[p][n] += (n_space_divz - 2) * par->dd[2];
+                    pos0z[p][n] += (n_space_divz - 2) * par->dd[2];
+                    nzm++;
                 }
-                //      cout << "nzm " << nzm << " nzp " << nzp << endl;
+                else if (ii[p][2][n] >= n_space_divz - 1)
+                {
+                    pos1z[p][n] -= (n_space_divz - 2) * par->dd[2];
+                    pos0z[p][n] -= (n_space_divz - 2) * par->dd[2];
+                    nzp++;
+                }
+#endif
             }
         }
     }
@@ -240,11 +196,10 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                     np_center[p][k][j][i][1] += (q[p][n]) * offset[p][1][n];
                     np_center[p][k][j][i][2] += (q[p][n]) * offset[p][2][n];
                 }
-                smoothscalarfield(np[p], ftemp[p], np_center[p], p);
             }
-#pragma omp parallel for simd
-            for (unsigned int i = 0; i < n_cells; i++)
-                (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
+            smoothscalarfield(np[0], ftemp[0], np_center[0], 0);
+            smoothscalarfield(np[1], ftemp[0], np_center[1], 1);
+            memcpy(reinterpret_cast<float *>(npt), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
         }
 #pragma omp section
         {
@@ -265,6 +220,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 }
                 smoothscalarfield(jc2[p][0][c], ftemp[pc2], jc_center[p][0][c], te);
                 smoothscalarfield(jc2[p][1][c], ftemp[pc2], jc_center[p][1][c], te + 1);
+                memcpy(reinterpret_cast<float *>(currentj[p]), reinterpret_cast<float *>(ftemp[pc2]]), n_cells * sizeof(float));
             }
 #pragma omp parallel sections
             {

@@ -29,11 +29,7 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],float f
                 if (fabs(fc[k][j][i][0]) > 0.5)
                     cout << " (fabs(fc[k][j][i][0] )>0.5) " << d << " " << f[k][j][i] << " " << s << " " << i << " " << j << " " << k << endl;
             }
-    // why are there a bunch of stuff here?
-    //   fc[1][1][1][0] = 0;
-    //   fc[1][1][1][1] = 0;
-    //   fc[1][1][1][2] = 0;
-    // calculate the 8 coefficients out of 27 and their indices
+      // calculate the 8 coefficients out of 27 and their indices
     /* center is [0][0][0] [dk][dj][di]so [-1][-1][-1],[-1][-1][0],[-1][-1][1] ... dk*n_space_divx*n_space_divx+dj*n_space_divx+di */
     int k1, j1, i1, sw;
     float fx0, fx1, fy0, fy1, fz0, fz1;
@@ -150,7 +146,5 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx],float f
                 ftemp[k1][j1][i1] += f[k0][j0][i0] * fz0 * fy0 * fx0;
             }
     //     cout << "smoothfield copy back" << endl;
-    memcpy(reinterpret_cast<float *>(f), reinterpret_cast<float *>(ftemp), n_cells * sizeof(float));
-
-//      _aligned_free(ftemp);
+ //   memcpy(reinterpret_cast<float *>(f), reinterpret_cast<float *>(ftemp), n_cells * sizeof(float));
 }
