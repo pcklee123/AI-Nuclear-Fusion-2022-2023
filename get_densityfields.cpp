@@ -85,15 +85,18 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     }
 #pragma omp barrier
 
-#pragma omp parallel for num_threads(6)
-    for (int pc = 0; pc < 6; ++pc)
+#pragma omp parallel for num_threads(2)
+    for (int p = 0; p < 2; ++p)
     {
-        int p = pc / 3, c = pc % 3;
 #pragma omp parallel for simd
         for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
         {
-            ii[p][c][n] = (int)roundf((pos1x[p][n] - par->posL[c]) * ddi[c]);
-            offset[p][c][n] = (pos1x[p][n] - par->posL[c]) * ddi[c] - (float)(ii[p][c][n]);
+            ii[p][0][n] = (int)roundf((pos1x[p][n] - par->posL[0]) * ddi[0]);
+            offset[p][0][n] = (pos1x[p][n] - par->posL[0]) * ddi[0] - (float)(ii[p][0][n]);
+            ii[p][1][n] = (int)roundf((pos1y[p][n] - par->posL[1]) * ddi[1]);
+            offset[p][1][n] = (pos1y[p][n] - par->posL[1]) * ddi[1] - (float)(ii[p][1][n]);
+            ii[p][2][n] = (int)roundf((pos1z[p][n] - par->posL[2]) * ddi[2]);
+            offset[p][2][n] = (pos1z[p][n] - par->posL[2]) * ddi[2] - (float)(ii[p][2][n]);
         }
     }
 
@@ -157,8 +160,12 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             smoothscalarfield(np[0], ftemp[0], np_center[0], 0);
             memcpy(reinterpret_cast<float *>(np[0]), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
             smoothscalarfield(np[1], ftemp[0], np_center[1], 1);
-            //npt is smoothed np[0] and np[1] are not
+            // npt is smoothed np[0] and np[1] are not
             memcpy(reinterpret_cast<float *>(npt), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
+            /*#pragma omp parallel for simd num_threads(nthreads)
+                        for (unsigned int i = 0; i < n_cells; i++)
+                            (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
+                            */
         }
 #pragma omp section
         {

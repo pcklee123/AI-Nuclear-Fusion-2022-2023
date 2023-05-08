@@ -83,10 +83,12 @@ public:
         }
         void newline();
         void close();
+
 };
 static Time timer;
 static Log logger;
 
+extern ofstream info_file;
 void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par *par);
 void log_headers();
 //void save_vti_c2(string filename, int i, int ncomponents, double t,float data1[3][n_space_divz2][n_space_divy2][n_space_divz2], par *par);
