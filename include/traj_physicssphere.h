@@ -1,25 +1,24 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
 #define cldevice 1
-// #define sphere           // do hot spot  problem
-#define cylinder        // do hot rod problem
-#define Temp_e 1e7      // in Kelvin
-#define Temp_d 1e7      // in Kelvin
+#define sphere           // do hot spot  problem
+                         // #define cylinder //do hot rod problem
+#define Temp_e 1e7       // in Kelvin
+#define Temp_d 1e7       // in Kelvin
 constexpr float f1 = 8; // make bigger to make smaller time steps
 constexpr float f2 = f1 * 2;
 constexpr float incf = 1.2; // increment
 constexpr float decf = 0.8; // decrement factor
-constexpr int R_s = 8;    // LPF smoothing radius
-constexpr int r0_f = 8;   //radius of sphere or cylinder 
+constexpr float R_s = 8;    // LPF smoothing radius
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 100;  // in T
+constexpr float Bmax0 = 10; // in T
 constexpr float Emax0 = 1e6; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback = 2;   // background particles per cell - improves stability
 constexpr float Bz0 = 0.001;   // in T
-constexpr float Ez0 = 1e6;
+constexpr float Ez0 = 0;
 constexpr float a0 = 0.1e-3;       // typical dimensions of a cell in m
-constexpr float target_part = 1e13; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e7; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 constexpr int n_space = 32;                                      // must be 2 to power of n
@@ -34,7 +33,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc = 100;          // number of times to calculate E and B between printouts
+constexpr int nc = 100;            // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
@@ -105,5 +104,5 @@ struct par // useful parameters
     float Bcoef[2] = {0, 0};
     unsigned int ncalcp[2] = {md_me, 1};
     unsigned int n_partp[2] = {n_parte, n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
-    unsigned int cl_align = 1024;
+    unsigned int cl_align=1024;
 };

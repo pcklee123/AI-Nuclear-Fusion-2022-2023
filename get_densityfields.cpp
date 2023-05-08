@@ -77,8 +77,8 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #endif
 #ifdef cylinder // rollover particles in z direction
                 bool toolow = pos1z[p][n] <= par->posL_1[2], toohigh = pos1z[p][n] >= par->posH_1[2];
-                pos1z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2]; : (toohigh ? (2-n_space_divz ) * par->dd[2]; : 0);
-                pos0z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2]; : (toohigh ? (2-n_space_divz ) * par->dd[2]; : 0);
+                pos1z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2] : (toohigh ? (2 - n_space_divz) * par->dd[2] : 0);
+                pos0z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2] : (toohigh ? (2 - n_space_divz) * par->dd[2] : 0);
 #endif
             }
         }

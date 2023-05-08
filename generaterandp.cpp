@@ -8,7 +8,7 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
     // initial bulk electron, ion velocity
     float v0[2][3] = {{0, 0, 0 /*1e6*/}, {0, 0, 0}};
 
-    float r0 = 8 * a0; // if sphere this is the radius
+    float r0 = r0_f * a0; // if sphere this is the radius
     float area = 4 * pi * r0 * r0;
     float volume = 4 / 3 * pi * r0 * r0 * r0;
 
@@ -101,7 +101,7 @@ void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], fl
     // initial bulk electron, ion velocity
     float v0[2][3] = {{0, 0, -1e7f}, {0, 0, 0}}; /*1e6*/
 
-    float r0 = 8 * a0; // the radius
+    float r0 = r0_f * a0; // the radius
     float area = pi * r0 * r0;
     float volume = pi * r0 * r0 * n_space * a0;
 
