@@ -85,7 +85,7 @@ void kernel tnp_k_implicit(
   float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
         z = z1[id];
   float8 temp, pos;
-  float r1 = 1.0f;
+  float r1 = 10.0f;
   float r2 = r1 * r1;
   float8 store0, store1, store2, store3, store4, store5;
   const float Bcoeff = Bcoef / r1;
