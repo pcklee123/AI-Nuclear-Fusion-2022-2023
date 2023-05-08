@@ -45,15 +45,17 @@ int main()
     timer.mark(); // The second is for compute_d_time
     timer.mark(); // The third is for start up dt
 
+    cl_set_build_options(par);
+    cl_start(par);
     double t = 0;
 
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
     cout << "(unsigned int) ((int)(-2.5f))" << (unsigned int)((int)(-2.5f)) << endl;
     // position of particle and velocity: stored as 2 positions at slightly different times
     /** CL: Ensure that pos0/1.. contain multiple of 64 bytes, ie. multiple of 16 floats **/
-    auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, 4096)));
-    auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, 4096)));
-    //    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+    auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
+    auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
+    //    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
     auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[0]));
     auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[1]));
     auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[2]));
@@ -79,12 +81,12 @@ int main()
     /** CL: Ensure that Ea/Ba contain multiple of 64 bytes, ie. multiple of 16 floats **/
     auto *E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // selfgenerated E field
     auto *Ee = new float[3][n_space_divz][n_space_divy][n_space_divx];                                                 // External E field
-    float *Ea1 = (float *)_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, 4096);                                 // coefficients for Trilinear interpolation Electric field
+    float *Ea1 = (float *)_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align);                                 // coefficients for Trilinear interpolation Electric field
     auto *Ea = reinterpret_cast<float(&)[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(*Ea1);
 
     auto *B = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // new float[3][n_space_divz][n_space_divy][n_space_divx];
     auto *Be = new float[3][n_space_divz][n_space_divy][n_space_divx];
-    float *Ba1 = (float *)_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, 4096); // coefficients for Trilinear interpolation Magnetic field
+    float *Ba1 = (float *)_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align); // coefficients for Trilinear interpolation Magnetic field
     auto *Ba = reinterpret_cast<float(&)[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(*Ba1);
 
     auto *V = reinterpret_cast<float(&)[n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(n_cells));
@@ -121,8 +123,7 @@ int main()
     cout << "Set initial random positions: " << timer.replace() << "s\n";
 
     fftwf_init_threads();
-    cl_set_build_options(par);
-    cl_start();
+
 
     int i_time = 0;
     get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);

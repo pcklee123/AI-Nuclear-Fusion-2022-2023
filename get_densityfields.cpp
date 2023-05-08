@@ -43,9 +43,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 
     //  cout << "get_density_start\n";
 // remove out of bounds points and get x,y,z index of each particle
-#pragma omp parallel num_threads(2)
+#pragma omp parallel for num_threads(2)
+    for (int p = 0; p < 2; ++p)
     {
-        int p = omp_get_thread_num();
 #pragma omp parallel sections
         {
 #pragma omp section
@@ -113,9 +113,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     }
 #pragma omp barrier
 
-#pragma omp parallel num_threads(2)
+#pragma omp parallel for num_threads(2)
+    for (int p = 0; p < 2; ++p)
     {
-        int p = omp_get_thread_num();
         float KE = 0;
         int nt = 0;
 #pragma omp parallel for simd num_threads(nthreads) reduction(+ : KE, nt)
