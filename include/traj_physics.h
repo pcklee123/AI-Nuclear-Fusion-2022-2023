@@ -5,7 +5,7 @@
                          // #define cylinder //do hot rod problem
 #define Temp_e 1e7       // in Kelvin
 #define Temp_d 1e7       // in Kelvin
-constexpr float f1 = 16; // make bigger to make smaller time steps
+constexpr float f1 = 8; // make bigger to make smaller time steps
 constexpr float f2 = f1 * 2;
 constexpr float incf = 1.2; // increment
 constexpr float decf = 0.8; // decrement factor
@@ -32,7 +32,7 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 30; // total number of time steps to calculate
+constexpr int ndatapoints = 300; // total number of time steps to calculate
 constexpr int nc = 100;            // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
