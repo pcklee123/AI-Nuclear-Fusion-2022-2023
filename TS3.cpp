@@ -50,7 +50,7 @@ int main()
     double t = 0;
 
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
-    cout << "(unsigned int) ((int)(-2.5f))" << (unsigned int)((int)(-2.5f)) << endl;
+    info_file << "(unsigned int) ((int)(-2.5f))" << (unsigned int)((int)(-2.5f)) << endl;
     // position of particle and velocity: stored as 2 positions at slightly different times
     /** CL: Ensure that pos0/1.. contain multiple of 64 bytes, ie. multiple of 16 floats **/
     //auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
