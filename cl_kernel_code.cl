@@ -138,8 +138,8 @@ void kernel tnp_k_implicit(
 
     float xyP = xP * yP, yzP = yP * zP, xzP = xP * zP;
     float xxP = xP * xP, yyP = yP * yP, zzP = zP * zP;
-    float b_det = 1.f / (1.f + xxP + yyP + zzP);
-    // float b_det = r2 / (r2 + xxP + yyP + zzP);
+    //float b_det = 1.f / (1.f + xxP + yyP + zzP);
+     float b_det = r2 / (r2 + xxP + yyP + zzP);
 
     float vx = (x - xprev); // / dt -> cancels out in the end
     float vy = (y - yprev);
@@ -150,18 +150,16 @@ void kernel tnp_k_implicit(
     zprev = z;
 
     float vxxe = vx + xE, vyye = vy + yE, vzze = vz + zE;
-    // x += vx + b_det * (-vx * (yyP + zzP) + vyye * (zP + xyP) + vzze * (xzP -
-    // yP) + (1.f + xxP) * xE); y += vy + b_det * (vxxe * (xyP - zP) -  vy *
-    // (xxP + zzP) + vzze * (xP + yzP) + (1.f + yyP) * yE); z += vz + b_det *
-    // (vxxe * (yP + xzP) + vyye * (yzP - xP) -  vz * (xxP + yyP) + (1.f * zzP)
-    // * zE);
+    //x += vx + b_det * (-vx * (yyP + zzP) + vyye * (zP + xyP) + vzze * (xzP - yP) + (1.f + xxP) * xE); 
+    //y += vy + b_det * (vxxe * (xyP - zP) -  vy * (xxP + zzP) + vzze * (xP + yzP) + (1.f + yyP) * yE); 
+    //z += vz + b_det * (vxxe * (yP + xzP) + vyye * (yzP - xP) -  vz * (xxP + yyP) + (1.f * zzP) * zE);
     //  do fma
     x += fma(b_det,
              fma(-vx, yyP + zzP,
                  fma(vyye, zP + xyP, fma(vzze, xzP - yP, fma(xxP, xE, xE)))),
              vx);
     y += fma(b_det,
-             fma(vxxe, xyP - xP,
+             fma(vxxe, xyP - zP,
                  fma(-vy, xxP + zzP, fma(vzze, xP + yzP, fma(yyP, yE, yE)))),
              vy);
     z += fma(b_det,
