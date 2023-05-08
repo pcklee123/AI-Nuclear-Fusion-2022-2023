@@ -83,7 +83,6 @@ public:
         }
         void newline();
         void close();
-
 };
 static Time timer;
 static Log logger;
@@ -91,14 +90,14 @@ static Log logger;
 extern ofstream info_file;
 void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par *par);
 void log_headers();
-//void save_vti_c2(string filename, int i, int ncomponents, double t,float data1[3][n_space_divz2][n_space_divy2][n_space_divz2], par *par);
+// void save_vti_c2(string filename, int i, int ncomponents, double t,float data1[3][n_space_divz2][n_space_divy2][n_space_divz2], par *par);
 void save_vti_c(string filename, int i, int ncomponents, double t, float data1[][n_space_divz][n_space_divy][n_space_divz], par *par);
 // void save_vti(string filename, int i, unsigned int n_space_div[3], float posl[3], float dd[3], uint64_t num, int ncomponents, double t, float data[n_space_divz][n_space_divy][n_space_divz], string typeofdata, int sizeofdata);
 // void save_pvd(string filename, int ndatapoints);
 // void save_vtp(string filename, int i, uint64_t num, int ncomponents, double t, const char *data, const char *points);
 void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points[n_output_part][3]);
 void set_initial_pos_vel(int n_part_types, int n_particles, float *pos0, float *pos1, float *sigma, int *q, int *m, int *nt);
-void cl_start(par* par);
+void cl_start(par *par);
 void cl_set_build_options(par *par);
 
 void tnp(float *Ea1, float *Ba1, float *pos0x, float *pos0y, float *pos0z, float *pos1x, float *pos1y, float *pos1z, int p, par *par);
@@ -141,7 +140,7 @@ void generateParticles(float a0, float r0, int *qs, int *mp, float pos0x[2][n_pa
                        float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int q[2][n_partd], int m[2][n_partd], int *nt);
 void generateField(float Ee[3][n_space_divz][n_space_divy][n_space_divx], float Be[3][n_space_divz][n_space_divy][n_space_divx]);
 void id_to_cell(int id, int *x, int *y, int *z);
-void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par);
+void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par);
 
 void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                           float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],

@@ -103,47 +103,48 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp barrier
     //  cout << "get_density_checked out of bounds\n";
 
-#pragma omp parallel for num_threads(2)
+    // #pragma omp parallel for num_threads(2)
     for (int p = 0; p < 2; ++p)
     {
-#pragma omp parallel for simd
+        // #pragma omp parallel for simd
         for (int n = 0; n < par->n_part[p]; ++n)
         {
-            v[p][0][n] = (pos1x[p][n] - pos0x[p][n]) * dti[p];
-            v[p][1][n] = (pos1y[p][n] - pos0y[p][n]) * dti[p];
-            v[p][2][n] = (pos1z[p][n] - pos0z[p][n]) * dti[p];
+            v[p][0][n] = q[p][n] * (pos1x[p][n] - pos0x[p][n]) * dti[p];
+            v[p][1][n] = q[p][n] * (pos1y[p][n] - pos0y[p][n]) * dti[p];
+            v[p][2][n] = q[p][n] * (pos1z[p][n] - pos0z[p][n]) * dti[p];
         }
     }
 
 #pragma omp barrier
-
-//#pragma omp parallel for num_threads(2)
-    for (int p = 0; p < 2; ++p)
-    {
-    float KE = 0;
-    int nt = 0;
-#pragma omp parallel for simd num_threads(nthreads) reduction(+ : KE, nt)
-        for (int n = 0; n < par->n_part[p]; ++n)
+    /*
+    //#pragma omp parallel for num_threads(2)
+        for (int p = 0; p < 2; ++p)
         {
-            KE += v[p][0][n] * v[p][0][n] + v[p][1][n] * v[p][1][n] + v[p][2][n] * v[p][2][n];
-            nt += q[p][n];
+        float KE = 0;
+        int nt = 0;
+    //#pragma omp parallel for simd num_threads(nthreads) reduction(+ : KE, nt)
+            for (int n = 0; n < par->n_part[p]; ++n)
+            {
+                KE += v[p][0][n] * v[p][0][n] + v[p][1][n] * v[p][1][n] + v[p][2][n] * v[p][2][n];
+                nt += q[p][n];
+            }
+            par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass)*r_part_spart; // as if these particles were actually samples of the greater thing
+            par->nt[p] = nt;
+            cout <<p<<" "<<par->KEtot[p]<<endl;
         }
-        par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass)*r_part_spart; // as if these particles were actually samples of the greater thing
-        par->nt[p] = nt;
-    }
-#pragma omp barrier
+    #pragma omp barrier
 
-    //  cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
+        //  cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
 
-#pragma omp parallel for num_threads(6)
-    for (int pc = 0; pc < 6; ++pc)
-    {
-        int p = pc / 3, c = pc % 3;
-        for (int n = 0; n < par->n_part[p]; ++n)
-            v[p][c][n] *= (float)q[p][n];
-    }
-
-#pragma omp barrier
+    #pragma omp parallel for num_threads(6)
+        for (int pc = 0; pc < 6; ++pc)
+        {
+            int p = pc / 3, c = pc % 3;
+            for (int n = 0; n < par->n_part[p]; ++n)
+                v[p][c][n] *= (float)q[p][n];
+        }
+    #pragma omp barrier
+    */
 
 #pragma omp parallel sections
     {

@@ -53,22 +53,22 @@ int main()
     info_file << "(unsigned int) ((int)(-2.5f))" << (unsigned int)((int)(-2.5f)) << endl;
     // position of particle and velocity: stored as 2 positions at slightly different times
     /** CL: Ensure that pos0/1.. contain multiple of 64 bytes, ie. multiple of 16 floats **/
-    //auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
-    //auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
-    //    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-    //auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[0]));
-    //auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[1]));
-    //auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[2]));
-    //auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[0]));
-    //auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[1]));
-    //auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[2]));
+    // auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
+    // auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
+    //     auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+    // auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[0]));
+    // auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[1]));
+    // auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[2]));
+    // auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[0]));
+    // auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[1]));
+    // auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[2]));
 
-     auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-     auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-     auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-     auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-     auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-     auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+    auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+    auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+    auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+    auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+    auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
 
     //    charge of particles
     auto *q = static_cast<int(*)[n_partd]>(_aligned_malloc(2 * n_partd * sizeof(int), alignment)); // charge of each particle +1 for H,D or T or -1 for electron can also be +2 for He for example
@@ -81,7 +81,7 @@ int main()
     /** CL: Ensure that Ea/Ba contain multiple of 64 bytes, ie. multiple of 16 floats **/
     auto *E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // selfgenerated E field
     auto *Ee = new float[3][n_space_divz][n_space_divy][n_space_divx];                                                 // External E field
-    float *Ea1 = (float *)_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align);                                 // coefficients for Trilinear interpolation Electric field
+    float *Ea1 = (float *)_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align);                        // coefficients for Trilinear interpolation Electric field
     auto *Ea = reinterpret_cast<float(&)[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(*Ea1);
 
     auto *B = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // new float[3][n_space_divz][n_space_divy][n_space_divx];
@@ -124,7 +124,6 @@ int main()
 
     fftwf_init_threads();
 
-
     int i_time = 0;
     get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
     int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
@@ -133,23 +132,20 @@ int main()
 #pragma omp section
         changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par); /* change time step if E or B too big*/
 #pragma omp section
-        {
 #ifdef Uon_
-            // cout << "calculate the total potential energy U\n";
-            //                  timer.mark();
-            calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
-            //                 cout << "U: " << timer.elapsed() << "s, ";
+        // cout << "calculate the total potential energy U\n";
+        //                  timer.mark();
+        calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
+        //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
-            sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
-            save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
-            save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
-        }
+        sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
+        save_hist(i_time, t, q, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
+        save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
+        log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 #pragma omp section
         calc_trilin_constants(E, Ea, par);
 #pragma omp section
         calc_trilin_constants(B, Ba, par);
-#pragma omp section
-        log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
     }
 #pragma omp barrier
     info(par); // printout initial info.csv file
@@ -166,6 +162,7 @@ int main()
                 total_ncalc[p] += par->ncalcp[p];
             cout << "motion: " << timer.elapsed() << "s, ";
             t += par->dt[0] * par->ncalcp[0];
+
             //  find number of particle and current density fields
             timer.mark();
             get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
@@ -182,7 +179,7 @@ int main()
 #pragma omp parallel sections
             {
 #pragma omp section
-                save_hist(i_time, t, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
+                save_hist(i_time, t, q, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
                 // cout<<"save hist done"<<endl;
                 /* change time step if E or B too big*/
                 changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par);

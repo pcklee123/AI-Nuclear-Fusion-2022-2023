@@ -35,26 +35,36 @@ void save_files(int i_time, double t,
   }
 }
 
-void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
+void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
 {
   long KEhist[2][Hist_n];
   memset(KEhist, 0, sizeof(KEhist));
   float coef[2];
   for (int p = 0; p < 2; ++p)
   {
+    float KE = 0;
+    int nt = 0;
     coef[p] = 0.5 * (float)mp[p] * (float)Hist_n / (e_charge_mass * par->dt[p] * par->dt[p] * (float)Hist_max);
     for (int i = 0; i < par->n_part[p]; ++i)
     {
       float dx = pos1x[p][i] - pos0x[p][i];
       float dy = pos1y[p][i] - pos0y[p][i];
       float dz = pos1z[p][i] - pos0z[p][i];
-      unsigned int index = (int)floor(coef[p] * (dx * dx + dy * dy + dz * dz));
+      float v2 = (dx * dx + dy * dy + dz * dz);
+      unsigned int index = (int)floor(coef[p] * v2);
+      KE += v2;
+      nt += q[p][i];
+
       if (index >= Hist_n)
         index = Hist_n - 1;
       //   if (index < 0) cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * par->dt[p] * par->dt[p]*(float)Hist_max))<< endl;
       KEhist[p][index]++;
     }
+    par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass * par->dt[p] * par->dt[p]) * r_part_spart; // as if these particles were actually samples of the greater thing
+    par->nt[p] = nt*  r_part_spart;
+   //   cout << p << " " << par->KEtot[p] << endl;
   }
+
   // Create a vtkPolyData object
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 
@@ -101,7 +111,7 @@ void save_hist(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_p
   writer->Write();
 }
 
-void save_hist1(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
+void save_hist1(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
 {
   // Create the vtkTable object
   vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
@@ -129,19 +139,27 @@ void save_hist1(int i_time, double t, float pos0x[2][n_partd], float pos0y[2][n_
   float coef[2];
   for (int p = 0; p < 2; ++p)
   {
+    float KE = 0;
+    int nt = 0;
     coef[p] = 0.5 * (float)mp[p] * (float)Hist_n / (e_charge_mass * par->dt[p] * par->dt[p] * (float)Hist_max);
     for (int i = 0; i < par->n_part[p]; ++i)
     {
       float dx = pos1x[p][i] - pos0x[p][i];
       float dy = pos1y[p][i] - pos0y[p][i];
       float dz = pos1z[p][i] - pos0z[p][i];
-      unsigned int index = (int)floor(coef[p] * (dx * dx + dy * dy + dz * dz));
+      float v2 = (dx * dx + dy * dy + dz * dz);
+      unsigned int index = (int)floor(coef[p] * v2);
+      KE += v2;
+      nt += q[p][i];
       if (index < Hist_n)
         //        index = Hist_n - 1;
         //   if (index < 0)
         //     cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * par->dt[p] * par->dt[p]*(float)Hist_max))<< endl;
         KEhist[p][index]++;
     }
+    par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass)*r_part_spart; // as if these particles were actually samples of the greater thing
+    par->nt[p] = nt;
+    cout << p << " " << par->KEtot[p] << endl;
   }
   // Add the histogram values to the arrays
   for (int i = 0; i < Hist_n; ++i)
