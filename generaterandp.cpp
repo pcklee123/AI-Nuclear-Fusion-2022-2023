@@ -16,7 +16,7 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
     float Density_e = (n_partd - ((n_space_divx - 2) * (n_space_divy - 2) * (n_space_divz - 2) * nback)) / volume * r_part_spart;
     float Density_e1 = nback * r_part_spart / (a0 * a0 * a0);
 
-    cout << "initial density = " << Density_e << "/m^3,  background density = " << Density_e1 << "/m^3 \n";
+    info_file << "initial density = " << Density_e << "/m^3,  background density = " << Density_e1 << "/m^3 \n";
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
@@ -27,11 +27,11 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
     float acc_e = e_charge_mass * Emax0;
     float TE = sqrt(vel_e * vel_e / (acc_e * acc_e) + 2 * a0 / acc_e) - vel_e / acc_e; // time for electron to move across 1 cell
     // set time step to allow electrons to gyrate if there is B field or to allow electrons to move slowly throughout the plasma distance
-    cout << "Tdebye=" << TDebye << ", Tcycloton/4=" << Tcyclotron / 4 << ", plasma period/3=" << plasma_period / 4 << ",TE/2=" << TE/2 << endl;
+    info_file << "Tdebye=" << TDebye << ", Tcycloton/4=" << Tcyclotron / 4 << ", plasma period/3=" << plasma_period / 4 << ",TE/2=" << TE/2 << endl;
     par->dt[0] =  min(min(min(TDebye, Tcyclotron / 4), plasma_period /  4), TE / 2)/ncalc0[0]; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
     par->dt[1] = par->dt[0] * md_me;
     //  float mu0_4pidt[2]= {mu0_4pi/par->dt[0],mu0_4pi/par->dt[1]};
-    cout << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
+    info_file << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
 
     // set initial positions and velocity
     float sigma[2] = {sqrt(kb * Temp[0] / (mp[0] * e_mass)), sqrt(kb * Temp[1] / (mp[1] * e_mass))};
@@ -40,7 +40,7 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
     rng = gsl_rng_alloc(gsl_rng_rand48); // pick random number generator
     time_t myTime;
     seed = time(&myTime);
-    cout << "seed=" << seed << "\n";
+    info_file << "seed=" << seed << "\n";
     gsl_rng_set(rng, seed); // set seed
 
     for (int p = 0; p < 2; p++)
@@ -106,21 +106,21 @@ void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], fl
     float volume = pi * r0 * r0 * n_space * a0;
 
     // calculated plasma parameters
-    cout << "initial e Temperature, = " << Temp_e / 11600 << "eV, initial d Temperature, = " << Temp_d / 11600 << " eV\n";
+    info_file << "initial e Temperature, = " << Temp_e / 11600 << "eV, initial d Temperature, = " << Temp_d / 11600 << " eV\n";
     float Density_e = (n_partd - (n_space_divx - 2) * (n_space_divy - 2) * (n_space_divz - 2) * nback) / volume * r_part_spart;
     float Density_e1 = nback * r_part_spart / (a0 * a0 * a0);
-    cout << "initial density = " << Density_e << "background density = " << Density_e1 << endl;
+    info_file << "initial density = " << Density_e << "background density = " << Density_e1 << endl;
     float initial_current = Density_e * e_charge * v0[0][2] * area;
-    cout << "initial current = " << initial_current << endl;
+    info_file << "initial current = " << initial_current << endl;
     float Bmaxi = initial_current * 2e-7 / r0;
-    cout << "initial Bmax = " << Bmaxi << endl;
+    info_file << "initial Bmax = " << Bmaxi << endl;
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
     float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass) + v0[0][0] * v0[0][0] + v0[0][1] * v0[0][1] + v0[0][2] * v0[0][2]);
-    cout << "electron velocity due to temp and initial velocity " << vel_e << endl;
+    info_file << "electron velocity due to temp and initial velocity " << vel_e << endl;
     float Tv = a0 / vel_e; // time for electron to move across 1 cell
-    cout << "Tv = " << Tv << endl;
+    info_file << "Tv = " << Tv << endl;
     float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * Bmax0);
     float TDebye = Debye_Length / vel_e;
     float TE = sqrt(2 * a0 / e_charge_mass / Emax0);
@@ -128,9 +128,9 @@ void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], fl
 
     par->dt[0] = 4 * min(min(min(TDebye, min(Tv / md_me, Tcyclotron) / 4), plasma_period / ncalc0[0] / 4), TE / ncalc0[0]) / 2; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
     par->dt[1] = par->dt[0] * md_me;
-    cout << "par->dt[0] = " << par->dt[0] << endl;
+    info_file << "par->dt[0] = " << par->dt[0] << endl;
     //  float mu0_4pidt[2]= {mu0_4pi/par->dt[0],mu0_4pi/par->dt[1]};
-    cout << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
+    info_file << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;
     /*
     cout << "electron Temp = " << Temp[0] << " K, electron Density = " << Density_e << " m^-3" << endl;
     cout << "Plasma Frequency(assume cold) = " << plasma_freq << " Hz, Plasma period = " << plasma_period << " s" << endl;
@@ -149,7 +149,7 @@ void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], fl
 
     time_t myTime;
     seed = time(&myTime);
-    cout << "seed=" << seed << "\n";
+    info_file << "seed=" << seed << "\n";
     gsl_rng_set(rng, seed); // set seed
 
     for (int p = 0; p < 2; p++)
