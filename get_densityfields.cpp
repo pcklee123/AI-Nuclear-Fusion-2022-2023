@@ -155,6 +155,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 }
             }
             smoothscalarfield(np[0], ftemp[0], np_center[0], 0);
+            memcpy(reinterpret_cast<float *>(np[0]), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
             smoothscalarfield(np[1], ftemp[0], np_center[1], 1);
             //npt is smoothed np[0] and np[1] are not
             memcpy(reinterpret_cast<float *>(npt), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));

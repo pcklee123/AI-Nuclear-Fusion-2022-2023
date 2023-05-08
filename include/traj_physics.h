@@ -12,10 +12,11 @@ constexpr float decf = 0.8; // decrement factor
 constexpr float R_s = 8;    // LPF smoothing radius
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 20;  // in T
+constexpr float Bmax0 = 100;  // in T
 constexpr float Emax0 = 1e6; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback = 8;   // background particles per cell - improves stability
-
+constexpr float Bz0 = 100;  // in T
+constexpr float Ez0 = 0;
 constexpr float a0 = 0.1e-3;       // typical dimensions of a cell in m
 constexpr float target_part = 1e7; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
