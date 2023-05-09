@@ -51,24 +51,25 @@ int main()
 
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
     info_file << "(unsigned int) ((int)(-2.5f))" << (unsigned int)((int)(-2.5f)) << endl;
-    // position of particle and velocity: stored as 2 positions at slightly different times
+    // position of particle and velocity: stored as 2 positions at slightly different times [3 components][2 types of particles][number of particles]
     /** CL: Ensure that pos0/1.. contain multiple of 64 bytes, ie. multiple of 16 floats **/
-    // auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
-    // auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
-    //     auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-    // auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[0]));
-    // auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[1]));
-    // auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[2]));
-    // auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[0]));
-    // auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[1]));
-    // auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[2]));
+     auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
+     auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
 
-    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-    auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-    auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-    auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-    auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
-    auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, 4096))); // new float[2][n_partd];
+     auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[0]));
+     auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[1]));
+     auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[2]));
+     auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[0]));
+     auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[1]));
+     auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[2]));
+/*
+    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+    auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+    auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+    auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+    auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+    auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+*/
 
     //    charge of particles
     auto *q = static_cast<int(*)[n_partd]>(_aligned_malloc(2 * n_partd * sizeof(int), alignment)); // charge of each particle +1 for H,D or T or -1 for electron can also be +2 for He for example
