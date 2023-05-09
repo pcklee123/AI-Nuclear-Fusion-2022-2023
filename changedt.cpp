@@ -1,5 +1,5 @@
 #include "include/traj.h"
-void changedt(particles *pt ,int cdt, par *par)
+void changedt(particles *pt, int cdt, par *par)
 {
     float inc = 0;
     //   cout << endl<< cdt << " ";
@@ -62,13 +62,7 @@ void changedt(particles *pt ,int cdt, par *par)
     }
     if (inc == 0)
         return;
-#pragma omp parallel for num_threads(2)
-    for (int p = 0; p < 2; ++p)
 #pragma omp parallel for simd
-        for (int n = 0; n < par->n_part[p]; n++)
-        { 
-            pt->pos[0][0][p][n] = pt->pos[1][0][p][n] - (pt->pos[1][0][p][n] - pt->pos[0][0][p][n]) * inc;
-            pt->pos[0][1][p][n] = pt->pos[1][1][p][n] - (pt->pos[1][1][p][n] - pt->pos[0][1][p][n]) * inc;
-            pt->pos[0][2][p][n] = pt->pos[1][2][p][n] - (pt->pos[1][2][p][n] - pt->pos[0][2][p][n]) * inc;
-        }
+    for (int n = 0; n < par->n_part[0] * 3 * 2; n++)
+        pt->pos0[n] = pt->pos1[n] - (pt->pos1[n] - pt->pos0[n]) * inc;
 }
