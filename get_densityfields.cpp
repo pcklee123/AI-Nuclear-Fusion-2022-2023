@@ -133,15 +133,18 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                     np_center[p][k][j][i][2] += (q[p][n]) * offset[p][2][n];
                 }
             }
+            /*
             smoothscalarfield(np[0], ftemp[0], np_center[0], 0);
             memcpy(reinterpret_cast<float *>(np[0]), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
             smoothscalarfield(np[1], ftemp[0], np_center[1], 1);
             // npt is smoothed np[0] and np[1] are not
             memcpy(reinterpret_cast<float *>(npt), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
-            /*#pragma omp parallel for simd num_threads(nthreads)
-                        for (unsigned int i = 0; i < n_cells; i++)
-                            (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
-                            */
+            */
+            //*
+#pragma omp parallel for simd num_threads(nthreads)
+            for (unsigned int i = 0; i < n_cells; i++)
+                (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
+            //*/
         }
 #pragma omp section
         {

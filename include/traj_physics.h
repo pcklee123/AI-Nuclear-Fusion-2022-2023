@@ -1,17 +1,17 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 0
-#define sphere          // do hot spot  problem
-                        // #define cylinder //do hot rod problem
-#define Temp_e 1e7      // in Kelvin
-#define Temp_d 1e7      // in Kelvin
-constexpr float f1 = 1; // make bigger to make smaller time steps
-constexpr float f2 = f1 * 2;
-constexpr float incf = 1.2; // increment
-constexpr float decf = 0.8; // decrement factor
-constexpr int n_space = 64;                                      // must be 2 to power of n
-constexpr float R_s = n_space/4;    // LPF smoothing radius
-constexpr float r0_f = 8;   //  radius of sphere or cylinder
+#define cldevice 1
+#define sphere        // do hot spot  problem
+                      // #define cylinder //do hot rod problem
+#define Temp_e 1e7    // in Kelvin
+#define Temp_d 1e7    // in Kelvin
+constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+constexpr int f2 = f1 * 2;
+constexpr float incf = 1.2;        // increment
+constexpr float decf = 0.8;        // decrement factor
+constexpr int n_space = 64;        // must be 2 to power of n
+constexpr float R_s = n_space / 4; // LPF smoothing radius
+constexpr float r0_f = 8;          //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 10;  // in T
@@ -35,7 +35,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = 1;           // number of times to calculate E and B between printouts
+constexpr int nc = f1 * 100;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
@@ -84,7 +84,7 @@ struct par // useful parameters
     float dt[2]; // time step electron,deuteron
     float Emax = Emax0;
     float Bmax = Bmax0;
-    float nt[2];                                                                                                             // total number of particles
+    float nt[2];                                                                                                            // total number of particles
     float KEtot[2];                                                                                                         // Total KE of particles
     float posL[3] = {-a0 * (n_space_divx - 1) / 2.0f, -a0 *(n_space_divy - 1.0) / 2.0, -a0 *(n_space_divz - 1.0) / 2.0};    // Lowest position of cells (x,y,z)
     float posH[3] = {a0 * (n_space_divx - 1) / 2.0f, a0 *(n_space_divy - 1.0) / 2.0, a0 *(n_space_divz - 1.0) / 2.0};       // Highes position of cells (x,y,z)
@@ -115,4 +115,10 @@ struct field // fields
 
 struct particles // particles
 {
+    float *pos0x;
+    float *pos0y;
+    float *pos0z;
+    float *pos1x;
+    float *pos1y;
+    float *pos1z;
 };
