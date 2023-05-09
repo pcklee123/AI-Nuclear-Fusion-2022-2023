@@ -9,8 +9,9 @@ constexpr float f1 = 1; // make bigger to make smaller time steps
 constexpr float f2 = f1 * 2;
 constexpr float incf = 1.2; // increment
 constexpr float decf = 0.8; // decrement factor
-constexpr float R_s = 8;    // LPF smoothing radius
-constexpr float r0_f = 8;   // LPF smoothing radius
+constexpr int n_space = 64;                                      // must be 2 to power of n
+constexpr float R_s = n_space/4;    // LPF smoothing radius
+constexpr float r0_f = 8;   //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 10;  // in T
@@ -22,7 +23,7 @@ constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
 constexpr float target_part = 1e11; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
-constexpr int n_space = 64;                                      // must be 2 to power of n
+
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
@@ -33,8 +34,8 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = 1;           // number of times to calculate E and B between printouts
+constexpr int ndatapoints = 300; // total number of time steps to calculate
+constexpr int nc = 30;           // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
