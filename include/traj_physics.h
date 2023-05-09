@@ -19,10 +19,10 @@ constexpr float nback = 2;   // background particles per cell - improves stabili
 constexpr float Bz0 = 0.001; // in T
 constexpr float Ez0 = 0;
 constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
-constexpr float target_part = 1e10; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e11; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
-constexpr int n_space = 32;                                      // must be 2 to power of n
+constexpr int n_space = 64;                                      // must be 2 to power of n
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
@@ -83,7 +83,7 @@ struct par // useful parameters
     float dt[2]; // time step electron,deuteron
     float Emax = Emax0;
     float Bmax = Bmax0;
-    long nt[2];                                                                                                             // total number of particles
+    float nt[2];                                                                                                             // total number of particles
     float KEtot[2];                                                                                                         // Total KE of particles
     float posL[3] = {-a0 * (n_space_divx - 1) / 2.0f, -a0 *(n_space_divy - 1.0) / 2.0, -a0 *(n_space_divz - 1.0) / 2.0};    // Lowest position of cells (x,y,z)
     float posH[3] = {a0 * (n_space_divx - 1) / 2.0f, a0 *(n_space_divy - 1.0) / 2.0, a0 *(n_space_divz - 1.0) / 2.0};       // Highes position of cells (x,y,z)

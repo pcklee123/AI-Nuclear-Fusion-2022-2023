@@ -43,7 +43,7 @@ void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd],
   for (int p = 0; p < 2; ++p)
   {
     float KE = 0;
-    int nt = 0;
+    long nt = 0;
     coef[p] = 0.5 * (float)mp[p] * (float)Hist_n / (e_charge_mass * par->dt[p] * par->dt[p] * (float)Hist_max);
     for (int i = 0; i < par->n_part[p]; ++i)
     {
