@@ -38,7 +38,6 @@ Log::Log()
     log_file << setprecision(5);
 }
 
-
 void Log::newline()
 {
     log_file << "\n";
@@ -49,7 +48,6 @@ void Log::close()
 {
     log_file.close();
 }
-
 
 void log_headers()
 {
@@ -106,13 +104,13 @@ float maxvalf(float *data_1d, int n)
     return max;
 }
 
-void info(par* par)
+void info(par *par)
 {
     // print initial conditions
     {
         info_file << "float size=" << sizeof(float) << ", "
-               << "int32_t size=" << sizeof(int32_t) << ", "
-               << "int size=" << sizeof(int) << endl;
+                  << "int32_t size=" << sizeof(int32_t) << ", "
+                  << "int size=" << sizeof(int) << endl;
         info_file << "omp_get_max_threads()= " << omp_get_max_threads() << endl;
         info_file << "Data Origin," << par->posL[0] << "," << par->posL[1] << "," << par->posL[0] << endl;
         info_file << "Data Spacing," << par->dd[0] << "," << par->dd[1] << "," << par->dd[2] << endl;
@@ -129,8 +127,25 @@ void info(par* par)
         info_file << "number of particles per cell = ," << n_partd / (n_space * n_space * n_space) << endl;
         info_file << "time for electrons to leave box = ," << n_space * a0 / sqrt(2 * kb * Temp_e / e_mass) << ",s" << endl;
         info_file << "time for ions to leave box = ," << n_space * a0 * md_me / sqrt(2 * kb * Temp_d / e_mass) << ",s" << endl;
-
     }
 }
+particles *alloc_particles(par *par)
+{ 
+    auto *s = (particles *)malloc(sizeof(particles));/*
+    //[pos0,pos1][x,y,z][electrons,ions][n_partd]
+    auto *pos0 = reinterpret_cast<float(&)[2][3][2][par->n_part[0]]>(*((float *)_aligned_malloc(sizeof(float) * par->n_part[0] * 2 * 3 * 2, par->cl_align)));
+    // auto *pos1 = reinterpret_cast<float(&)[3][2][par->n_part[0]]>(*((float *)_aligned_malloc(sizeof(float) * par->n_part[0] * 2 * 3, par->cl_align)));
 
-
+    s->pos0x = &pos0[0][0][0][0];
+    s->pos0y = &pos0[0][1][0][0];
+    s->pos0z = &pos0[0][2][0][0];
+    s->pos1x = &pos0[1][0][0][0];
+    s->pos1y = &pos0[1][1][0][0];
+    s->pos1x = &pos0[1][2][0][0];
+    auto *pos0y = reinterpret_cast<float(&)[2][par->n_part[0]]>(*(float *)(pos0[1]));
+        auto *pos0z = reinterpret_cast<float(&)[2][par->n_part[0]]>(*(float *)(pos0[2]));
+        auto *pos1x = reinterpret_cast<float(&)[2][par->n_part[0]]>(*(float *)(pos1[0]));
+        auto *pos1y = reinterpret_cast<float(&)[2][par->n_part[0]]>(*(float *)(pos1[1]));
+        auto *pos1z = reinterpret_cast<float(&)[2][par->n_part[0]]>(*(float *)(pos1[2]));*/
+    return s;
+}

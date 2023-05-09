@@ -9,6 +9,8 @@ unsigned int n_space_div[3] = {n_space_divx, n_space_divy, n_space_divz};
 unsigned int n_space_div2[3] = {n_space_divx2, n_space_divy2, n_space_divz2};
 par par1;
 par *par = &par1;
+particles particl1;
+particles *particl = &particl1; //= alloc_particles( par);
 string outpath;
 ofstream info_file;
 int main()
@@ -53,26 +55,37 @@ int main()
     info_file << "(unsigned int) ((int)(-2.5f))" << (unsigned int)((int)(-2.5f)) << endl;
     // position of particle and velocity: stored as 2 positions at slightly different times [3 components][2 types of particles][number of particles]
     /** CL: Ensure that pos0/1.. contain multiple of 64 bytes, ie. multiple of 16 floats **/
+    //*
+
+    //  auto *pos0x =particl->pos0x;
+    auto *pos = reinterpret_cast<float(&)[2][3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * par->n_part[0] * 2 * 3 * 2, par->cl_align)));
+    //    auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
+    //  auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
+
+    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[0][0]));
+    auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[0][1]));
+    auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[0][2]));
+    auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[1][0]));
+    auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[1][1]));
+    auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[1][2]));
+    particl->pos = pos;
+    particl->pos0 =  reinterpret_cast<float(*)>(pos[0]);
+    particl->pos1 =  reinterpret_cast<float(*)>(pos[1]);
+    particl->pos0x = pos0x;
+    particl->pos0y = pos0y;
+    particl->pos0z = pos0z;
+    particl->pos1x = pos1x;
+    particl->pos1y = pos1y;
+    particl->pos1z = pos1z;
+    // */
     /*
-    auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
-     auto *pos1 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
-
-     auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[0]));
-     auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[1]));
-     auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos0[2]));
-     auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[0]));
-     auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[1]));
-     auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos1[2]));
-
-    */
-
-    auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-    auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-    auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-    auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-    auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-    auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
-                                                                                                                                   // * /
+        auto *pos0x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+        auto *pos0y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+        auto *pos0z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+        auto *pos1x = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+        auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+        auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2, par->cl_align))); // new float[2][n_partd];
+                                                                                                                                        */
 
     //    charge of particles
     auto *q = static_cast<int(*)[n_partd]>(_aligned_malloc(2 * n_partd * sizeof(int), alignment)); // charge of each particle +1 for H,D or T or -1 for electron can also be +2 for He for example
@@ -132,7 +145,7 @@ int main()
 #pragma omp parallel sections
     {
 #pragma omp section
-        changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par); /* change time step if E or B too big*/
+        changedt(particl, cdt, par); /* change time step if E or B too big*/
 #pragma omp section
 #ifdef Uon_
         // cout << "calculate the total potential energy U\n";
@@ -184,8 +197,8 @@ int main()
                 save_hist(i_time, t, q, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
                 // cout<<"save hist done"<<endl;
                 /* change time step if E or B too big*/
-                changedt(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, cdt, par);
-                // cout<<"changedt done"<<endl;
+                changedt(particl, cdt, par);
+                // cout<<"change_dt done"<<endl;
                 log_entry(i_time, ntime, cdt, total_ncalc, t, par);
                 // cout<<"log entry done"<<endl;
 #pragma omp section

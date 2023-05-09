@@ -1,5 +1,5 @@
 #include "include/traj.h"
-void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int cdt, par *par)
+void changedt(particles *pt ,int cdt, par *par)
 {
     float inc = 0;
     //   cout << endl<< cdt << " ";
@@ -36,7 +36,7 @@ void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n
         inc = decf;
         par->dt[0] *= decf;
         par->dt[1] *= decf;
-        //cout << "dt decrease B exceeded and E too low\n";
+        // cout << "dt decrease B exceeded and E too low\n";
         break;
     case 7: // impossible case E too high and too low ..
         break;
@@ -62,25 +62,13 @@ void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n
     }
     if (inc == 0)
         return;
-#pragma omp parallel num_threads(2)
-    {
-        int p = omp_get_thread_num();
-#pragma omp parallel sections
-        {
-#pragma omp section
+#pragma omp parallel for num_threads(2)
+    for (int p = 0; p < 2; ++p)
 #pragma omp parallel for simd
-            for (int n = 0; n < par->n_part[p]; n++)
-                pos0x[p][n] = pos1x[p][n] - (pos1x[p][n] - pos0x[p][n]) * inc;
-
-#pragma omp section
-#pragma omp parallel for simd
-            for (int n = 0; n < par->n_part[p]; n++)
-                pos0y[p][n] = pos1y[p][n] - (pos1y[p][n] - pos0y[p][n]) * inc;
-
-#pragma omp section
-#pragma omp parallel for simd
-            for (int n = 0; n < par->n_part[p]; n++)
-                pos0z[p][n] = pos1z[p][n] - (pos1z[p][n] - pos0z[p][n]) * inc;
+        for (int n = 0; n < par->n_part[p]; n++)
+        { 
+            pt->pos[0][0][p][n] = pt->pos[1][0][p][n] - (pt->pos[1][0][p][n] - pt->pos[0][0][p][n]) * inc;
+            pt->pos[0][1][p][n] = pt->pos[1][1][p][n] - (pt->pos[1][1][p][n] - pt->pos[0][1][p][n]) * inc;
+            pt->pos[0][2][p][n] = pt->pos[1][2][p][n] - (pt->pos[1][2][p][n] - pt->pos[0][2][p][n]) * inc;
         }
-    }
 }

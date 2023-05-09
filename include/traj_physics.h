@@ -1,10 +1,10 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
 #define cldevice 1
-#define sphere        // do hot spot  problem
-                      // #define cylinder //do hot rod problem
-#define Temp_e 1e7    // in Kelvin
-#define Temp_d 1e7    // in Kelvin
+#define sphere         // do hot spot  problem
+                       // #define cylinder //do hot rod problem
+#define Temp_e 1e7     // in Kelvin
+#define Temp_d 1e7     // in Kelvin
 constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2;        // increment
@@ -35,7 +35,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = f1 * 100;      // number of times to calculate E and B between printouts
+constexpr int nc = f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
@@ -115,10 +115,13 @@ struct field // fields
 
 struct particles // particles
 {
-    float *pos0x;
-    float *pos0y;
-    float *pos0z;
-    float *pos1x;
-    float *pos1y;
-    float *pos1z;
+    float (*pos)[3][2][n_partd];
+    float *pos0;
+    float *pos1;
+    float (*pos0x)[n_partd];
+    float (*pos0y)[n_partd];
+    float (*pos0z)[n_partd];
+    float (*pos1x)[n_partd];
+    float (*pos1y)[n_partd];
+    float (*pos1z)[n_partd];
 };

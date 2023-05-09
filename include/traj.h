@@ -129,7 +129,7 @@ void calc_trilin_constants(float E[3][n_space_divz][n_space_divy][n_space_divx],
                            float Ea[n_space_divz][n_space_divy][n_space_divx][3][ncoeff],
                            par *par);
 
-void changedt(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int inc, par *par);
+void changedt(particles *p, int inc, par *par);
 
 void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
            float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
@@ -153,4 +153,5 @@ void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx], float 
                        float fc[n_space_divz][n_space_divy][n_space_divx][3], int s);
 float maxvalf(float *data_1d, int n);
 void info(par *par);
+particles *alloc_particles(par *par);
 #endif // TRAJ_H_INCLUDED
