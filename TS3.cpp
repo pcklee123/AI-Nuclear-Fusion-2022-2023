@@ -90,7 +90,7 @@ int main()
 #define generateRandom
 #ifdef generateRandom
 #ifdef sphere
-    generate_rand_sphere(particl, par);
+    generate_rand_sphere(pt, par);
 #endif // sphere
 #ifdef cylinder
     generate_rand_cylinder(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, par);
@@ -107,12 +107,12 @@ int main()
     fftwf_init_threads();
 
     int i_time = 0;
-    get_densityfields(currentj, np, npt, particl, jc, par);
+    get_densityfields(currentj, np, npt, pt, jc, par);
     int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
 #pragma omp parallel sections
     {
 #pragma omp section
-        changedt(particl, cdt, par); /* change time step if E or B too big*/
+        changedt(pt, cdt, par); /* change time step if E or B too big*/
 #pragma omp section
 #ifdef Uon_
         // cout << "calculate the total potential energy U\n";
@@ -147,7 +147,7 @@ int main()
 
             //  find number of particle and current density fields
             timer.mark();
-            get_densityfields(currentj, np, npt, particl, jc, par);
+            get_densityfields(currentj, np, npt, pt, jc, par);
             cout << "density: " << timer.elapsed() << "s, ";
 
             timer.mark();
@@ -164,7 +164,7 @@ int main()
                 save_hist(i_time, t, q, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
                 // cout<<"save hist done"<<endl;
                 /* change time step if E or B too big*/
-                changedt(particl, cdt, par);
+                changedt(pt, cdt, par);
                 // cout<<"change_dt done"<<endl;
                 log_entry(i_time, ntime, cdt, total_ncalc, t, par);
                 // cout<<"log entry done"<<endl;
