@@ -15,48 +15,17 @@ string outpath;
 ofstream info_file;
 int main()
 {
-    info_file.open("info.csv");
-    omp_set_nested(true);
-    nthreads = omp_get_max_threads(); // omp_set_num_threads(nthreads);
-
-    cin.tie(NULL); // Fast printing
-    ios_base::sync_with_stdio(false);
-    try
-    {
-        if (!std::filesystem::create_directory(outpath1))
-            outpath = outpath1;
-        else if (!std::filesystem::create_directory(outpath2))
-            outpath = outpath2;
-    }
-    catch (const std::filesystem::__cxx11::filesystem_error &e)
-    {
-        std::cerr << "Error creating output directory: " << e.what() << '\n';
-        try
-        {
-            if (!std::filesystem::create_directory(outpath2))
-                outpath = outpath2;
-        }
-        catch (const std::filesystem::__cxx11::filesystem_error &e)
-        {
-            std::cerr << "Error creating output directory: " << e.what() << '\n';
-        }
-    }
-    info_file << "Output dir: " << outpath << "\n";
-
     timer.mark(); // Yes, 3 time marks. The first is for the overall program dt
     timer.mark(); // The second is for compute_d_time
     timer.mark(); // The third is for start up dt
-
-    cl_set_build_options(par);
-    cl_start(par);
     double t = 0;
 
+
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
-    info_file << "(unsigned int) ((int)(-2.5f))" << (unsigned int)((int)(-2.5f)) << endl;
+
     // position of particle and velocity: stored as 2 positions at slightly different times [3 components][2 types of particles][number of particles]
     /** CL: Ensure that pos0/1.. contain multiple of 64 bytes, ie. multiple of 16 floats **/
     //*
-
     //  auto *pos0x =particl->pos0x;
     auto *pos = reinterpret_cast<float(&)[2][3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * par->n_part[0] * 2 * 3 * 2, par->cl_align)));
     //    auto *pos0 = reinterpret_cast<float(&)[3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * n_partd * 2 * 3, par->cl_align)));
@@ -69,8 +38,8 @@ int main()
     auto *pos1y = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[1][1]));
     auto *pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pos[1][2]));
     particl->pos = pos;
-    particl->pos0 =  reinterpret_cast<float(*)>(pos[0]);
-    particl->pos1 =  reinterpret_cast<float(*)>(pos[1]);
+    particl->pos0 = reinterpret_cast<float(*)>(pos[0]);
+    particl->pos1 = reinterpret_cast<float(*)>(pos[1]);
     particl->pos0x = pos0x;
     particl->pos0y = pos0y;
     particl->pos0z = pos0z;
@@ -90,7 +59,8 @@ int main()
     //    charge of particles
     auto *q = static_cast<int(*)[n_partd]>(_aligned_malloc(2 * n_partd * sizeof(int), alignment)); // charge of each particle +1 for H,D or T or -1 for electron can also be +2 for He for example
     auto *m = static_cast<int(*)[n_partd]>(_aligned_malloc(2 * n_partd * sizeof(int), alignment)); // mass of of each particle not really useful unless we want to simulate many different types of particles
-
+    particl->q = q;
+    particl->m = m;
     // reduced particle position dataset for printing/plotting
     auto *posp = new float[2][n_output_part][3];
     auto *KE = new float[2][n_output_part];
@@ -123,7 +93,7 @@ int main()
 #define generateRandom
 #ifdef generateRandom
 #ifdef sphere
-    generate_rand_sphere(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, par);
+    generate_rand_sphere(particl, par);
 #endif // sphere
 #ifdef cylinder
     generate_rand_cylinder(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, par);
@@ -140,7 +110,7 @@ int main()
     fftwf_init_threads();
 
     int i_time = 0;
-    get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
+    get_densityfields(currentj, np, npt, particl, jc, par);
     int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
 #pragma omp parallel sections
     {
@@ -180,7 +150,7 @@ int main()
 
             //  find number of particle and current density fields
             timer.mark();
-            get_densityfields(currentj, np, npt, pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, q, jc, par);
+            get_densityfields(currentj, np, npt, particl, jc, par);
             cout << "density: " << timer.elapsed() << "s, ";
 
             timer.mark();

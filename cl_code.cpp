@@ -34,7 +34,7 @@ void cl_set_build_options(par *par)
     // add_build_option("NC", n_cells);
 }
 // void cl_start(cl::Context &context1, cl::Device &default_device1, cl::Program &program1)
-void cl_start(par* par)
+void cl_start(par *par)
 {
     int AA[1] = {-1};
 #pragma omp target
@@ -77,8 +77,8 @@ void cl_start(par* par)
             info_file << "\t\tDevice Global Memory: MB " << device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>() / 1024 / 1024 << std::endl;
             info_file << "\t\tDevice Max Clock Frequency: MHz " << device.getInfo<CL_DEVICE_MAX_CLOCK_FREQUENCY>() << std::endl;
             info_file << "\t\tDevice Max Allocateable Memory MB: " << device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>() / 1024 / 1024 << std::endl;
-            par->cl_align=device.getInfo<CL_DEVICE_MEM_BASE_ADDR_ALIGN>() ;
-            info_file << "\t\tDevice addr_align: kB " << device.getInfo<CL_DEVICE_MEM_BASE_ADDR_ALIGN>()  << std::endl;
+            par->cl_align = device.getInfo<CL_DEVICE_MEM_BASE_ADDR_ALIGN>();
+            info_file << "\t\tDevice addr_align: kB " << device.getInfo<CL_DEVICE_MEM_BASE_ADDR_ALIGN>() << std::endl;
             info_file << "\t\tDevice Local Memory: kB " << device.getInfo<CL_DEVICE_LOCAL_MEM_SIZE>() / 1024 << std::endl;
             info_file << "\t\tDevice Available: " << device.getInfo<CL_DEVICE_AVAILABLE>() << std::endl;
         }
@@ -90,15 +90,10 @@ void cl_start(par* par)
     info_file << "Using platform: " << default_platform.getInfo<CL_PLATFORM_NAME>() << "\n";
     default_platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
     cl::Device default_device;
-    cout << "device_id =" << device_id << endl;
-    if (device_id >= cldevice)
-        default_device = devices[cldevice];
-    else
-    {
-        default_device = devices[device_id];
-        cout << "device_id =" << device_id << endl;
-    }
-    info_file << "\t\tDevice Name: " << default_device.getInfo<CL_DEVICE_NAME>() << "\n";
+    // cout << "device_id =" << device_id << endl;
+    device_id >= cldevice ? cldevice : device_id;
+    default_device = devices[device_id];
+    info_file << "\t\tDevice Name: " << default_device.getInfo<CL_DEVICE_NAME>() << "device_id =" << device_id << endl;
     info_file << "OpenCL Version: " << default_device.getInfo<CL_DEVICE_VERSION>() << std::endl;
 
     cl::Context context({default_device});

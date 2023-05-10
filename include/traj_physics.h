@@ -124,4 +124,6 @@ struct particles // particles
     float (*pos1x)[n_partd];
     float (*pos1y)[n_partd];
     float (*pos1z)[n_partd];
+    int (*q)[n_partd];
+    int (*m)[n_partd];
 };

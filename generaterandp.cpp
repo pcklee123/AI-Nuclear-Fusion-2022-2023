@@ -1,7 +1,5 @@
 #include "traj.h"
-void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
-                          float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                          int q[2][n_partd], int m[2][n_partd], par *par)
+void generate_rand_sphere(particles *pt, par *par)
 {
     // spherical plasma set plasma parameters
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
@@ -53,14 +51,14 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
                 for (int j = 1; j < n_space_divy - 1; ++j)
                     for (int i = 1; i < n_space_divx - 1; ++i)
                     {
-                        pos0x[p][na] = ((float)(i - n_space_divx / 2) + (float)rand() / RAND_MAX) * a0;
-                        pos0y[p][na] = ((float)(j - n_space_divy / 2) + (float)rand() / RAND_MAX) * a0;
-                        pos0z[p][na] = ((float)(k - n_space_divz / 2) + (float)rand() / RAND_MAX) * a0;
-                        pos1x[p][na] = pos0x[p][na];
-                        pos1y[p][na] = pos0y[p][na];
-                        pos1z[p][na] = pos0z[p][na];
-                        q[p][na] = qs[p];
-                        m[p][na] = mp[p];
+                        pt->pos0x[p][na] = ((float)(i - n_space_divx / 2) + (float)rand() / RAND_MAX) * a0;
+                        pt->pos0y[p][na] = ((float)(j - n_space_divy / 2) + (float)rand() / RAND_MAX) * a0;
+                        pt->pos0z[p][na] = ((float)(k - n_space_divz / 2) + (float)rand() / RAND_MAX) * a0;
+                        pt->pos1x[p][na] = pt->pos0x[p][na];
+                        pt->pos1y[p][na] = pt->pos0y[p][na];
+                        pt->pos1z[p][na] = pt->pos0z[p][na];
+                        pt->q[p][na] = qs[p];
+                        pt->m[p][na] = mp[p];
                         na++;
                     }
                 //         cout << pos1z[p][na - 1] << " ";
@@ -74,14 +72,14 @@ void generate_rand_sphere(float pos0x[2][n_partd], float pos0y[2][n_partd], floa
             // float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.5);
             double x, y, z;
             gsl_ran_dir_3d(rng, &x, &y, &z);
-            pos0x[p][n] = r * x;
-            pos1x[p][n] = pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * par->dt[p];
-            pos0y[p][n] = r * y;
-            pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * par->dt[p];
-            pos0z[p][n] = r * z;
-            pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * par->dt[p];
-            q[p][n] = qs[p];
-            m[p][n] = mp[p];
+            pt->pos0x[p][n] = r * x;
+            pt->pos1x[p][n] = pt->pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * par->dt[p];
+            pt->pos0y[p][n] = r * y;
+            pt->pos1y[p][n] = pt->pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * par->dt[p];
+            pt->pos0z[p][n] = r * z;
+            pt->pos1z[p][n] = pt->pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * par->dt[p];
+            pt->q[p][n] = qs[p];
+            pt->m[p][n] = mp[p];
             //         nt[p] += q[p][n];
         }
     }
