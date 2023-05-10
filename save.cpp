@@ -2,7 +2,7 @@
 
 
 
-void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
+void save_hist(int i_time, double t, particles *pt, par *par)
 {
   long KEhist[2][Hist_n];
   memset(KEhist, 0, sizeof(KEhist));

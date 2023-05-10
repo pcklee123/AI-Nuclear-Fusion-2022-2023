@@ -97,7 +97,7 @@ void save_vti_c(string filename, int i, int ncomponents, double t, float data1[]
 // void save_vti(string filename, int i, unsigned int n_space_div[3], float posl[3], float dd[3], uint64_t num, int ncomponents, double t, float data[n_space_divz][n_space_divy][n_space_divz], string typeofdata, int sizeofdata);
 // void save_pvd(string filename, int ndatapoints);
 // void save_vtp(string filename, int i, uint64_t num, int ncomponents, double t, const char *data, const char *points);
-//void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points[n_output_part][3],par * par);
+// void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points[n_output_part][3],par * par);
 void set_initial_pos_vel(int n_part_types, int n_particles, float *pos0, float *pos1, float *sigma, int *q, int *m, int *nt);
 void cl_start(par *par);
 void cl_set_build_options(par *par);
@@ -114,11 +114,8 @@ void save_files(int i_time, double t,
                 float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
                 float V[n_space_divz][n_space_divy][n_space_divx],
                 float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
-                float KE[2][n_output_part], float posp[2][n_output_part][3], par *par);
-void sel_part_print(float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                    float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
-                    float posp[2][n_output_part][3], float KE[2][n_output_part],
-                    int m[2][n_partd], par *par);
+                particles *pt, par *par);
+//void sel_part_print(particles *pt, float posp[2][n_output_part][3], float KE[2][n_output_part], par *par);
 
 void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
                        float np[2][n_space_divz][n_space_divy][n_space_divx],

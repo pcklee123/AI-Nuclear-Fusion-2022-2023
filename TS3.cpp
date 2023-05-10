@@ -11,7 +11,7 @@ par par1;
 par *par = &par1;
 particles particl1;
 particles *pt = &particl1; //= alloc_particles( par);
-//string outpath;
+// string outpath;
 ofstream info_file;
 int main()
 {
@@ -19,7 +19,6 @@ int main()
     timer.mark(); // The second is for compute_d_time
     timer.mark(); // The third is for start up dt
     double t = 0;
-
 
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
 
@@ -93,17 +92,17 @@ int main()
     generate_rand_sphere(pt, par);
 #endif // sphere
 #ifdef cylinder
-    generate_rand_cylinder(pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, par);
+    generate_rand_cylinder(pt, par);
 #endif // cylinder
 #else
-    generateParticles(a0, r0, qs, mp, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, q, m, nt);
+    generateParticles(a0, r0, qs, mp, pt, nt);
 #endif
 
     // get limits and spacing of Field cells
     generateField(Ee, Be);
 
     cout << "Set initial random positions: " << timer.replace() << "s\n";
-    //startup stuff set output path opencl and print initial info
+    // startup stuff set output path opencl and print initial info
     info(par); // printout initial info.csv file
     fftwf_init_threads();
 
@@ -121,9 +120,9 @@ int main()
         calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
         //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
-        sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
-        save_hist(i_time, t, q, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
-        save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
+        //       sel_part_print(pt, posp, KE, m, par);
+        //save_hist(i_time, t, pt, par);
+        save_files(i_time, t, np, currentj, V, E, B, pt, par);
         log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 #pragma omp section
         calc_trilin_constants(E, Ea, par);
@@ -161,30 +160,20 @@ int main()
             timer.mark();
 #pragma omp parallel sections
             {
+
 #pragma omp section
-                save_hist(i_time, t, q, pos0x, pos0y, pos0z, pos1x, pos1y, pos1z, par);
-                // cout<<"save hist done"<<endl;
-                /* change time step if E or B too big*/
-                changedt(pt, cdt, par);
-                // cout<<"change_dt done"<<endl;
-                log_entry(i_time, ntime, cdt, total_ncalc, t, par);
-                // cout<<"log entry done"<<endl;
-#pragma omp section
-                {
 #ifdef Uon_
-                    // cout << "calculate the total potential energy U\n";
-                    // timer.mark();// calculate the total potential energy U
-                    calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
-                    // cout << "U: " << timer.elapsed() << "s, ";
+                // cout << "calculate the total potential energy U\n";
+                // timer.mark();// calculate the total potential energy U
+                calcU(V, E, B, pos1x, pos1y, pos1z, q, par); // cout << "U: " << timer.elapsed() << "s, ";
 #endif
-                }
+                changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
+
+                log_entry(i_time, ntime, cdt, total_ncalc, t, par); // cout<<"log entry done"<<endl;
+
 #pragma omp section
                 calc_trilin_constants(E, Ea, par);
-#pragma omp section
                 calc_trilin_constants(B, Ba, par);
-#pragma omp section
-                sel_part_print(pos1x, pos1y, pos1z, pos0x, pos0y, pos0z, posp, KE, m, par);
-                // cout<<"sel_part_print done"<<endl;
             }
 #pragma omp barrier
             cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";
@@ -192,7 +181,7 @@ int main()
         }
         // print out all files for paraview
         timer.mark();
-        save_files(i_time, t, np, currentj, V, E, B, KE, posp, par);
+        save_files(i_time, t, np, currentj, V, E, B, pt, par);
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
     }
     cout << "Overall execution time: " << timer.elapsed() << "s";
