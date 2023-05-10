@@ -58,4 +58,4 @@ debug: $(DOBJ)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(DODIR)/*.o *~ core $(INCDIR)/*~ TS3.exe TS3debug.exe *.vti *.vtp *.csv
+	rm -f $(ODIR)/*.o $(DODIR)/*.o *~ core $(INCDIR)/*~ TS3.exe TS3debug.exe *.vti *.vtp 

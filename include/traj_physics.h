@@ -107,7 +107,7 @@ struct par // useful parameters
     unsigned int ncalcp[2] = {md_me, 1};
     unsigned int n_partp[2] = {n_parte, n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
     unsigned int cl_align = 4096;
-    string outpath;
+    std::string outpath;
 };
 
 struct field // fields

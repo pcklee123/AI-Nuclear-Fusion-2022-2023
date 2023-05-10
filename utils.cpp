@@ -115,9 +115,9 @@ void info(par *par)
     try
     {
         if (!std::filesystem::create_directory(outpath1))
-            outpath = outpath1;
+            par->outpath = outpath1;
         else if (!std::filesystem::create_directory(outpath2))
-            outpath = outpath2;
+            par->outpath = outpath2;
     }
     catch (const std::filesystem::__cxx11::filesystem_error &e)
     {
@@ -125,15 +125,14 @@ void info(par *par)
         try
         {
             if (!std::filesystem::create_directory(outpath2))
-                outpath = outpath2;
+                par->outpath = outpath2;
         }
         catch (const std::filesystem::__cxx11::filesystem_error &e)
         {
             std::cerr << "Error creating output directory: " << e.what() << '\n';
         }
     }
-    info_file << "Output dir: " << outpath << "\n";
-    par->outpath=outpath;
+    info_file << "Output dir: " << par->outpath << "\n";
     cl_set_build_options(par);
     cl_start(par);
     // print initial conditions

@@ -1,6 +1,6 @@
 #ifndef TRAJ_H_INCLUDED
 #define TRAJ_H_INCLUDED
-#include "traj_physics.h"
+
 #define CL_HPP_TARGET_OPENCL_VERSION 300
 #include <immintrin.h>
 #include <iostream>
@@ -39,6 +39,8 @@
 #include <fftw3.h>
 
 using namespace std;
+
+#include "traj_physics.h"
 extern cl::Context context_g;
 extern cl::Device default_device_g;
 extern cl::Program program_g;
@@ -95,7 +97,7 @@ void save_vti_c(string filename, int i, int ncomponents, double t, float data1[]
 // void save_vti(string filename, int i, unsigned int n_space_div[3], float posl[3], float dd[3], uint64_t num, int ncomponents, double t, float data[n_space_divz][n_space_divy][n_space_divz], string typeofdata, int sizeofdata);
 // void save_pvd(string filename, int ndatapoints);
 // void save_vtp(string filename, int i, uint64_t num, int ncomponents, double t, const char *data, const char *points);
-void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points[n_output_part][3]);
+//void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points[n_output_part][3],par * par);
 void set_initial_pos_vel(int n_part_types, int n_particles, float *pos0, float *pos1, float *sigma, int *q, int *m, int *nt);
 void cl_start(par *par);
 void cl_set_build_options(par *par);

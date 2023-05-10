@@ -1,39 +1,6 @@
 #include "include/traj.h"
 
-void save_files(int i_time, double t,
-                float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
-                float V[n_space_divz][n_space_divy][n_space_divx],
-                float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
-                float KE[2][n_output_part], float posp[2][n_output_part][3], par *par)
-{
-#pragma omp parallel sections
-  {
-#ifdef printDensity
-#pragma omp section
-    save_vti_c("Ne", i_time, 1, t, &np[0], par);
-#pragma omp section
-    save_vti_c("je", i_time, 3, t, currentj[0], par);
-#endif
-#ifdef printV
-#pragma omp section
-    save_vti_c("V", i_time, 1, t, V, par);
-#endif
-#ifdef printE
-#pragma omp section
-    save_vti_c("E", i_time, 3, t, E, par);
-#endif
-#ifdef printB
-#pragma omp section
-    save_vti_c("B", i_time, 3, t, B, par);
-#endif
-#ifdef printParticles
-#pragma omp section
-    save_vtp("e", i_time, n_output_part, t, KE[0], posp[0]);
-#pragma omp section
-    save_vtp("d", i_time, n_output_part, t, KE[1], posp[1]);
-#endif
-  }
-}
+
 
 void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
 {
@@ -111,76 +78,7 @@ void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd],
   writer->Write();
 }
 
-void save_hist1(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par)
-{
-  // Create the vtkTable object
-  vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
-  // Create the histogram arrays
-  vtkSmartPointer<vtkDoubleArray> energyArray = vtkSmartPointer<vtkDoubleArray>::New();
-  energyArray->SetName("Energy(eV)");
-  vtkSmartPointer<vtkDoubleArray> electronHistArray = vtkSmartPointer<vtkDoubleArray>::New();
-  electronHistArray->SetName("Electron KE Histogram");
-  vtkSmartPointer<vtkDoubleArray> ionHistArray = vtkSmartPointer<vtkDoubleArray>::New();
-  ionHistArray->SetName("Ion KE Histogram");
 
-  // Create a polydata object
-  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
-
-  // Add the FieldData to the PolyData
-  vtkSmartPointer<vtkFieldData> fieldData = polyData->GetFieldData();
-  vtkSmartPointer<vtkDoubleArray> timevalue = vtkSmartPointer<vtkDoubleArray>::New();
-  timevalue->SetName("TimeValue");
-  timevalue->SetNumberOfTuples(1);
-  timevalue->InsertNextValue(t);
-  fieldData->AddArray(timevalue);
-
-  long KEhist[2][Hist_n];
-  memset(KEhist, 0, sizeof(KEhist));
-  float coef[2];
-  for (int p = 0; p < 2; ++p)
-  {
-    float KE = 0;
-    int nt = 0;
-    coef[p] = 0.5 * (float)mp[p] * (float)Hist_n / (e_charge_mass * par->dt[p] * par->dt[p] * (float)Hist_max);
-    for (int i = 0; i < par->n_part[p]; ++i)
-    {
-      float dx = pos1x[p][i] - pos0x[p][i];
-      float dy = pos1y[p][i] - pos0y[p][i];
-      float dz = pos1z[p][i] - pos0z[p][i];
-      float v2 = (dx * dx + dy * dy + dz * dz);
-      unsigned int index = (int)floor(coef[p] * v2);
-      KE += v2;
-      nt += q[p][i];
-      if (index < Hist_n)
-        //        index = Hist_n - 1;
-        //   if (index < 0)
-        //     cout << "error index<0"<<(0.5 * (float)mp[p] * (dx * dx + dy * dy + dz * dz) * (float)Hist_n/ (e_charge_mass * par->dt[p] * par->dt[p]*(float)Hist_max))<< endl;
-        KEhist[p][index]++;
-    }
-    par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass)*r_part_spart; // as if these particles were actually samples of the greater thing
-    par->nt[p] = nt;
-    cout << p << " " << par->KEtot[p] << endl;
-  }
-  // Add the histogram values to the arrays
-  for (int i = 0; i < Hist_n; ++i)
-  {
-    energyArray->InsertNextValue(((double)(i + 0.5) * (double)Hist_max) / (double)(Hist_n));
-    electronHistArray->InsertNextValue((double)(KEhist[0][i] + 1));
-    ionHistArray->InsertNextValue((double)(KEhist[1][i] + 1));
-  }
-
-  // Add the histogram arrays to the table
-  table->AddColumn(energyArray);
-  table->AddColumn(electronHistArray);
-  table->AddColumn(ionHistArray);
-  // table->AddColumn(timevalue);
-
-  // Write the table to a file
-  vtkSmartPointer<vtkDelimitedTextWriter> writer = vtkSmartPointer<vtkDelimitedTextWriter>::New();
-  writer->SetFileName((par->outpath + "KEhist_" + to_string(i_time) + ".csv").c_str());
-  writer->SetInputData(table);
-  writer->Write();
-}
 
 /**
  * This corrects the order of dimensions for view in paraview, as opposed to save_vti which prints the raw data.
@@ -236,7 +134,7 @@ void save_vti_c(string filename, int i,
   writer->Write();                   // Write the output file
 }
 
-void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points1[n_output_part][3])
+void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points1[n_output_part][3],par *par)
 {
   // Create a polydata object
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
@@ -267,4 +165,39 @@ void save_vtp(string filename, int i, uint64_t num, double t, float data[n_outpu
   writer->SetCompressionLevel(9);    // Set the level of compression (0-9)
   writer->SetInputData(polyData);
   writer->Write();
+}
+
+void save_files(int i_time, double t,
+                float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
+                float V[n_space_divz][n_space_divy][n_space_divx],
+                float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
+                float KE[2][n_output_part], float posp[2][n_output_part][3], par *par)
+{
+#pragma omp parallel sections
+  {
+#ifdef printDensity
+#pragma omp section
+    save_vti_c("Ne", i_time, 1, t, &np[0], par);
+#pragma omp section
+    save_vti_c("je", i_time, 3, t, currentj[0], par);
+#endif
+#ifdef printV
+#pragma omp section
+    save_vti_c("V", i_time, 1, t, V, par);
+#endif
+#ifdef printE
+#pragma omp section
+    save_vti_c("E", i_time, 3, t, E, par);
+#endif
+#ifdef printB
+#pragma omp section
+    save_vti_c("B", i_time, 3, t, B, par);
+#endif
+#ifdef printParticles
+#pragma omp section
+    save_vtp("e", i_time, n_output_part, t, KE[0], posp[0],par);
+#pragma omp section
+    save_vtp("d", i_time, n_output_part, t, KE[1], posp[1],par);
+#endif
+  }
 }
