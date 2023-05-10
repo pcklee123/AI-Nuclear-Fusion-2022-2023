@@ -4,9 +4,7 @@
 void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
                        float np[2][n_space_divz][n_space_divy][n_space_divx],
                        float npt[n_space_divz][n_space_divy][n_space_divx],
-                       float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                       float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
-                       int q[2][n_partd],
+                       particles *pt,
                        float jc[3][n_space_divz][n_space_divy][n_space_divx], par *par)
 {
     // find number of particle and current density fields
@@ -52,33 +50,33 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel for simd
             for (unsigned int n = 0; n < par->n_part[p]; ++n)
             {
-                bool toolow = pos1x[p][n] <= par->posL_1[0], toohigh = pos1x[p][n] >= par->posH_1[0];
-                pos1x[p][n] = toolow ? par->posL_15[0] : (toohigh ? par->posH_15[0] : pos1x[p][n]);
-                pos0x[p][n] = (toolow || toohigh) ? pos1x[p][n] : pos0x[p][n];
-                q[p][n] = (toolow || toohigh) ? 0 : q[p][n];
+                bool toolow = pt->pos1x[p][n] <= par->posL_1[0], toohigh = pt->pos1x[p][n] >= par->posH_1[0];
+                pt->pos1x[p][n] = toolow ? par->posL_15[0] : (toohigh ? par->posH_15[0] : pt->pos1x[p][n]);
+                pt->pos0x[p][n] = (toolow || toohigh) ? pt->pos1x[p][n] : pt->pos0x[p][n];
+                pt->q[p][n] = (toolow || toohigh) ? 0 : pt->q[p][n];
             }
 #pragma omp section
 #pragma omp parallel for simd
             for (unsigned int n = 0; n < par->n_part[p]; ++n)
             {
-                bool toolow = pos1y[p][n] <= par->posL_1[1], toohigh = pos1y[p][n] >= par->posH_1[1];
-                pos1y[p][n] = toolow ? par->posL_15[1] : (toohigh ? par->posH_15[1] : pos1y[p][n]);
-                pos0y[p][n] = (toolow || toohigh) ? pos1y[p][n] : pos0y[p][n];
-                q[p][n] = (toolow || toohigh) ? 0 : q[p][n];
+                bool toolow = pt->pos1y[p][n] <= par->posL_1[1], toohigh = pt->pos1y[p][n] >= par->posH_1[1];
+                pt->pos1y[p][n] = toolow ? par->posL_15[1] : (toohigh ? par->posH_15[1] : pt->pos1y[p][n]);
+                pt->pos0y[p][n] = (toolow || toohigh) ? pt->pos1y[p][n] : pt->pos0y[p][n];
+                pt->q[p][n] = (toolow || toohigh) ? 0 : pt->q[p][n];
             }
 #pragma omp section
             for (unsigned int n = 0; n < par->n_part[p]; ++n)
             {
 #ifdef sphere
-                bool toolow = pos1z[p][n] <= par->posL_1[2], toohigh = pos1z[p][n] >= par->posH_1[2];
-                pos1z[p][n] = toolow ? par->posL_15[2] : (toohigh ? par->posH_15[2] : pos1z[p][n]);
-                pos0z[p][n] = (toolow || toohigh) ? pos1z[p][n] : pos0z[p][n];
-                q[p][n] = (toolow || toohigh) ? 0 : q[p][n];
+                bool toolow = pt->pos1z[p][n] <= par->posL_1[2], toohigh = pt->pos1z[p][n] >= par->posH_1[2];
+                pt->pos1z[p][n] = toolow ? par->posL_15[2] : (toohigh ? par->posH_15[2] : pt->pos1z[p][n]);
+                pt->pos0z[p][n] = (toolow || toohigh) ? pt->pos1z[p][n] : pt->pos0z[p][n];
+                pt->q[p][n] = (toolow || toohigh) ? 0 : pt->q[p][n];
 #endif
 #ifdef cylinder // rollover particles in z direction
-                bool toolow = pos1z[p][n] <= par->posL_1[2], toohigh = pos1z[p][n] >= par->posH_1[2];
-                pos1z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2] : (toohigh ? (2 - n_space_divz) * par->dd[2] : 0);
-                pos0z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2] : (toohigh ? (2 - n_space_divz) * par->dd[2] : 0);
+                bool toolow = pt->pos1z[p][n] <= par->posL_1[2], toohigh = pt->pos1z[p][n] >= par->posH_1[2];
+                pt->pos1z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2] : (toohigh ? (2 - n_space_divz) * par->dd[2] : 0);
+                pt->pos0z[p][n] += toolow ? (n_space_divz - 2) * par->dd[2] : (toohigh ? (2 - n_space_divz) * par->dd[2] : 0);
 #endif
             }
         }
@@ -91,12 +89,12 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel for simd
         for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
         {
-            ii[p][0][n] = (int)roundf((pos1x[p][n] - par->posL[0]) * ddi[0]);
-            offset[p][0][n] = (pos1x[p][n] - par->posL[0]) * ddi[0] - (float)(ii[p][0][n]);
-            ii[p][1][n] = (int)roundf((pos1y[p][n] - par->posL[1]) * ddi[1]);
-            offset[p][1][n] = (pos1y[p][n] - par->posL[1]) * ddi[1] - (float)(ii[p][1][n]);
-            ii[p][2][n] = (int)roundf((pos1z[p][n] - par->posL[2]) * ddi[2]);
-            offset[p][2][n] = (pos1z[p][n] - par->posL[2]) * ddi[2] - (float)(ii[p][2][n]);
+            ii[p][0][n] = (int)roundf((pt->pos1x[p][n] - par->posL[0]) * ddi[0]);
+            offset[p][0][n] = (pt->pos1x[p][n] - par->posL[0]) * ddi[0] - (float)(ii[p][0][n]);
+            ii[p][1][n] = (int)roundf((pt->pos1y[p][n] - par->posL[1]) * ddi[1]);
+            offset[p][1][n] = (pt->pos1y[p][n] - par->posL[1]) * ddi[1] - (float)(ii[p][1][n]);
+            ii[p][2][n] = (int)roundf((pt->pos1z[p][n] - par->posL[2]) * ddi[2]);
+            offset[p][2][n] = (pt->pos1z[p][n] - par->posL[2]) * ddi[2] - (float)(ii[p][2][n]);
         }
     }
 
@@ -109,9 +107,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         // #pragma omp parallel for simd
         for (int n = 0; n < par->n_part[p]; ++n)
         {
-            v[p][0][n] = q[p][n] * (pos1x[p][n] - pos0x[p][n]) * dti[p];
-            v[p][1][n] = q[p][n] * (pos1y[p][n] - pos0y[p][n]) * dti[p];
-            v[p][2][n] = q[p][n] * (pos1z[p][n] - pos0z[p][n]) * dti[p];
+            v[p][0][n] = pt->q[p][n] * (pt->pos1x[p][n] - pt->pos0x[p][n]) * dti[p];
+            v[p][1][n] = pt->q[p][n] * (pt->pos1y[p][n] - pt->pos0y[p][n]) * dti[p];
+            v[p][2][n] = pt->q[p][n] * (pt->pos1z[p][n] - pt->pos0z[p][n]) * dti[p];
         }
     }
 
@@ -127,10 +125,10 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 for (int n = 0; n < par->n_part[p]; ++n)
                 {
                     unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                    np[p][k][j][i] += (q[p][n]);
-                    np_center[p][k][j][i][0] += (q[p][n]) * offset[p][0][n];
-                    np_center[p][k][j][i][1] += (q[p][n]) * offset[p][1][n];
-                    np_center[p][k][j][i][2] += (q[p][n]) * offset[p][2][n];
+                    np[p][k][j][i] += (pt->q[p][n]);
+                    np_center[p][k][j][i][0] += (pt->q[p][n]) * offset[p][0][n];
+                    np_center[p][k][j][i][1] += (pt->q[p][n]) * offset[p][1][n];
+                    np_center[p][k][j][i][2] += (pt->q[p][n]) * offset[p][2][n];
                 }
             }
             /*

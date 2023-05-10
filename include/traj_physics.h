@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 1
+#define cldevice 0
 #define sphere         // do hot spot  problem
                        // #define cylinder //do hot rod problem
 #define Temp_e 1e7     // in Kelvin
@@ -107,6 +107,7 @@ struct par // useful parameters
     unsigned int ncalcp[2] = {md_me, 1};
     unsigned int n_partp[2] = {n_parte, n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
     unsigned int cl_align = 4096;
+    string outpath;
 };
 
 struct field // fields

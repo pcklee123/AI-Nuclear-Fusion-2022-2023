@@ -103,7 +103,7 @@ void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd],
 
   // Write the polyData object to a file using VTK's XML file format
   vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
-  writer->SetFileName((outpath + "KEhist_" + to_string(i_time) + ".vtp").c_str());
+  writer->SetFileName((par->outpath + "KEhist_" + to_string(i_time) + ".vtp").c_str());
   writer->SetDataModeToBinary();
   writer->SetCompressorTypeToZLib(); // Enable compression
   writer->SetCompressionLevel(9);    // Set the level of compression (0-9)
@@ -177,7 +177,7 @@ void save_hist1(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd]
 
   // Write the table to a file
   vtkSmartPointer<vtkDelimitedTextWriter> writer = vtkSmartPointer<vtkDelimitedTextWriter>::New();
-  writer->SetFileName((outpath + "KEhist_" + to_string(i_time) + ".csv").c_str());
+  writer->SetFileName((par->outpath + "KEhist_" + to_string(i_time) + ".csv").c_str());
   writer->SetInputData(table);
   writer->Write();
 }
@@ -226,7 +226,7 @@ void save_vti_c(string filename, int i,
   fieldData->AddArray(timeArray);
 
   vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New(); // Create the vtkXMLImageDataWriter object
-  writer->SetFileName((outpath + filename + "_" + to_string(i) + ".vti").c_str());               // Set the output file name                                                                     // Set the time value
+  writer->SetFileName((par->outpath + filename + "_" + to_string(i) + ".vti").c_str());               // Set the output file name                                                                     // Set the time value
   writer->SetDataModeToBinary();
   // writer->SetCompressorTypeToLZ4();
   writer->SetCompressorTypeToZLib(); // Enable compression
@@ -261,7 +261,7 @@ void save_vtp(string filename, int i, uint64_t num, double t, float data[n_outpu
   polyData->GetPointData()->AddArray(kineticEnergy);
   // Write the output file
   vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
-  writer->SetFileName((outpath + filename + "_" + to_string(i) + ".vtp").c_str());
+  writer->SetFileName((par->outpath + filename + "_" + to_string(i) + ".vtp").c_str());
   writer->SetDataModeToBinary();
   writer->SetCompressorTypeToZLib(); // Enable compression
   writer->SetCompressionLevel(9);    // Set the level of compression (0-9)

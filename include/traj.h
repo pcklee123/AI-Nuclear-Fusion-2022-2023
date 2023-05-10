@@ -121,9 +121,7 @@ void sel_part_print(float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1
 void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
                        float np[2][n_space_divz][n_space_divy][n_space_divx],
                        float npt[n_space_divz][n_space_divy][n_space_divx],
-                       float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                       float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
-                       int q[2][n_partd],
+                       particles *pt,
                        float jc[3][n_space_divz][n_space_divy][n_space_divz], par *par);
 void calc_trilin_constants(float E[3][n_space_divz][n_space_divy][n_space_divx],
                            float Ea[n_space_divz][n_space_divy][n_space_divx][3][ncoeff],

@@ -133,7 +133,7 @@ void info(par *par)
         }
     }
     info_file << "Output dir: " << outpath << "\n";
-    
+    par->outpath=outpath;
     cl_set_build_options(par);
     cl_start(par);
     // print initial conditions
