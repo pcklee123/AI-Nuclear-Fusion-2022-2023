@@ -103,7 +103,8 @@ int main()
     generateField(Ee, Be);
 
     cout << "Set initial random positions: " << timer.replace() << "s\n";
-
+    //startup stuff set output path opencl and print initial info
+    info(par); // printout initial info.csv file
     fftwf_init_threads();
 
     int i_time = 0;
@@ -130,7 +131,7 @@ int main()
         calc_trilin_constants(B, Ba, par);
     }
 #pragma omp barrier
-    info(par); // printout initial info.csv file
+
     cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << 0 << ")\n";
 
     for (i_time = 1; i_time < ndatapoints; i_time++)

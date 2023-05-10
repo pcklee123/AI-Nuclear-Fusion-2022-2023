@@ -91,7 +91,7 @@ void cl_start(par *par)
     default_platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
     cl::Device default_device;
     // cout << "device_id =" << device_id << endl;
-    device_id >= cldevice ? cldevice : device_id;
+    device_id = device_id >= cldevice ? cldevice : device_id;
     default_device = devices[device_id];
     info_file << "\t\tDevice Name: " << default_device.getInfo<CL_DEVICE_NAME>() << "device_id =" << device_id << endl;
     info_file << "OpenCL Version: " << default_device.getInfo<CL_DEVICE_VERSION>() << std::endl;
@@ -115,6 +115,7 @@ void cl_start(par *par)
     {
         info_file << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << endl;
         info_file << cl_build_options.str() << endl;
+        cerr << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << endl;
         exit(1);
     }
     else
