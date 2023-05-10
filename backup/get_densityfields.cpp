@@ -4,9 +4,7 @@
 void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
                        float np[2][n_space_divz][n_space_divy][n_space_divx],
                        float npt[n_space_divz][n_space_divy][n_space_divx],
-                       float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd],
-                       float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
-                       int q[2][n_partd],
+                       particles *pt,
                        float jc[3][n_space_divz][n_space_divy][n_space_divx], par *par)
 {
     // find number of particle and current density fields
@@ -55,17 +53,17 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 #pragma omp parallel for simd
                 for (unsigned int n = 0; n < par->n_part[p]; ++n) // get cell indices (x,y,z) a particle belongs to
                 {
-                    if (pos1x[p][n] <= par->posL[0] + par->dd[0])
+                    if (pt->pos1x[p][n] <= par->posL[0] + par->dd[0])
                     {
-                        pos1x[p][n] = par->posL[0] + par->dd[0] * 1.5;
-                        pos0x[p][n] = pos1x[p][n];
+                        pt->pos1x[p][n] = par->posL[0] + par->dd[0] * 1.5;
+                        pt->pos0x[p][n] = pt->pos1x[p][n];
                         q[p][n] = 0;
                         nxm++;
                     }
-                    else if (pos1x[p][n] >= par->posH[0] - par->dd[0])
+                    else if (pt->pos1x[p][n] >= par->posH[0] - par->dd[0])
                     {
-                        pos1x[p][n] = par->posH[0] - par->dd[0] * 1.5;
-                        pos0x[p][n] = pos1x[p][n];
+                        pt->pos1x[p][n] = par->posH[0] - par->dd[0] * 1.5;
+                        pt->pos0x[p][n] = pos1x[p][n];
                         q[p][n] = 0;
                         nxp++;
                     }
@@ -256,7 +254,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     }
 #pragma omp barrier
 
-  //  cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
+    //  cout << par->KEtot[0] << " " << par->KEtot[1] << " " << par->nt[0] << " " << par->nt[1] << endl;
 
 #pragma omp parallel num_threads(2)
     {
@@ -285,7 +283,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     {
 #pragma omp section
         int p = 0; //
- //       cout << "np0 :" << omp_get_thread_num() << endl;
+                   //       cout << "np0 :" << omp_get_thread_num() << endl;
         for (int n = 0; n < par->n_part[p]; ++n)
         {
             unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
@@ -299,7 +297,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 //  cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
 #pragma omp section
         int p = 1;
-   //     cout << "np1 :" << omp_get_thread_num() << endl;
+        //     cout << "np1 :" << omp_get_thread_num() << endl;
         for (int n = 0; n < par->n_part[p]; ++n)
         {
             unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
@@ -308,9 +306,9 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
             np_center[p][k][j][i][1] += (float)q[p][n] * offset[p][1][n];
             np_center[p][k][j][i][2] += (float)q[p][n] * offset[p][2][n];
         }
-      //  cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+        //  cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
         smoothscalarfield(np[p], ftemp[1], np_center[p], 1); // p
-   //     cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
+                                                             //     cout << "Max Np" << p << " " << maxvalf(reinterpret_cast<float *>(np[p]), n_cells) << endl;
 
 #pragma omp section
         int p = 0;
@@ -410,8 +408,8 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         smoothscalarfield(jc2[p][1][c], ftemp[7], jc_center[p][1][c], 13); // n
     }
 #pragma omp barrier
-  //  cout << "Max Np0" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
-  //  cout << "Max Np1" << maxvalf(reinterpret_cast<float *>(np[1]), n_cells) << endl;
+    //  cout << "Max Np0" << maxvalf(reinterpret_cast<float *>(np[0]), n_cells) << endl;
+    //  cout << "Max Np1" << maxvalf(reinterpret_cast<float *>(np[1]), n_cells) << endl;
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -434,7 +432,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
         }
     }
 #pragma omp barrier
- //   cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
+    //   cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
 #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells * 3; i++)
         (reinterpret_cast<float *>(jc))[i] = (reinterpret_cast<float *>(currentj[0]))[i] + (reinterpret_cast<float *>(currentj[1]))[i];
