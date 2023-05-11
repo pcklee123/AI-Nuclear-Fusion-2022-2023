@@ -1,7 +1,5 @@
 #include "include/traj.h"
 
-
-
 void save_hist(int i_time, double t, particles *pt, par *par)
 {
   long KEhist[2][Hist_n];
@@ -14,13 +12,13 @@ void save_hist(int i_time, double t, particles *pt, par *par)
     coef[p] = 0.5 * (float)mp[p] * (float)Hist_n / (e_charge_mass * par->dt[p] * par->dt[p] * (float)Hist_max);
     for (int i = 0; i < par->n_part[p]; ++i)
     {
-      float dx = pos1x[p][i] - pos0x[p][i];
-      float dy = pos1y[p][i] - pos0y[p][i];
-      float dz = pos1z[p][i] - pos0z[p][i];
+      float dx = pt->pos1x[p][i] - pt->pos0x[p][i];
+      float dy = pt->pos1y[p][i] - pt->pos0y[p][i];
+      float dz = pt->pos1z[p][i] - pt->pos0z[p][i];
       float v2 = (dx * dx + dy * dy + dz * dz);
       unsigned int index = (int)floor(coef[p] * v2);
       KE += v2;
-      nt += q[p][i];
+      nt += pt->q[p][i];
 
       if (index >= Hist_n)
         index = Hist_n - 1;
@@ -28,8 +26,8 @@ void save_hist(int i_time, double t, particles *pt, par *par)
       KEhist[p][index]++;
     }
     par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass * par->dt[p] * par->dt[p]) * r_part_spart; // as if these particles were actually samples of the greater thing
-    par->nt[p] = nt*  r_part_spart;
-   //   cout << p << " " << par->KEtot[p] << endl;
+    par->nt[p] = nt * r_part_spart;
+    //   cout << p << " " << par->KEtot[p] << endl;
   }
 
   // Create a vtkPolyData object
@@ -78,8 +76,6 @@ void save_hist(int i_time, double t, particles *pt, par *par)
   writer->Write();
 }
 
-
-
 /**
  * This corrects the order of dimensions for view in paraview, as opposed to save_vti which prints the raw data.
  */
@@ -124,7 +120,7 @@ void save_vti_c(string filename, int i,
   fieldData->AddArray(timeArray);
 
   vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New(); // Create the vtkXMLImageDataWriter object
-  writer->SetFileName((par->outpath + filename + "_" + to_string(i) + ".vti").c_str());               // Set the output file name                                                                     // Set the time value
+  writer->SetFileName((par->outpath + filename + "_" + to_string(i) + ".vti").c_str());          // Set the output file name                                                                     // Set the time value
   writer->SetDataModeToBinary();
   // writer->SetCompressorTypeToLZ4();
   writer->SetCompressorTypeToZLib(); // Enable compression
@@ -134,7 +130,7 @@ void save_vti_c(string filename, int i,
   writer->Write();                   // Write the output file
 }
 
-void save_vtp(string filename, int i, uint64_t num, double t, float data[n_output_part], float points1[n_output_part][3],par *par)
+void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *pt, par *par)
 {
   // Create a polydata object
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
@@ -149,10 +145,34 @@ void save_vtp(string filename, int i, uint64_t num, double t, float data[n_outpu
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkFloatArray> kineticEnergy = vtkSmartPointer<vtkFloatArray>::New();
   kineticEnergy->SetName("KE");
-  for (int i = 0; i < num; ++i)
+
+  int nprtd = floor(par->n_part[p] / n_output_part);
+#pragma omp parallel for simd
+  // #pragma omp distribute parallel for simd
+  for (int nprt = 0; nprt < n_output_part; nprt++)
   {
-    points->InsertNextPoint(points1[i][0], points1[i][1], points1[i][2]);
-    kineticEnergy->InsertNextValue(data[i]);
+    int n = nprt * nprtd + rand() % nprtd;
+    if (nprtd == 0 && n >= par->n_part[p])
+    {
+      //  KE[p][nprt] = 0;
+      //  posp[p][nprt][0] = 0;
+      //  posp[p][nprt][1] = 0;
+      //  posp[p][nprt][2] = 0;
+      continue;
+    }
+    float dpos, dpos2 = 0;
+    dpos = (pt->pos1x[p][n] - pt->pos0x[p][n]);
+    dpos *= dpos;
+    dpos2 += dpos;
+    dpos = (pt->pos1y[p][n] - pt->pos0y[p][n]);
+    dpos *= dpos;
+    dpos2 += dpos;
+    dpos = (pt->pos1z[p][n] - pt->pos0z[p][n]);
+    dpos *= dpos;
+    dpos2 += dpos;
+    kineticEnergy->InsertNextValue(0.5 * pt->m[p][n] * (dpos2) / (e_charge_mass * par->dt[p] * par->dt[p]));
+    // in units of eV
+    points->InsertNextPoint(pt->pos1x[p][n], pt->pos1y[p][n], pt->pos1z[p][n]);
   }
 
   polyData->SetPoints(points);
@@ -171,7 +191,7 @@ void save_files(int i_time, double t,
                 float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
                 float V[n_space_divz][n_space_divy][n_space_divx],
                 float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
-                float KE[2][n_output_part], float posp[2][n_output_part][3], par *par)
+                particles *pt, par *par)
 {
 #pragma omp parallel sections
   {
@@ -195,9 +215,9 @@ void save_files(int i_time, double t,
 #endif
 #ifdef printParticles
 #pragma omp section
-    save_vtp("e", i_time, n_output_part, t, KE[0], posp[0],par);
+    save_vtp("e", i_time, n_output_part, t, 0, pt, par);
 #pragma omp section
-    save_vtp("d", i_time, n_output_part, t, KE[1], posp[1],par);
+    save_vtp("d", i_time, n_output_part, t, 1, pt, par);
 #endif
   }
 }

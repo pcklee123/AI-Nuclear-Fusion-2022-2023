@@ -4,9 +4,10 @@ void sel_part_print(float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1
                     float posp[2][n_output_part][3], float KE[2][n_output_part],
                     int m[2][n_partd], par *par)
 {
-#pragma omp parallel num_threads(2)
+    /*
+#pragma omp parallel for num_threads(2)
+    for (int p = 0; p << 2; ++p)
     {
-        int p = omp_get_thread_num();
         int nprtd = floor(par->n_part[p] / n_output_part);
 #pragma omp parallel for simd
         // #pragma omp distribute parallel for simd
@@ -38,4 +39,5 @@ void sel_part_print(float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1
             posp[p][nprt][2] = pos0z[p][n];
         }
     }
+    */
 }
