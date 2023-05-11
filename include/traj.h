@@ -93,7 +93,7 @@ extern ofstream info_file;
 void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par *par);
 void log_headers();
 // void save_vti_c2(string filename, int i, int ncomponents, double t,float data1[3][n_space_divz2][n_space_divy2][n_space_divz2], par *par);
-void save_vti_c(string filename, int i, int ncomponents, double t, float data1[][n_space_divz][n_space_divy][n_space_divz], par *par);
+//void save_vti_c(string filename, int i, int ncomponents, double t, float data1[][n_space_divz][n_space_divy][n_space_divz], par *par);
 // void save_vti(string filename, int i, unsigned int n_space_div[3], float posl[3], float dd[3], uint64_t num, int ncomponents, double t, float data[n_space_divz][n_space_divy][n_space_divz], string typeofdata, int sizeofdata);
 // void save_pvd(string filename, int ndatapoints);
 // void save_vtp(string filename, int i, uint64_t num, int ncomponents, double t, const char *data, const char *points);
@@ -102,9 +102,9 @@ void set_initial_pos_vel(int n_part_types, int n_particles, float *pos0, float *
 void cl_start(par *par);
 void cl_set_build_options(par *par);
 
-void tnp(float *Ea1, float *Ba1, float *pos0x, float *pos0y, float *pos0z, float *pos1x, float *pos1y, float *pos1z, int p, par *par);
+void tnp(float *Ea1, float *Ba1,  int p, particles *pt, par *par);
 // void get_precalc_r3(float precalc_r3[3][n_space_divz2][n_space_divy2][n_space_divx2], float dd[3]);
-int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
+int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
             float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
             float Ee[3][n_space_divz][n_space_divy][n_space_divx], float Be[3][n_space_divz][n_space_divy][n_space_divx],
             float npt[n_space_divz][n_space_divy][n_space_divx], float jc[3][n_space_divz][n_space_divy][n_space_divx],
@@ -112,7 +112,7 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
 
 void save_files(int i_time, double t,
                 float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
-                float V[n_space_divz][n_space_divy][n_space_divx],
+                float V[1][n_space_divz][n_space_divy][n_space_divx],
                 float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
                 particles *pt, par *par);
 //void sel_part_print(particles *pt, float posp[2][n_output_part][3], float KE[2][n_output_part], par *par);
@@ -128,10 +128,9 @@ void calc_trilin_constants(float E[3][n_space_divz][n_space_divy][n_space_divx],
 
 void changedt(particles *p, int inc, par *par);
 
-void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
+void calcU(float V[1][n_space_divz][n_space_divy][n_space_divx],
            float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
-           float posx[2][n_partd], float posy[2][n_partd], float posz[2][n_partd],
-           int q[2][n_partd], par *par);
+           particles *pt, par *par);
 
 void generateParticles(float a0, float r0, int *qs, int *mp, float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd],
                        float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], int q[2][n_partd], int m[2][n_partd], int *nt);

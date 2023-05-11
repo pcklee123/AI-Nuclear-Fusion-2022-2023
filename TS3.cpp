@@ -58,8 +58,8 @@ int main()
     pt->q = q;
     pt->m = m;
     // reduced particle position dataset for printing/plotting
-    auto *posp = new float[2][n_output_part][3];
-    auto *KE = new float[2][n_output_part];
+    // auto *posp = new float[2][n_output_part][3];
+    // auto *KE = new float[2][n_output_part];
 
     /** CL: Ensure that Ea/Ba contain multiple of 64 bytes, ie. multiple of 16 floats **/
     auto *E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells));                             // selfgenerated E field
@@ -70,7 +70,7 @@ int main()
     auto *Be = new float[3][n_space_divz][n_space_divy][n_space_divx];
     auto *Ba = static_cast<float(*)[n_space_divy][n_space_divx][3][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Magnetic field
 
-    auto *V = reinterpret_cast<float(&)[n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(n_cells));
+    auto *V = reinterpret_cast<float(&)[1][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(n_cells));
 
     auto *np = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * n_cells * sizeof(float), alignment));
     auto *npt = static_cast<float(*)[n_space_divy][n_space_divx]>(_aligned_malloc(n_cells * sizeof(float), alignment));
@@ -117,11 +117,9 @@ int main()
 #ifdef Uon_
         // cout << "calculate the total potential energy U\n";
         //                  timer.mark();
-        calcU(V, E, B, pos1x, pos1y, pos1z, q, par);
+        calcU(V, E, B, pt, par);
         //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
-        //       sel_part_print(pt, posp, KE, m, par);
-        //save_hist(i_time, t, pt, par);
         save_files(i_time, t, np, currentj, V, E, B, pt, par);
         log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 #pragma omp section
@@ -137,9 +135,9 @@ int main()
     {
         for (int ntime = 0; ntime < nc; ntime++)
         {
-            timer.mark();                                                                                            // For timestep
-            timer.mark();                                                                                            // Work out motion
-            tnp(Ea[0][0][0][0], Ba[0][0][0][0], pos0x[0], pos0y[0], pos0z[0], pos1x[0], pos1y[0], pos1z[0], 0, par); //  calculate the next position par->ncalcp[p] times
+            timer.mark();                                    // For timestep
+            timer.mark();                                    // Work out motion
+            tnp(Ea[0][0][0][0], Ba[0][0][0][0], 0, pt, par); //  calculate the next position par->ncalcp[p] times
             for (int p = 0; p < 2; ++p)
                 total_ncalc[p] += par->ncalcp[p];
             cout << "motion: " << timer.elapsed() << "s, ";
@@ -160,19 +158,11 @@ int main()
             timer.mark();
 #pragma omp parallel sections
             {
-
 #pragma omp section
-#ifdef Uon_
-                // cout << "calculate the total potential energy U\n";
-                // timer.mark();// calculate the total potential energy U
-                calcU(V, E, B, pos1x, pos1y, pos1z, q, par); // cout << "U: " << timer.elapsed() << "s, ";
-#endif
                 changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
-
-                log_entry(i_time, ntime, cdt, total_ncalc, t, par); // cout<<"log entry done"<<endl;
-
 #pragma omp section
                 calc_trilin_constants(E, Ea, par);
+#pragma omp section
                 calc_trilin_constants(B, Ba, par);
             }
 #pragma omp barrier
@@ -180,8 +170,15 @@ int main()
             cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
         }
         // print out all files for paraview
+
+#ifdef Uon_
+        // cout << "calculate the total potential energy U\n";
+        // timer.mark();// calculate the total potential energy U
+        calcU(V, E, B, pt, par); // cout << "U: " << timer.elapsed() << "s, ";
+#endif
         timer.mark();
         save_files(i_time, t, np, currentj, V, E, B, pt, par);
+        log_entry(i_time, 0, cdt, total_ncalc, t, par); // cout<<"log entry done"<<endl;
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
     }
     cout << "Overall execution time: " << timer.elapsed() << "s";

@@ -85,8 +85,8 @@ void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par
     logger.write(par->nt[1]);
     logger.write(par->KEtot[0]);
     logger.write(par->KEtot[1]);
-    logger.write(par->UB);
     logger.write(par->UE);
+    logger.write(par->UB);
     logger.write(par->KEtot[0] + par->KEtot[1] + par->UB + par->UE);
     logger.write(par->Emax);
     logger.write(par->Bmax);
@@ -111,7 +111,7 @@ void info(par *par)
     nthreads = omp_get_max_threads(); // omp_set_num_threads(nthreads);
 
     cin.tie(NULL); // Fast printing
-    ios_base::sync_with_stdio(false);
+    //ios_base::sync_with_stdio(false);
     try
     {
         if (!std::filesystem::create_directory(outpath1))

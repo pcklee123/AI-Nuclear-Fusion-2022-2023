@@ -17,7 +17,7 @@ constexpr float r0_f = 8;          //  radius of sphere or cylinder
 constexpr float Bmax0 = 10;  // in T
 constexpr float Emax0 = 1e6; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback = 2;   // background particles per cell - improves stability
-constexpr float Bz0 = 0.001; // in T
+constexpr float Bz0 = 1; // in T
 constexpr float Ez0 = 0;
 constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
 constexpr float target_part = 1e11; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
@@ -44,12 +44,14 @@ constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the
 #define trilinon_
 #define Uon_  // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
 #define Eon_  // whether to calculate the electric (E) field
+#define UE_field
 #define Bon_  // whether to calculate the magnetic (B) field
+#define UB_field
 #define EFon_ // whether to apply electric force
 #define BFon_ // whether to apply magnetic force
 #define printDensity
 #define printParticles
-// #define printV //print out V
+#define printV //print out V
 #define printB // print out B field
 #define printE // print out E field
 // #define FileIn //whether to load from input file (unused)

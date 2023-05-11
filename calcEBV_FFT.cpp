@@ -135,7 +135,7 @@ auto *precalc_r3 = reinterpret_cast<fftwf_complex (&)[2][3][N2_c][N1][N0]>(*fftw
 auto *precalc_r2 = reinterpret_cast<fftwf_complex (&)[N2_c][N1][N0]>(*fftwf_alloc_complex(n_cells4));
 #endif
 
-int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
+int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
             float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
             float Ee[3][n_space_divz][n_space_divy][n_space_divx], float Be[3][n_space_divz][n_space_divy][n_space_divx],
             float npt[n_space_divz][n_space_divy][n_space_divx], float jc[3][n_space_divz][n_space_divy][n_space_divx],
@@ -228,7 +228,7 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
         for (k = 0; k < n_space_divz; k++)
         {
             loc_k = k + (k < 0 ? n_space_divz2 : 0); // The "logical" array position
-       //     cout << loc_k << " ";
+                                                     //     cout << loc_k << " ";
             // We wrap around values smaller than 0 to the other side of the array, since 0, 0, 0 is defined as the center of the convolution pattern an hence rz should be 0
             rz = k; // The change in z coordinate for the k-th cell.
             rz2 = rz * rz;
@@ -248,19 +248,21 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
                     precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= w;
+                    precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= w;
+                    precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= w;
+                    precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= w;
                     precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= w;
+                    precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= w;
+                    precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= w;
+                    precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= w;
 
-// precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
-// precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
-// precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= r > pi/2 ? 0.f : w;
-//  precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-//  precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
-//  precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= r > pi ? 0.f : w;
 #ifdef Uon_
                     // precalc_r2[loc_k][loc_j][loc_i][0] = r > pi ? 0.f : w;
                     // precalc_r2[loc_k][loc_j][loc_i][1] = r > pi ? 0.f : w;
+                    precalc_r2[loc_k][loc_j][loc_i][0] *=  w;
+                    precalc_r2[loc_k][loc_j][loc_i][1] *=  w;
 #endif
                 }
             }
@@ -335,7 +337,7 @@ int calcEBV(float V[n_space_divz][n_space_divy][n_space_divx],
             for (k = 0; k < n_space_divz; ++k)
             {
                 for (j = 0; j < n_space_divy; ++j)
-                    memcpy(V[k][j], &fft_real[3][jj += N0], sizeof(float) * n_space_divx);
+                    memcpy(V[0][k][j], &fft_real[3][jj += N0], sizeof(float) * n_space_divx);
                 jj += N0N1_2;
             }
 #endif

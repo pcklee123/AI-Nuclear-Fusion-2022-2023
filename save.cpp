@@ -2,6 +2,7 @@
 
 void save_hist(int i_time, double t, particles *pt, par *par)
 {
+  // cout << "save_hist"<<endl;
   long KEhist[2][Hist_n];
   memset(KEhist, 0, sizeof(KEhist));
   float coef[2];
@@ -81,13 +82,14 @@ void save_hist(int i_time, double t, particles *pt, par *par)
  */
 void save_vti_c(string filename, int i,
                 int ncomponents, double t,
-                float data1[][n_space_divz][n_space_divy][n_space_divz], par *par)
+                float (*data1)[n_space_divz][n_space_divy][n_space_divz], par *par)
 {
   if (ncomponents > 3)
   {
     cout << "Error: Cannot write file " << filename << " - too many components" << endl;
     return;
   }
+  // cout << "save_vti_c"<<endl;
   int xi = (par->n_space_div[0] - 1) / maxcells + 1;
   int yj = (par->n_space_div[0] - 1) / maxcells + 1;
   int zk = (par->n_space_div[0] - 1) / maxcells + 1;
@@ -132,6 +134,7 @@ void save_vti_c(string filename, int i,
 
 void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *pt, par *par)
 {
+  // cout << "save_vti_p"<<endl;
   // Create a polydata object
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
   // Add the FieldData to the PolyData
@@ -147,8 +150,8 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
   kineticEnergy->SetName("KE");
 
   int nprtd = floor(par->n_part[p] / n_output_part);
-#pragma omp parallel for simd
-  // #pragma omp distribute parallel for simd
+  // #pragma omp parallel for simd
+  //  #pragma omp distribute parallel for simd
   for (int nprt = 0; nprt < n_output_part; nprt++)
   {
     int n = nprt * nprtd + rand() % nprtd;
@@ -189,12 +192,15 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
 
 void save_files(int i_time, double t,
                 float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
-                float V[n_space_divz][n_space_divy][n_space_divx],
+                float V[1][n_space_divz][n_space_divy][n_space_divx],
                 float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
                 particles *pt, par *par)
 {
+
 #pragma omp parallel sections
   {
+#pragma omp section
+    save_hist(i_time, t, pt, par);
 #ifdef printDensity
 #pragma omp section
     save_vti_c("Ne", i_time, 1, t, &np[0], par);

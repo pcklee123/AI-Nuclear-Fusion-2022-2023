@@ -12,14 +12,13 @@ namespace
         return lhs.cell < rhs.cell;
     }
 }
-void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
-           float E[3][n_space_divz][n_space_divy][n_space_divz], float B[3][n_space_divz][n_space_divy][n_space_divx],
-           float posx[2][n_partd], float posy[2][n_partd], float posz[2][n_partd],
-           int q[2][n_partd], par *par)
+void calcU(float V[1][n_space_divz][n_space_divy][n_space_divx],
+           float E[3][n_space_divz][n_space_divy][n_space_divz], float B[3][n_space_divz][n_space_divy][n_space_divx], particles *pt, par *par)
 {
 
     const float dd0 = 1 / par->dd[0], dd1 = 1 / par->dd[1], dd2 = 1 / par->dd[2];
     float EUtot = 0.f;
+    float BUtot = 0.f;
     {
         // Calculate electrical potential energy, from get_densityfields.cpp
         for (int p = 0; p < 2; p++)
@@ -27,22 +26,23 @@ void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
 #pragma omp parallel for reduction(+ : EUtot)
             for (int n = 0; n < par->n_part[p]; ++n)
             {
-                float dx = (posx[p][n] - par->posL[0]) * dd0; // Get the cell positions in decimal
-                float dy = (posy[p][n] - par->posL[1]) * dd1;
-                float dz = (posz[p][n] - par->posL[2]) * dd2;
+                float dx = (pt->pos1x[p][n] - par->posL[0]) * dd0; // Get the cell positions in decimal
+                float dy = (pt->pos1y[p][n] - par->posL[1]) * dd1;
+                float dz = (pt->pos1z[p][n] - par->posL[2]) * dd2;
                 unsigned int i = roundf(dx), j = roundf(dy), k = roundf(dz); // Round away from 0
                 dx -= i;
                 dy -= k;
                 dz -= k; // and get the "fractional cell" values (ie. located at cell 5.1 -> 0.1)
                 // Perform trilinear interpolation
                 float dx1 = 1 - dx;
-                float c00 = V[k][j][i] * dx1 + V[k][j][i + 1] * dx;
-                float c01 = V[k + 1][j][i] * dx1 + V[k + 1][j][i + 1] * dx;
-                float c10 = V[k][j + 1][i] * dx1 + V[k][j + 1][i + 1] * dx;
-                float c11 = V[k + 1][j + 1][i] * dx1 + V[k + 1][j + 1][i + 1] * dx;
+                float c00 = V[0][k][j][i] * dx1 + V[0][k][j][i + 1] * dx;
+                float c01 = V[0][k + 1][j][i] * dx1 + V[0][k + 1][j][i + 1] * dx;
+                float c10 = V[0][k][j + 1][i] * dx1 + V[0][k][j + 1][i + 1] * dx;
+                float c11 = V[0][k + 1][j + 1][i] * dx1 + V[0][k + 1][j + 1][i + 1] * dx;
                 float c = (c00 * (1 - dy) + c10 * dy) * (1 - dz) + (c01 * (1 - dy) + c11 * dy) * dz;
-                EUtot += c * q[p][n];
+                EUtot += c * pt->q[p][n];
             }
+            cout << p << "EUtot" << EUtot << endl;
         }
         EUtot *= 0.5f * e_charge;
         // EUtot *= r_part_spart; // scale to target particles
@@ -115,17 +115,17 @@ void calcU(float V[n_space_divz][n_space_divy][n_space_divx],
     {
         float E2tot = 0;
         float *E_1d = reinterpret_cast<float *>(E);
+#pragma omp parallel for reduction(+ : E2tot)
         for (int i = 0; i < n_cells * 3; ++i)
         {
             float e = E_1d[i];
             E2tot += e * e; // Why can we do this? Because E^2 = Ex^2 + Ey^2 + Ez^2
         }
-        E2tot *= 0.5f * epsilon0 * (par->[0] * par->[1] * par->[2]); // dV
+        E2tot *= 0.5f * epsilon0 * (par->dd[0] * par->dd[1] * par->dd[2]); // dV
         EUtot += E2tot;
     }
 #endif
-    float BUtot = 0;
-#define UB_field
+
 #ifdef UB_field
     // Energy stored in magnetic field - 1/2 B^2/u0
     {
