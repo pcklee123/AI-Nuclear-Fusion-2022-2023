@@ -9,8 +9,8 @@ constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for
 constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2;        // increment
 constexpr float decf = 0.8;        // decrement factor
-constexpr int n_space = 64;        // must be 2 to power of n
-constexpr float R_s = n_space / 4; // LPF smoothing radius
+constexpr int n_space = 32;        // must be 2 to power of n
+constexpr float R_s = n_space / 2; // LPF smoothing radius
 constexpr float r0_f = 8;          //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
