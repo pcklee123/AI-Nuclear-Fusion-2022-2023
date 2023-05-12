@@ -64,7 +64,9 @@ int main()
         save_files(i_time, t, fi, pt, par);
         log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 #pragma omp section
+      //  cout << "        calc_trilin_constants(fi, par)\n";
         calc_trilin_constants(fi, par);
+      //  cout << "        calc_trilin_constants(fi, par)\n";
     }
 #pragma omp barrier
 

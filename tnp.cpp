@@ -1,6 +1,5 @@
 #include "include/traj.h"
-void tnp(float *Ea, float *Ba,
-         int p, particles *pt, par *par)
+void tnp(fields *fi, particles *pt, par *par)
 {
    unsigned int n0 = n_partd;                 // number of particles ci[0];
    unsigned int n = n_partd * 2;              // both electron and ion
@@ -41,8 +40,8 @@ void tnp(float *Ea, float *Ba,
    // Note that special alignment has been given to Ea, Ba, y0, z0, x0, x1, y1 in order to actually do this properly
 
    // Assume buffers A, B, I, J (Ea, Ba, ci, cf) will always be the same. Then we save a bit of time.
-   static cl::Buffer buffer_A(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? Ea : NULL);
-   static cl::Buffer buffer_B(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? Ba : NULL);
+   static cl::Buffer buffer_A(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
+   static cl::Buffer buffer_B(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
    /*
    cl::Buffer buffer_C(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x : NULL); // x0
    cl::Buffer buffer_D(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y : NULL); // y0
@@ -52,20 +51,20 @@ void tnp(float *Ea, float *Ba,
    cl::Buffer buffer_H(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z : NULL); // z1
    */
    //*
-   cl::Buffer buffer_C(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[0] : NULL);             // x0
-   cl::Buffer buffer_D(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[0] : NULL);             // y0
-   cl::Buffer buffer_E(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[0] : NULL);             // z0
-   cl::Buffer buffer_F(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[0] : NULL);             // x1
-   cl::Buffer buffer_G(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[0] : NULL);             // y1
-   cl::Buffer buffer_H(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[0] : NULL);             // z1
-                                                                                                                                  //   cout << "offsets" << endl;
+   cl::Buffer buffer_C(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[0] : NULL);        // x0
+   cl::Buffer buffer_D(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[0] : NULL);        // y0
+   cl::Buffer buffer_E(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[0] : NULL);        // z0
+   cl::Buffer buffer_F(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[0] : NULL);        // x1
+   cl::Buffer buffer_G(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[0] : NULL);        // y1
+   cl::Buffer buffer_H(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[0] : NULL);        // z1
+                                                                                                                                    //   cout << "offsets" << endl;
    cl::Buffer buffer_C_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[1] : NULL); // x0
    cl::Buffer buffer_D_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[1] : NULL); // x0
    cl::Buffer buffer_E_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[1] : NULL); // x0
    cl::Buffer buffer_F_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[1] : NULL); // x0
    cl::Buffer buffer_G_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[1] : NULL); // x0
    cl::Buffer buffer_H_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[1] : NULL); // x0
-                                                                                                                                  // */
+                                                                                                                                    // */
    // cout << "command q" << endl;
    //  create queue to which we will push commands for the device.
    static cl::CommandQueue queue(context_g, default_device_g);
@@ -78,8 +77,8 @@ void tnp(float *Ea, float *Ba,
    else
    {
       //  cout << "write buffer" << endl;
-      queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * nc, Ea);
-      queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(float) * nc, Ba);
+      queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * nc, fi->Ea);
+      queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(float) * nc, fi->Ba);
       //*
       queue.enqueueWriteBuffer(buffer_C, CL_TRUE, 0, n4, pt->pos0x[0]);
       queue.enqueueWriteBuffer(buffer_D, CL_TRUE, 0, n4, pt->pos0y[0]);

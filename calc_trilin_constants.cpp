@@ -6,19 +6,28 @@ void calc_trilin_constants(fields *fi, par *par)
     const float dV1 = 1 / dV;
 
     // const int c_skip = n_cells;
-    const int i_skip = 1, j_skip = n_space_divx * i_skip, k_skip = n_space_divy * j_skip, c_skip = n_space_divz * k_skip;
-    const int ij_skip = i_skip + j_skip, jk_skip = j_skip + k_skip, ik_skip = i_skip + k_skip, ijk_skip = i_skip + j_skip + k_skip;
-    float *E_flat = fi->E[0][0][0][0];
-    float *Ea = {&fi->Ea[0][0][0][0][0], &fi->Ba[0][0][0][0][0]};
-    //float Ea[2][n_space_divz][n_space_divy][n_space_divx][3][ncoeff];
-    // Ea[0] =reinterpret_cast<float(&)[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(fi->Ea);
-    // Ea[1] =static_cast<float[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(fi->Ba);
+    static const int i_skip = 1, j_skip = n_space_divx * i_skip, k_skip = n_space_divy * j_skip, c_skip = n_space_divz * k_skip;
+    static const int ij_skip = i_skip + j_skip, jk_skip = j_skip + k_skip, ik_skip = i_skip + k_skip, ijk_skip = i_skip + j_skip + k_skip;
+
+    // float Ea[2][n_space_divz][n_space_divy][n_space_divx][3][ncoeff];
+    //  Ea[0] =reinterpret_cast<float(&)[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(fi->Ea);
+    //  Ea[1] =static_cast<float[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(fi->Ba);
     //*Ea = &fi->Ea[0][0][0][0][0];
-   // Ea[1] = static_cast<float[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(fi->Ba);
-#pragma omp parallel for num_threads(2)
+    // Ea[1] = static_cast<float[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]>(fi->Ba);
+    // #pragma omp parallel for num_threads(2)
     for (int a = 0; a < 2; ++a)
     {
-
+        float *E_flat, *Ea;
+        if (a == 0)
+        {
+            E_flat = &fi->E[0][0][0][0];
+            Ea = &fi->Ea[0][0][0][0][0];
+        }
+        else
+        {
+            E_flat = &fi->B[0][0][0][0];
+            Ea = &fi->Ba[0][0][0][0][0];
+        }
         int E_idx = 0;
         for (unsigned int k = 0; k < n_space_divz - 1; k++)
         {
@@ -63,8 +72,8 @@ void calc_trilin_constants(fields *fi, par *par)
                         const float c101 = E_flat[offset + ik_skip];  // E[c][k1][j][i1];
                         const float c110 = E_flat[offset + ij_skip];  // E[c][k][j1][i1];
                         const float c111 = E_flat[offset + ijk_skip]; // E[c][k1][j1][i1];
-                        
-                        //  -c000 x1y1z1 +c001 x1y1z0  +           c010  x1y0z1 -       c011     x1y0z0 +   c100         x0y1z1 - c101           x0y1z0  -    c110        x0y0z1  + c111      x0y0z0
+                        int oa = (offset) * 8;
+                        /*
                         Ea[k][j][i][c][0] = (-c000 * x1y1z1 + c001 * x1y1z0 + c010 * x1y0z1 - c011 * x1y0z0 + c100 * x0y1z1 - c101 * x0y1z0 - c110 * x0y0z1 + c111 * x0y0z0) * dV1;
                         // x
                         Ea[k][j][i][c][1] = ((c000 - c100) * y1z1 + (-c001 + c101) * y1z0 + (-c010 + c110) * y0z1 + (c011 - c111) * y0z0) * dV1;
@@ -79,6 +88,23 @@ void calc_trilin_constants(fields *fi, par *par)
                         // yz
                         Ea[k][j][i][c][6] = ((-c000 + c001 + c010 - c011) * x1 + (c100 - c101 - c110 + c111) * x0) * dV1;
                         Ea[k][j][i][c][7] = (c000 - c001 - c010 + c011 - c100 + c101 + c110 - c111) * dV1;
+                        */
+                        //  -c000 x1y1z1 +c001 x1y1z0  +           c010  x1y0z1 -       c011     x1y0z0 +   c100         x0y1z1 - c101           x0y1z0  -    c110        x0y0z1  + c111      x0y0z0
+                        Ea[oa] = (-c000 * x1y1z1 + c001 * x1y1z0 + c010 * x1y0z1 - c011 * x1y0z0 + c100 * x0y1z1 - c101 * x0y1z0 - c110 * x0y0z1 + c111 * x0y0z0) * dV1;
+                        // x
+                        Ea[oa + 1] = ((c000 - c100) * y1z1 + (-c001 + c101) * y1z0 + (-c010 + c110) * y0z1 + (c011 - c111) * y0z0) * dV1;
+                        // y
+                        Ea[oa + 2] = ((c000 - c010) * x1z1 + (-c001 + c011) * x1z0 + (-c100 + c110) * x0z1 + (c101 - c111) * x0z0) * dV1;
+                        // z
+                        Ea[oa + 3] = ((c000 - c001) * x1y1 + (-c010 + c011) * x1y0 + (-c100 + c101) * x0y1 + (c110 - c111) * x0y0) * dV1;
+                        // xy
+                        Ea[oa + 4] = ((-c000 + c010 + c100 - c110) * z1 + (c001 - c011 - c101 + c111) * z0) * dV1;
+                        // xz
+                        Ea[oa + 5] = ((-c000 + c001 + c100 - c101) * y1 + (c010 - c011 - c110 + c111) * y0) * dV1;
+                        // yz
+                        Ea[oa + 6] = ((-c000 + c001 + c010 - c011) * x1 + (c100 - c101 - c110 + c111) * x0) * dV1;
+                        Ea[oa + 7] = (c000 - c001 - c010 + c011 - c100 + c101 + c110 - c111) * dV1;
+                       // cout << oa << " ";
                     }
                     ++E_idx;
                 }

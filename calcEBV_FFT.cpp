@@ -135,11 +135,7 @@ auto *precalc_r3 = reinterpret_cast<fftwf_complex (&)[2][3][N2_c][N1][N0]>(*fftw
 auto *precalc_r2 = reinterpret_cast<fftwf_complex (&)[N2_c][N1][N0]>(*fftwf_alloc_complex(n_cells4));
 #endif
 
-int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
-            float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
-            float Ee[3][n_space_divz][n_space_divy][n_space_divx], float Be[3][n_space_divz][n_space_divy][n_space_divx],
-            float npt[n_space_divz][n_space_divy][n_space_divx], float jc[3][n_space_divz][n_space_divy][n_space_divx],
-            par *par)
+int calcEBV(fields *fi, par *par)
 // float precalc_r3[3][n_space_divz2][n_space_divy2][n_space_divx2],  float Aconst, float Vconst,
 {
     static int first = 1;
@@ -286,7 +282,7 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
                 {
                     for (i = 0; i < n_space_divx; ++i)
                     {
-                        fft_real[0][jj + i] = npt[k][j][i];
+                        fft_real[0][jj + i] = fi->npt[k][j][i];
                     }
                     jj += N0;
                 }
@@ -325,7 +321,7 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
                     for (j = 0; j < n_space_divy; ++j)
                     {
                         for (i = 0; i < n_space_divx; ++i)
-                            E[c][k][j][i] = fft_real_c[jj + i] + Ee[c][k][j][i];
+                            fi->E[c][k][j][i] = fft_real_c[jj + i] + fi->Ee[c][k][j][i];
                         jj += N0;
                     }
                     jj += N0N1_2;
@@ -336,7 +332,7 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
             for (k = 0; k < n_space_divz; ++k)
             {
                 for (j = 0; j < n_space_divy; ++j)
-                    memcpy(V[0][k][j], &fft_real[3][jj += N0], sizeof(float) * n_space_divx);
+                    memcpy(fi->V[0][k][j], &fft_real[3][jj += N0], sizeof(float) * n_space_divx);
                 jj += N0N1_2;
             }
 #endif
@@ -358,7 +354,7 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
             for (k = 0; k < n_space_divz; ++k)
             {
                 for (j = 0; j < n_space_divy; ++j)
-                    memcpy(&fft_real[c][jj += N0], jc[c][k][j], sizeof(float) * n_space_divx);
+                    memcpy(&fft_real[c][jj += N0], fi->jc[c][k][j], sizeof(float) * n_space_divx);
                 jj += N0N1_2;
             }
         }
@@ -386,7 +382,7 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
                 for (j = 0; j < n_space_divy; ++j)
                 {
                     for (i = 0; i < n_space_divx; ++i)
-                        B[c][k][j][i] = fft_real_c[jj + i] + Be[c][k][j][i];
+                        fi->B[c][k][j][i] = fft_real_c[jj + i] + fi->Be[c][k][j][i];
                     jj += N0;
                 }
                 jj += N0N1_2;
@@ -403,8 +399,8 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
         // Perform estimate of electric potential energy
         size_t i, j, k, jj = 0;
         float EUtot = 0.f;
-        const float *V_1d = reinterpret_cast<float *>(V);
-        const float *npt_1d = reinterpret_cast<float *>(npt);
+        const float *V_1d = reinterpret_cast<float *>(fi->V);
+        const float *npt_1d = reinterpret_cast<float *>(fi->npt);
         for (int i = 0; i < n_cells; ++i)
         {
             EUtot += V_1d[i] * npt_1d[i];
@@ -419,9 +415,9 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
 #pragma omp parallel sections
     {
 #pragma omp section
-        par->Emax = maxvalf(reinterpret_cast<float *>(E), n_cells * 3);
+        par->Emax = maxvalf(reinterpret_cast<float *>(fi->E), n_cells * 3);
 #pragma omp section
-        par->Bmax = maxvalf(reinterpret_cast<float *>(B), n_cells * 3);
+        par->Bmax = maxvalf(reinterpret_cast<float *>(fi->B), n_cells * 3);
     }
 
     float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * (par->Bmax + 1e-5f));

@@ -189,8 +189,8 @@ void generateConstantBField(float Ee[3][n_space_divz][n_space_divy][n_space_divx
         Be[2][k][j][i] = 0.f;
     } 
 }
-void generateField(float Ee[3][n_space_divz][n_space_divy][n_space_divx], float Be[3][n_space_divz][n_space_divy][n_space_divx]){
-    generateEmptyField(Ee, Be);
+void generateField(fields * fi,par *par){
+    generateEmptyField(fi->Ee, fi->Be);
     //generateStripedEField(Ee, Be);
     //generateConstantBField(Ee, Be);
 }
