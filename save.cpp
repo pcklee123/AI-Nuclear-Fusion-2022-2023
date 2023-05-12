@@ -190,34 +190,29 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
   writer->Write();
 }
 
-void save_files(int i_time, double t,
-                float np[2][n_space_divz][n_space_divy][n_space_divx], float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
-                float V[1][n_space_divz][n_space_divy][n_space_divx],
-                float E[3][n_space_divz][n_space_divy][n_space_divx], float B[3][n_space_divz][n_space_divy][n_space_divx],
-                particles *pt, par *par)
+void save_files(int i_time, double t, fields *fi, particles *pt, par *par)
 {
-
 #pragma omp parallel sections
   {
 #pragma omp section
     save_hist(i_time, t, pt, par);
 #ifdef printDensity
 #pragma omp section
-    save_vti_c("Ne", i_time, 1, t, &np[0], par);
+    save_vti_c("Ne", i_time, 1, t, &fi->np[0], par);
 #pragma omp section
-    save_vti_c("je", i_time, 3, t, currentj[0], par);
+    save_vti_c("je", i_time, 3, t, fi->currentj[0], par);
 #endif
 #ifdef printV
 #pragma omp section
-    save_vti_c("V", i_time, 1, t, V, par);
+    save_vti_c("V", i_time, 1, t, fi->V, par);
 #endif
 #ifdef printE
 #pragma omp section
-    save_vti_c("E", i_time, 3, t, E, par);
+    save_vti_c("E", i_time, 3, t, fi->E, par);
 #endif
 #ifdef printB
 #pragma omp section
-    save_vti_c("B", i_time, 3, t, B, par);
+    save_vti_c("B", i_time, 3, t, fi->B, par);
 #endif
 #ifdef printParticles
 #pragma omp section

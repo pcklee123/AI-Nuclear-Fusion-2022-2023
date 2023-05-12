@@ -118,7 +118,7 @@ struct field // fields
 
 struct particles // particles
 {
-    float (*pos)[3][2][n_partd];
+    float (*pos)[3][2][n_partd];//[2{previous-0,current-1}][3{x,y,z}][2{e,d}][n_partd]
     float *pos0;
     float *pos1;
     float (*pos0x)[n_partd];
@@ -129,4 +129,34 @@ struct particles // particles
     float (*pos1z)[n_partd];
     int (*q)[n_partd];
     int (*m)[n_partd];
+
+};
+
+struct fields // particles
+{ //[{x,y,z}][k][j][i]
+    float (*E)[n_space_divz][n_space_divy][n_space_divx];                             // selfgenerated E field[3]
+    float (*Ee)[n_space_divz][n_space_divy][n_space_divx];                                                                             // External E field[3]
+    float (*Ea)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Electric field
+    float (*B)[n_space_divz][n_space_divy][n_space_divx]; 
+    float (*Be)[n_space_divz][n_space_divy][n_space_divx];
+    float (*Ba)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
+    float (*V)[n_space_divz][n_space_divy][n_space_divx];
+    float (*np)[n_space_divz][n_space_divy][n_space_divx];
+    float (*npt)[n_space_divy][n_space_divx];
+    float (*currentj)[3][n_space_divz][n_space_divy][n_space_divx];
+    float (*jc)[n_space_divz][n_space_divy][n_space_divx];
+/*    float E[3][n_space_divz][n_space_divy][n_space_divx];                             // selfgenerated E field[3]
+    float Ee[3][n_space_divz][n_space_divy][n_space_divx];                                                                             // External E field[3]
+    float Ea[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Electric field
+
+    float B[3][n_space_divz][n_space_divy][n_space_divx]; 
+    float Be[3][n_space_divz][n_space_divy][n_space_divx];
+    float Ba[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
+
+    float V[1][n_space_divz][n_space_divy][n_space_divx];
+    float np[2][n_space_divz][n_space_divy][n_space_divx];
+    float npt[n_space_divz][n_space_divy][n_space_divx];
+    float currentj[2][3][n_space_divz][n_space_divy][n_space_divx];
+    float jc[3][n_space_divz][n_space_divy][n_space_divx];*/
+
 };

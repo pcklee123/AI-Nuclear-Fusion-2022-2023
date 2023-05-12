@@ -1,11 +1,7 @@
 #include "include/traj.h"
 // Interpolate the value at a given point
 
-void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_divx],
-                       float np[2][n_space_divz][n_space_divy][n_space_divx],
-                       float npt[n_space_divz][n_space_divy][n_space_divx],
-                       particles *pt,
-                       float jc[3][n_space_divz][n_space_divy][n_space_divx], par *par)
+void get_densityfields(fields *fi, particles *pt, par *par)
 {
     // find number of particle and current density fields
     // set limits beyond which particle is considered as "lost"
@@ -27,7 +23,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
     static auto *jc_center = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 2 * 3 * 3 * n_cells * sizeof(float), alignment));
 
     // set fields=0 in preparation// Could split into threads
-    fill(reinterpret_cast<float *>(np), reinterpret_cast<float *>(np) + n_cells, 0.f);
+    fill(reinterpret_cast<float *>(fi->np), reinterpret_cast<float *>(fi->np) + n_cells, 0.f);
     //   fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
     fill(reinterpret_cast<float *>(ftemp), reinterpret_cast<float *>(ftemp) + n_cells * 7, 0.f);
     fill(reinterpret_cast<float *>(np_center), reinterpret_cast<float *>(np_center) + n_cells * 3 * 2, 0.f);
@@ -125,20 +121,20 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 for (int n = 0; n < par->n_part[p]; ++n)
                 {
                     unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                    np[p][k][j][i] += (pt->q[p][n]);
+                    fi->np[p][k][j][i] += (pt->q[p][n]);
                     np_center[p][k][j][i][0] += (pt->q[p][n]) * offset[p][0][n];
                     np_center[p][k][j][i][1] += (pt->q[p][n]) * offset[p][1][n];
                     np_center[p][k][j][i][2] += (pt->q[p][n]) * offset[p][2][n];
                 }
             }
-            /*
-            smoothscalarfield(np[0], ftemp[0], np_center[0], 0);
-            memcpy(reinterpret_cast<float *>(np[0]), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
-            smoothscalarfield(np[1], ftemp[0], np_center[1], 1);
+            
+            smoothscalarfield(fi->np[0], ftemp[0], np_center[0], 0);
+            memcpy(reinterpret_cast<float *>(fi->np[0]), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
+            smoothscalarfield(fi->np[1], ftemp[0], np_center[1], 1);
             // npt is smoothed np[0] and np[1] are not
-            memcpy(reinterpret_cast<float *>(npt), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
-            */
-            //*
+            memcpy(reinterpret_cast<float *>(fi->npt), reinterpret_cast<float *>(ftemp[0]), n_cells * sizeof(float));
+            
+            /*
 #pragma omp parallel for simd num_threads(nthreads)
             for (unsigned int i = 0; i < n_cells; i++)
                 (reinterpret_cast<float *>(npt))[i] = (reinterpret_cast<float *>(np[0]))[i] + (reinterpret_cast<float *>(np[1]))[i];
@@ -163,7 +159,7 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
                 }
                 smoothscalarfield(jc2[p][0][c], ftemp[pc2], jc_center[p][0][c], te);
                 smoothscalarfield(jc2[p][1][c], ftemp[pc2], jc_center[p][1][c], te + 1);
-                memcpy(reinterpret_cast<float *>(currentj[p][c]), reinterpret_cast<float *>(ftemp[pc2]), n_cells * sizeof(float));
+                memcpy(reinterpret_cast<float *>(fi->currentj[p][c]), reinterpret_cast<float *>(ftemp[pc2]), n_cells * sizeof(float));
             }
         }
     }
@@ -174,6 +170,6 @@ void get_densityfields(float currentj[2][3][n_space_divz][n_space_divy][n_space_
 // cout << "Max Npt" << maxvalf(reinterpret_cast<float *>(npt), n_cells) << endl;
 #pragma omp parallel for simd num_threads(nthreads)
     for (unsigned int i = 0; i < n_cells * 3; i++)
-        (reinterpret_cast<float *>(jc))[i] = (reinterpret_cast<float *>(currentj[0]))[i] + (reinterpret_cast<float *>(currentj[1]))[i];
+        (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] + (reinterpret_cast<float *>(fi->currentj[1]))[i];
 #pragma omp barrier
 }

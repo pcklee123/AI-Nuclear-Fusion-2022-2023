@@ -22,28 +22,7 @@ int main()
     // allocate memory for particles
     particles *pt = alloc_particles(par);
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
-    /** CL: Ensure that Ea/Ba contain multiple of 64 bytes, ie. multiple of 16 floats **/
-    auto *E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells));                             // selfgenerated E field
-    auto *Ee = new float[3][n_space_divz][n_space_divy][n_space_divx];                                                                             // External E field
-    auto *Ea = static_cast<float(*)[n_space_divy][n_space_divx][3][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Electric field
-
-    auto *B = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // new float[3][n_space_divz][n_space_divy][n_space_divx];
-    auto *Be = new float[3][n_space_divz][n_space_divy][n_space_divx];
-    auto *Ba = static_cast<float(*)[n_space_divy][n_space_divx][3][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Magnetic field
-
-    auto *V = reinterpret_cast<float(&)[1][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(n_cells));
-
-    auto *np = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * n_cells * sizeof(float), alignment));
-    auto *npt = static_cast<float(*)[n_space_divy][n_space_divx]>(_aligned_malloc(n_cells * sizeof(float), alignment));
-    auto *currentj = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 3 * n_cells * sizeof(float), alignment));
-    auto *jc = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(3 * n_cells * sizeof(float), alignment));
-
-    log_headers();
-
-    cout << std::scientific;
-    cout.precision(1);
-    cerr << std::scientific;
-    cerr.precision(3);
+    fields *fi = alloc_fields(par);
 
     int total_ncalc[2] = {0, 0}; // particle 0 - electron, particle 1 deuteron
     cout << "Start up time = " << timer.replace() << "s\n";
@@ -58,19 +37,19 @@ int main()
     generate_rand_cylinder(pt, par);
 #endif // cylinder
 #else
-    generateParticles(a0, r0, qs, mp, pt, nt);
+    generateParticles(pt, par);
 #endif
 
     // get limits and spacing of Field cells
-    generateField(Ee, Be);
+    generateField(fi, par);
 
     cout << "Set initial random positions: " << timer.replace() << "s\n";
 
     fftwf_init_threads();
 
     int i_time = 0;
-    get_densityfields(currentj, np, npt, pt, jc, par);
-    int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
+    get_densityfields(fi, pt, par);
+    int cdt = calcEBV(fi, par);
 #pragma omp parallel sections
     {
 #pragma omp section
@@ -79,15 +58,13 @@ int main()
 #ifdef Uon_
         // cout << "calculate the total potential energy U\n";
         //                  timer.mark();
-        calcU(V, E, B, pt, par);
+        calcU(fi, pt, par);
         //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
-        save_files(i_time, t, np, currentj, V, E, B, pt, par);
+        save_files(i_time, t, fi, pt, par);
         log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 #pragma omp section
-        calc_trilin_constants(E, Ea, par);
-#pragma omp section
-        calc_trilin_constants(B, Ba, par);
+        calc_trilin_constants(fi, par);
     }
 #pragma omp barrier
 
@@ -97,9 +74,9 @@ int main()
     {
         for (int ntime = 0; ntime < nc; ntime++)
         {
-            timer.mark();                                    // For timestep
-            timer.mark();                                    // Work out motion
-            tnp(Ea[0][0][0][0], Ba[0][0][0][0], 0, pt, par); //  calculate the next position par->ncalcp[p] times
+            timer.mark();     // For timestep
+            timer.mark();     // Work out motion
+            tnp(fi, pt, par); //  calculate the next position par->ncalcp[p] times
             for (int p = 0; p < 2; ++p)
                 total_ncalc[p] += par->ncalcp[p];
             cout << "motion: " << timer.elapsed() << "s, ";
@@ -107,13 +84,13 @@ int main()
 
             //  find number of particle and current density fields
             timer.mark();
-            get_densityfields(currentj, np, npt, pt, jc, par);
+            get_densityfields(fi, pt, par);
             cout << "density: " << timer.elapsed() << "s, ";
 
             timer.mark();
             // set externally applied fields this is inside time loop so we can set time varying E and B field
             // calcEeBe(Ee,Be,t); // find E field must work out every i,j,k depends on charge in every other cell
-            int cdt = calcEBV(V, E, B, Ee, Be, npt, jc, par);
+            int cdt = calcEBV(fi, par);
             cout << "EBV: " << timer.elapsed() << "s, ";
 
             // calculate constants for each cell for trilinear interpolation
@@ -123,9 +100,7 @@ int main()
 #pragma omp section
                 changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
 #pragma omp section
-                calc_trilin_constants(E, Ea, par);
-#pragma omp section
-                calc_trilin_constants(B, Ba, par);
+                calc_trilin_constants(fi, par);
             }
 #pragma omp barrier
             cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";
@@ -136,10 +111,10 @@ int main()
 #ifdef Uon_
         // cout << "calculate the total potential energy U\n";
         // timer.mark();// calculate the total potential energy U
-        calcU(V, E, B, pt, par); // cout << "U: " << timer.elapsed() << "s, ";
+        calcU(fi, pt, par); // cout << "U: " << timer.elapsed() << "s, ";
 #endif
         timer.mark();
-        save_files(i_time, t, np, currentj, V, E, B, pt, par);
+        save_files(i_time, t, fi, pt, par);
         log_entry(i_time, 0, cdt, total_ncalc, t, par); // cout<<"log entry done"<<endl;
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
     }

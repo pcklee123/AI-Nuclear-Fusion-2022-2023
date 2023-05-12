@@ -12,8 +12,7 @@ namespace
         return lhs.cell < rhs.cell;
     }
 }
-void calcU(float V[1][n_space_divz][n_space_divy][n_space_divx],
-           float E[3][n_space_divz][n_space_divy][n_space_divz], float B[3][n_space_divz][n_space_divy][n_space_divx], particles *pt, par *par)
+void calcU(fields *fi, particles *pt, par *par)
 {
 
     const float dd0 = 1 / par->dd[0], dd1 = 1 / par->dd[1], dd2 = 1 / par->dd[2];
@@ -35,10 +34,10 @@ void calcU(float V[1][n_space_divz][n_space_divy][n_space_divx],
                 dz -= k; // and get the "fractional cell" values (ie. located at cell 5.1 -> 0.1)
                 // Perform trilinear interpolation
                 float dx1 = 1 - dx;
-                float c00 = V[0][k][j][i] * dx1 + V[0][k][j][i + 1] * dx;
-                float c01 = V[0][k + 1][j][i] * dx1 + V[0][k + 1][j][i + 1] * dx;
-                float c10 = V[0][k][j + 1][i] * dx1 + V[0][k][j + 1][i + 1] * dx;
-                float c11 = V[0][k + 1][j + 1][i] * dx1 + V[0][k + 1][j + 1][i + 1] * dx;
+                float c00 = fi->V[0][k][j][i] * dx1 + fi->V[0][k][j][i + 1] * dx;
+                float c01 = fi->V[0][k + 1][j][i] * dx1 + fi->V[0][k + 1][j][i + 1] * dx;
+                float c10 = fi->V[0][k][j + 1][i] * dx1 + fi->V[0][k][j + 1][i + 1] * dx;
+                float c11 = fi->V[0][k + 1][j + 1][i] * dx1 + fi->V[0][k + 1][j + 1][i + 1] * dx;
                 float c = (c00 * (1 - dy) + c10 * dy) * (1 - dz) + (c01 * (1 - dy) + c11 * dy) * dz;
                 EUtot += c * pt->q[p][n];
             }
@@ -114,7 +113,7 @@ void calcU(float V[1][n_space_divz][n_space_divy][n_space_divx],
 #ifdef UE_field
     {
         float E2tot = 0;
-        float *E_1d = reinterpret_cast<float *>(E);
+        float *E_1d = reinterpret_cast<float *>(fi->E);
 #pragma omp parallel for reduction(+ : E2tot)
         for (int i = 0; i < n_cells * 3; ++i)
         {
@@ -130,7 +129,7 @@ void calcU(float V[1][n_space_divz][n_space_divy][n_space_divx],
     // Energy stored in magnetic field - 1/2 B^2/u0
     {
         float B2tot = 0;
-        float *B_1d = reinterpret_cast<float *>(B);
+        float *B_1d = reinterpret_cast<float *>(fi->B);
 #pragma omp parallel for reduction(+ : B2tot)
         for (int i = 0; i < n_cells * 3; ++i)
         {
