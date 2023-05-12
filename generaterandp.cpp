@@ -18,15 +18,22 @@ void generate_rand_sphere(particles *pt, par *par)
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
-    float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass)+v0[0][0]*v0[0][0]+v0[0][1]*v0[0][1]+v0[0][2]*v0[0][2]);
-   // float Tv = a0 / vel_e; // time for electron to move across 1 cell if E=0
+    info_file << "debyeLength=" << Debye_Length << ", a0 = " << a0 << endl;
+    if (Debye_Length < a0)
+    {
+        cerr << "a0 = " << a0 << " too large for this density Debyle Length = " << Debye_Length << endl;
+
+        exit(1);
+    }
+    float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass) + v0[0][0] * v0[0][0] + v0[0][1] * v0[0][1] + v0[0][2] * v0[0][2]);
+    // float Tv = a0 / vel_e; // time for electron to move across 1 cell if E=0
     float Tcyclotron = 2.0 * pi * mp[0] / (e_charge_mass * Bmax0);
     float TDebye = Debye_Length / vel_e;
     float acc_e = e_charge_mass * Emax0;
     float TE = sqrt(vel_e * vel_e / (acc_e * acc_e) + 2 * a0 / acc_e) - vel_e / acc_e; // time for electron to move across 1 cell
     // set time step to allow electrons to gyrate if there is B field or to allow electrons to move slowly throughout the plasma distance
-    info_file << "Tdebye=" << TDebye << ", Tcycloton/4=" << Tcyclotron / 4 << ", plasma period/3=" << plasma_period / 4 << ",TE/2=" << TE/2 << endl;
-    par->dt[0] =  min(min(min(TDebye, Tcyclotron / 4), plasma_period /  4), TE / 2)/ncalc0[0]; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
+    info_file << "Tdebye=" << TDebye << ", Tcycloton/4=" << Tcyclotron / 4 << ", plasma period/3=" << plasma_period / 4 << ",TE/2=" << TE / 2 << endl;
+    par->dt[0] = min(min(min(TDebye, Tcyclotron / 4), plasma_period / 4), TE / 2) / ncalc0[0]; // electron should not move more than 1 cell after ncalc*dt and should not make more than 1/4 gyration and must calculate E before the next 1/4 plasma period
     par->dt[1] = par->dt[0] * md_me;
     //  float mu0_4pidt[2]= {mu0_4pi/par->dt[0],mu0_4pi/par->dt[1]};
     info_file << "v0 electron = " << v0[0][0] << "," << v0[0][1] << "," << v0[0][2] << endl;

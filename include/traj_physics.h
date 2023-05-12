@@ -20,7 +20,7 @@ constexpr float nback = 2;   // background particles per cell - improves stabili
 constexpr float Bz0 = 1; // in T
 constexpr float Ez0 = 0;
 constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
-constexpr float target_part = 1e11; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 

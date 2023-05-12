@@ -86,6 +86,8 @@ int main()
 
     int total_ncalc[2] = {0, 0}; // particle 0 - electron, particle 1 deuteron
     cout << "Start up time = " << timer.replace() << "s\n";
+    // startup stuff set output path opencl and print initial info
+    info(par); // printout initial info.csv file
 #define generateRandom
 #ifdef generateRandom
 #ifdef sphere
@@ -102,8 +104,7 @@ int main()
     generateField(Ee, Be);
 
     cout << "Set initial random positions: " << timer.replace() << "s\n";
-    // startup stuff set output path opencl and print initial info
-    info(par); // printout initial info.csv file
+
     fftwf_init_threads();
 
     int i_time = 0;

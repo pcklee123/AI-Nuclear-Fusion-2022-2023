@@ -210,7 +210,6 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
         }
         // Multiply by the respective constants here, since it is faster to parallelize it
         const float Vconst = kc * e_charge * r_part_spart / n_cells8;
-        ;
         const float Aconst = 1e-7 * e_charge * r_part_spart / n_cells8;
 
         vector_muls(reinterpret_cast<float *>(precalc_r3_base[0]), Vconst, n_cells8 * 3);
@@ -248,21 +247,21 @@ int calcEBV(float V[1][n_space_divz][n_space_divy][n_space_divx],
                     precalc_r3[0][0][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[0][1][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[0][2][loc_k][loc_j][loc_i][0] *= w;
-                    precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= w;
-                    precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= w;
-                    precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= w;
+                    /*precalc_r3[0][0][loc_k][loc_j][loc_i][1] *= w;
+                                        precalc_r3[0][1][loc_k][loc_j][loc_i][1] *= w;
+                                        precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= w;
+                                                    precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= w;
+                                        precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= w;
+                                        precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= w;*/
                     precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= w;
-                    precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= w;
-                    precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= w;
-                    precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= w;
 
 #ifdef Uon_
                     // precalc_r2[loc_k][loc_j][loc_i][0] = r > pi ? 0.f : w;
                     // precalc_r2[loc_k][loc_j][loc_i][1] = r > pi ? 0.f : w;
-                    precalc_r2[loc_k][loc_j][loc_i][0] *=  w;
-                    precalc_r2[loc_k][loc_j][loc_i][1] *=  w;
+                    precalc_r2[loc_k][loc_j][loc_i][0] *= w;
+                    //     precalc_r2[loc_k][loc_j][loc_i][1] *=  w;
 #endif
                 }
             }
