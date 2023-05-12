@@ -1,25 +1,25 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
 #define cldevice 0
-#define sphere         // do hot spot  problem
-                       // #define cylinder //do hot rod problem
-#define Temp_e 1e7     // in Kelvin
-#define Temp_d 1e7     // in Kelvin
-constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+#define sphere        // do hot spot  problem
+                      // #define cylinder //do hot rod problem
+#define Temp_e 1e7    // in Kelvin
+#define Temp_d 1e7    // in Kelvin
+constexpr int f1 = 2; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 2;
-constexpr float incf = 1.2;        // increment
-constexpr float decf = 0.8;        // decrement factor
-constexpr int n_space = 32;        // must be 2 to power of n
-constexpr float R_s = n_space / 2; // LPF smoothing radius
-constexpr float r0_f = 8;          //  radius of sphere or cylinder
+constexpr float incf = 1.2f;        // increment
+constexpr float decf = 1.0f / incf; // decrement factor
+constexpr int n_space = 32;         // must be 2 to power of n
+constexpr float R_s = n_space / 2;  // LPF smoothing radius
+constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 10;  // in T
 constexpr float Emax0 = 1e6; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 constexpr float nback = 2;   // background particles per cell - improves stability
-constexpr float Bz0 = 1; // in T
+constexpr float Bz0 = 1;     // in T
 constexpr float Ez0 = 0;
-constexpr float a0 = 0.1e-3;        // typical dimensions of a cell in m
+constexpr float a0 = 0.1e-3;       // typical dimensions of a cell in m
 constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
@@ -34,24 +34,24 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 30; // total number of time steps to calculate
-constexpr int nc = f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int ndatapoints = 300; // total number of time steps to calculate
+constexpr int nc = f1 * 10;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
 #define Hist_max Temp_e / 11600 * 60 // in eV Kelvin to eV is divide by 11600
 
 #define trilinon_
-#define Uon_  // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
-#define Eon_  // whether to calculate the electric (E) field
+#define Uon_ // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
+#define Eon_ // whether to calculate the electric (E) field
 #define UE_field
-#define Bon_  // whether to calculate the magnetic (B) field
+#define Bon_ // whether to calculate the magnetic (B) field
 #define UB_field
 #define EFon_ // whether to apply electric force
 #define BFon_ // whether to apply magnetic force
 #define printDensity
 #define printParticles
-#define printV //print out V
+#define printV // print out V
 #define printB // print out B field
 #define printE // print out E field
 // #define FileIn //whether to load from input file (unused)

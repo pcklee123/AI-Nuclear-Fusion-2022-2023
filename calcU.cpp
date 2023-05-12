@@ -42,7 +42,7 @@ void calcU(float V[1][n_space_divz][n_space_divy][n_space_divx],
                 float c = (c00 * (1 - dy) + c10 * dy) * (1 - dz) + (c01 * (1 - dy) + c11 * dy) * dz;
                 EUtot += c * pt->q[p][n];
             }
-            cout << p << "EUtot" << EUtot << endl;
+           // cout << p << "EUtot" << EUtot << endl;
         }
         EUtot *= 0.5f * e_charge;
         // EUtot *= r_part_spart; // scale to target particles
