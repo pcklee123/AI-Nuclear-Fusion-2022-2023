@@ -39,8 +39,8 @@ void tnp(fields *fi, particles *pt, par *par)
    // Note that special alignment has been given to Ea, Ba, y0, z0, x0, x1, y1 in order to actually do this properly
 
    // Assume buffers A, B, I, J (Ea, Ba, ci, cf) will always be the same. Then we save a bit of time.
-   static cl::Buffer buffer_A(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
-   static cl::Buffer buffer_B(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
+   static cl::Buffer buff_Ea(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
+   static cl::Buffer buff_Ba(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
    static cl::Buffer buffer_npt(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->npt : NULL);
    static cl::Buffer buffer_currentj(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->currentj : NULL);
 
@@ -72,8 +72,8 @@ void tnp(fields *fi, particles *pt, par *par)
    else
    {
       //  cout << "write buffer" << endl;
-      queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * nc, fi->Ea);
-      queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(float) * nc, fi->Ba);
+      queue.enqueueWriteBuffer(buff_Ea, CL_TRUE, 0, sizeof(float) * nc, fi->Ea);
+      queue.enqueueWriteBuffer(buff_Ba, CL_TRUE, 0, sizeof(float) * nc, fi->Ba);
 
       if (first)
       {
@@ -90,8 +90,8 @@ void tnp(fields *fi, particles *pt, par *par)
    //  set arguments to be fed into the kernel program
    //  cout << "kernel arguments for electron" << endl;
 
-   kernel_add.setArg(0, buffer_A);                       // the 1st argument to the kernel program Ea
-   kernel_add.setArg(1, buffer_B);                       // Ba
+   kernel_add.setArg(0, buff_Ea);                        // the 1st argument to the kernel program Ea
+   kernel_add.setArg(1, buff_Ba);                        // Ba
    kernel_add.setArg(2, buff_x0_e);                      // x0
    kernel_add.setArg(3, buff_y0_e);                      // y0
    kernel_add.setArg(4, buff_z0_e);                      // z0
@@ -102,6 +102,8 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_add.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp[0]); // npart
    kernel_add.setArg(11, sizeof(int), &par->ncalcp[0]);  // ncalc
+   kernel_add.setArg(12, buff_npt);                      // npt
+   kernel_add.setArg(13, buff_currentj);                      // npt
    // cout << "run kernel for electron" << endl;
 
    // run the kernel
@@ -120,8 +122,8 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
    }
    //  set arguments to be fed into the kernel program
-   kernel_add.setArg(0, buffer_A);                       // the 1st argument to the kernel program Ea
-   kernel_add.setArg(1, buffer_B);                       // Ba
+   kernel_add.setArg(0, buff_Ea);                        // the 1st argument to the kernel program Ea
+   kernel_add.setArg(1, buff_Ba);                        // Ba
    kernel_add.setArg(2, buff_x0_i);                      // x0
    kernel_add.setArg(3, buff_y0_i);                      // y0
    kernel_add.setArg(4, buff_z0_i);                      // z0
