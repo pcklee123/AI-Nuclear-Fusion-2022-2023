@@ -41,8 +41,8 @@ void tnp(fields *fi, particles *pt, par *par)
    // Assume buffers A, B, I, J (Ea, Ba, ci, cf) will always be the same. Then we save a bit of time.
    static cl::Buffer buff_Ea(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
    static cl::Buffer buff_Ba(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
-   static cl::Buffer buffer_npt(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->npt : NULL);
-   static cl::Buffer buffer_currentj(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->currentj : NULL);
+   static cl::Buffer buff_npt(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->npt : NULL);
+   static cl::Buffer buff_currentj(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->currentj : NULL);
 
    static cl::Buffer buff_x0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[0] : NULL); // x0
    static cl::Buffer buff_y0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[0] : NULL); // y0
@@ -50,8 +50,6 @@ void tnp(fields *fi, particles *pt, par *par)
    static cl::Buffer buff_x1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[0] : NULL); // x1
    static cl::Buffer buff_y1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[0] : NULL); // y1
    static cl::Buffer buff_z1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[0] : NULL); // z1
-
-   //   cout << "offsets" << endl;
 
    static cl::Buffer buff_x0_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[1] : NULL); // x0
    static cl::Buffer buff_y0_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[1] : NULL); // y0
@@ -103,7 +101,8 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_add.setArg(10, sizeof(int), &par->n_partp[0]); // npart
    kernel_add.setArg(11, sizeof(int), &par->ncalcp[0]);  // ncalc
    kernel_add.setArg(12, buff_npt);                      // npt
-   kernel_add.setArg(13, buff_currentj);                      // npt
+   kernel_add.setArg(13, buff_currentj);                 // current
+  // kernel_add.setArg(14, sizeof(int), n_cells);          // ncells
    // cout << "run kernel for electron" << endl;
 
    // run the kernel
@@ -133,7 +132,10 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_add.setArg(8, sizeof(float), &par->Bcoef[1]);  // Bconst
    kernel_add.setArg(9, sizeof(float), &par->Ecoef[1]);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp[1]); // npart
-   kernel_add.setArg(11, sizeof(int), &par->ncalcp[1]);  // ncalc
+   kernel_add.setArg(11, sizeof(int), &par->ncalcp[1]);  //
+   kernel_add.setArg(12, buff_npt);                      // npt
+   kernel_add.setArg(13, buff_currentj);                 // current
+//kernel_add.setArg(14, sizeof(int), &n_cells);          // ncells
 
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);

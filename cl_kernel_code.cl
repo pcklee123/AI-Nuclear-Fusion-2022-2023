@@ -73,13 +73,18 @@ void kernel vector_mul_complex(global float2 *A, global float2 *B,
   A[i] = (float2)(b.s0 * c.s0 - b.s1 * c.s1, b.s0 * c.s1 + b.s1 * c.s0);
 }
 
-void kernel tnp_k_implicit(
-    global const float8 *a1, global const float8 *a2,     // E, B coeff
-    global float *x0, global float *y0, global float *z0, // prev pos
-    global float *x1, global float *y1, global float *z1, // current pos
-    float Bcoef, float Ecoef,                             // Bcoeff, Ecoeff
-    const unsigned int n, const unsigned int ncalc        // n, ncalc
-) {
+void kernel tnp_k_implicit(global const float8 *a1,
+                           global const float8 *a2, // E, B coeff
+                           global float *x0, global float *y0,
+                           global float *z0, // prev pos
+                           global float *x1, global float *y1,
+                           global float *z1,         // current pos
+                           float Bcoef, float Ecoef, // Bcoeff, Ecoeff
+                           const unsigned int n,
+                           const unsigned int ncalc, // n, ncalc
+                           global float *np, global float *currentj,
+                           const unsigned int n_cells) {
+
   uint id = get_global_id(0);
   uint prev_idx = UINT_MAX;
   float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
@@ -138,8 +143,8 @@ void kernel tnp_k_implicit(
 
     float xyP = xP * yP, yzP = yP * zP, xzP = xP * zP;
     float xxP = xP * xP, yyP = yP * yP, zzP = zP * zP;
-    //float b_det = 1.f / (1.f + xxP + yyP + zzP);
-     float b_det = r2 / (r2 + xxP + yyP + zzP);
+    // float b_det = 1.f / (1.f + xxP + yyP + zzP);
+    float b_det = r2 / (r2 + xxP + yyP + zzP);
 
     float vx = (x - xprev); // / dt -> cancels out in the end
     float vy = (y - yprev);
@@ -150,10 +155,12 @@ void kernel tnp_k_implicit(
     zprev = z;
 
     float vxxe = vx + xE, vyye = vy + yE, vzze = vz + zE;
-    //x += vx + b_det * (-vx * (yyP + zzP) + vyye * (zP + xyP) + vzze * (xzP - yP) + (1.f + xxP) * xE); 
-    //y += vy + b_det * (vxxe * (xyP - zP) -  vy * (xxP + zzP) + vzze * (xP + yzP) + (1.f + yyP) * yE); 
-    //z += vz + b_det * (vxxe * (yP + xzP) + vyye * (yzP - xP) -  vz * (xxP + yyP) + (1.f * zzP) * zE);
-    //  do fma
+    // x += vx + b_det * (-vx * (yyP + zzP) + vyye * (zP + xyP) + vzze * (xzP -
+    // yP) + (1.f + xxP) * xE); y += vy + b_det * (vxxe * (xyP - zP) -  vy *
+    // (xxP + zzP) + vzze * (xP + yzP) + (1.f + yyP) * yE); z += vz + b_det *
+    // (vxxe * (yP + xzP) + vyye * (yzP - xP) -  vz * (xxP + yyP) + (1.f * zzP)
+    // * zE);
+    //   do fma
     x += fma(b_det,
              fma(-vx, yyP + zzP,
                  fma(vyye, zP + xyP, fma(vzze, xzP - yP, fma(xxP, xE, xE)))),
@@ -167,6 +174,19 @@ void kernel tnp_k_implicit(
                  fma(vyye, yzP - xP, fma(-vz, xxP + yyP, fma(zzP, zE, zE)))),
              vz);
   }
+  __local int np_centeri[32 * 32 * 3];
+  __local int npi[32 * 32 ];
+  uint k = round((z - ZLOW) / DZ);
+  uint j = round((y - YLOW) / DY);
+  uint i = round((x - XLOW) / DX);
+  int offsetx = (x / DX - XLOW / DX - i) * 2147483647.0f;
+  int offsety = (y / DY - YLOW / DY - j) * 2147483647.0f;
+  int offsetz = (z / DZ - ZLOW / DZ - k) * 2147483647.0f;
+  uint idx1 = k * NY * NX + j * NX + i;
+  atomic_add(&npi[idx1], 1);
+  atomic_add(&np_centeri[idx1 * 3 + 0], offsetx);
+  atomic_add(&np_centeri[idx1 * 3 + 1], offsety);
+  atomic_add(&np_centeri[idx1 * 3 + 2], offsetz);
   x0[id] = xprev;
   y0[id] = yprev;
   z0[id] = zprev;
