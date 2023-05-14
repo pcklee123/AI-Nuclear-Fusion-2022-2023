@@ -44,22 +44,22 @@ void tnp(fields *fi, particles *pt, par *par)
    static cl::Buffer buffer_npt(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->npt : NULL);
    static cl::Buffer buffer_currentj(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->currentj : NULL);
 
-   static cl::Buffer buffer_C(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[0] : NULL); // x0
-   static cl::Buffer buffer_D(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[0] : NULL); // y0
-   static cl::Buffer buffer_E(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[0] : NULL); // z0
-   static cl::Buffer buffer_F(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[0] : NULL); // x1
-   static cl::Buffer buffer_G(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[0] : NULL); // y1
-   static cl::Buffer buffer_H(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[0] : NULL); // z1
+   static cl::Buffer buff_x0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[0] : NULL); // x0
+   static cl::Buffer buff_y0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[0] : NULL); // y0
+   static cl::Buffer buff_z0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[0] : NULL); // z0
+   static cl::Buffer buff_x1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[0] : NULL); // x1
+   static cl::Buffer buff_y1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[0] : NULL); // y1
+   static cl::Buffer buff_z1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[0] : NULL); // z1
 
    //   cout << "offsets" << endl;
 
    static cl::Buffer buff_x0_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[1] : NULL); // x0
-   static cl::Buffer buffer_D_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[1] : NULL); // y0
-   static cl::Buffer buffer_E_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[1] : NULL); // z0
-   static cl::Buffer buffer_F_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[1] : NULL); // x1
-   static cl::Buffer buffer_G_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[1] : NULL); // y1
-   static cl::Buffer buffer_H_offset(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[1] : NULL); // z1
-                                                                                                                                           // */
+   static cl::Buffer buff_y0_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[1] : NULL); // y0
+   static cl::Buffer buff_z0_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[1] : NULL); // z0
+   static cl::Buffer buff_x1_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[1] : NULL); // x1
+   static cl::Buffer buff_y1_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[1] : NULL); // y1
+   static cl::Buffer buff_z1_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[1] : NULL); // z1
+                                                                                                                                     // */
    // cout << "command q" << endl; //  create queue to which we will push commands for the device.
 
    static cl::CommandQueue queue(context_g, default_device_g);
@@ -67,7 +67,7 @@ void tnp(fields *fi, particles *pt, par *par)
    // write input arrays to the device
    if (fastIO)
    { // is mapping required? // Yes we might need to map because OpenCL does not guarantee that the data will be shared, alternatively use SVM
-     // auto * mapped_buffer_C = (float *)queue.enqueueMapBuffer(buffer_C, CL_TRUE, CL_MAP_WRITE, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buffer_C, mapped_buffer_C);
+     // auto * mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_WRITE, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
    }
    else
    {
@@ -77,13 +77,13 @@ void tnp(fields *fi, particles *pt, par *par)
 
       if (first)
       {
-         queue.enqueueWriteBuffer(buffer_C, CL_TRUE, 0, n4, pt->pos0x[0]);
-         queue.enqueueWriteBuffer(buffer_D, CL_TRUE, 0, n4, pt->pos0y[0]);
-         queue.enqueueWriteBuffer(buffer_E, CL_TRUE, 0, n4, pt->pos0z[0]);
-         queue.enqueueWriteBuffer(buffer_F, CL_TRUE, 0, n4, pt->pos1x[0]);
-         queue.enqueueWriteBuffer(buffer_G, CL_TRUE, 0, n4, pt->pos1y[0]);
-         queue.enqueueWriteBuffer(buffer_H, CL_TRUE, 0, n4, pt->pos1z[0]);
-         // queue.enqueueWriteBuffer(buffer_C, CL_TRUE, 0, n4 * 6 * 2, pt->pos0x[0]);
+         queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
+         queue.enqueueWriteBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
+         queue.enqueueWriteBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
+         queue.enqueueWriteBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
+         queue.enqueueWriteBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
+         queue.enqueueWriteBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
+         // queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4 * 6 * 2, pt->pos0x[0]);
       }
    }
    // return;
@@ -92,12 +92,12 @@ void tnp(fields *fi, particles *pt, par *par)
 
    kernel_add.setArg(0, buffer_A);                       // the 1st argument to the kernel program Ea
    kernel_add.setArg(1, buffer_B);                       // Ba
-   kernel_add.setArg(2, buffer_C);                       // x0
-   kernel_add.setArg(3, buffer_D);                       // y0
-   kernel_add.setArg(4, buffer_E);                       // z0
-   kernel_add.setArg(5, buffer_F);                       // x1
-   kernel_add.setArg(6, buffer_G);                       // y1
-   kernel_add.setArg(7, buffer_H);                       // z1
+   kernel_add.setArg(2, buff_x0_e);                      // x0
+   kernel_add.setArg(3, buff_y0_e);                      // y0
+   kernel_add.setArg(4, buff_z0_e);                      // z0
+   kernel_add.setArg(5, buff_x1_e);                      // x1
+   kernel_add.setArg(6, buff_y1_e);                      // y1
+   kernel_add.setArg(7, buff_z1_e);                      // z1
    kernel_add.setArg(8, sizeof(float), &par->Bcoef[0]);  // Bconst
    kernel_add.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp[0]); // npart
@@ -113,21 +113,21 @@ void tnp(fields *fi, particles *pt, par *par)
    if (first)
    {
       queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
-      queue.enqueueWriteBuffer(buffer_D_offset, CL_TRUE, 0, n4, pt->pos0y[1]);
-      queue.enqueueWriteBuffer(buffer_E_offset, CL_TRUE, 0, n4, pt->pos0z[1]);
-      queue.enqueueWriteBuffer(buffer_F_offset, CL_TRUE, 0, n4, pt->pos1x[1]);
-      queue.enqueueWriteBuffer(buffer_G_offset, CL_TRUE, 0, n4, pt->pos1y[1]);
-      queue.enqueueWriteBuffer(buffer_H_offset, CL_TRUE, 0, n4, pt->pos1z[1]);
+      queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
+      queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
+      queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
+      queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
+      queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
    }
    //  set arguments to be fed into the kernel program
    kernel_add.setArg(0, buffer_A);                       // the 1st argument to the kernel program Ea
    kernel_add.setArg(1, buffer_B);                       // Ba
-   kernel_add.setArg(2, buff_x0_i);                // x0
-   kernel_add.setArg(3, buffer_D_offset);                // y0
-   kernel_add.setArg(4, buffer_E_offset);                // z0
-   kernel_add.setArg(5, buffer_F_offset);                // x1
-   kernel_add.setArg(6, buffer_G_offset);                // y1
-   kernel_add.setArg(7, buffer_H_offset);                // z1
+   kernel_add.setArg(2, buff_x0_i);                      // x0
+   kernel_add.setArg(3, buff_y0_i);                      // y0
+   kernel_add.setArg(4, buff_z0_i);                      // z0
+   kernel_add.setArg(5, buff_x1_i);                      // x1
+   kernel_add.setArg(6, buff_y1_i);                      // y1
+   kernel_add.setArg(7, buff_z1_i);                      // z1
    kernel_add.setArg(8, sizeof(float), &par->Bcoef[1]);  // Bconst
    kernel_add.setArg(9, sizeof(float), &par->Ecoef[1]);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp[1]); // npart
@@ -139,23 +139,23 @@ void tnp(fields *fi, particles *pt, par *par)
    // read result arrays from the device to main memory
    if (fastIO)
    { // is mapping required?
-     // mapped_buffer_C = (float *)queue.enqueueMapBuffer(buffer_C, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buffer_C, mapped_buffer_C);
+     // mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
    }
    else
    {
-      queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, n4, pt->pos0x[0]);
-      queue.enqueueReadBuffer(buffer_D, CL_TRUE, 0, n4, pt->pos0y[0]);
-      queue.enqueueReadBuffer(buffer_E, CL_TRUE, 0, n4, pt->pos0z[0]);
-      queue.enqueueReadBuffer(buffer_F, CL_TRUE, 0, n4, pt->pos1x[0]);
-      queue.enqueueReadBuffer(buffer_G, CL_TRUE, 0, n4, pt->pos1y[0]);
-      queue.enqueueReadBuffer(buffer_H, CL_TRUE, 0, n4, pt->pos1z[0]);
+      queue.enqueueReadBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
+      queue.enqueueReadBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
+      queue.enqueueReadBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
+      queue.enqueueReadBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
+      queue.enqueueReadBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
+      queue.enqueueReadBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
 
       queue.enqueueReadBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
-      queue.enqueueReadBuffer(buffer_D_offset, CL_TRUE, 0, n4, pt->pos0y[1]);
-      queue.enqueueReadBuffer(buffer_E_offset, CL_TRUE, 0, n4, pt->pos0z[1]);
-      queue.enqueueReadBuffer(buffer_F_offset, CL_TRUE, 0, n4, pt->pos1x[1]);
-      queue.enqueueReadBuffer(buffer_G_offset, CL_TRUE, 0, n4, pt->pos1y[1]);
-      queue.enqueueReadBuffer(buffer_H_offset, CL_TRUE, 0, n4, pt->pos1z[1]);
+      queue.enqueueReadBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
+      queue.enqueueReadBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
+      queue.enqueueReadBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
+      queue.enqueueReadBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
+      queue.enqueueReadBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
    }
    first = false;
 }
