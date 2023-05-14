@@ -9,14 +9,20 @@ constexpr int f1 = 8; // make bigger to make smaller time steps // 8 is min for 
 constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
-constexpr int n_space =128;         // must be 2 to power of n
+
+constexpr int n_space =32;         // must be 2 to power of n
+constexpr float nback = 8;   // background particles per cell - improves stability
+constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
+constexpr int n_parte = n_partd;
+
 constexpr float R_s = n_space / 2;  // LPF smoothing radius
 constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
+
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 10;  // in T
 constexpr float Emax0 = 1e12; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
-constexpr float nback = 8;   // background particles per cell - improves stability
+
 constexpr float Bz0 = 1e-3;     // in T
 constexpr float Ez0 = 0;
 constexpr float a0 = 0.01e-3;       // typical dimensions of a cell in m
@@ -24,8 +30,6 @@ constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal
 
 // technical parameters
 
-constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
-constexpr int n_parte = n_partd;
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
 // a sphere 0.4 mm radius with 1e24*4/3*pi()*0.4^3 *1.6e-19C E on surface =2.4e12Vm-1 if all electrons have left.
 // r0=8*a0 Te 1e7,Td 1e7,B 100,E 1e10,nback 64, a0 1e-3,part 1e15,nspace 64 npartd *4 cylinder
@@ -35,7 +39,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc = f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int nc = 1;//f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
