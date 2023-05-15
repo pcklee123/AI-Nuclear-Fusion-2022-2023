@@ -10,8 +10,8 @@ constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
-constexpr int n_space =32;         // must be 2 to power of n
-constexpr float nback = 8;   // background particles per cell - improves stability
+constexpr int n_space = 32;                                      // must be 2 to power of n
+constexpr float nback = 8;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 
@@ -20,12 +20,12 @@ constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 10;  // in T
+constexpr float Bmax0 = 10;   // in T
 constexpr float Emax0 = 1e12; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
-constexpr float Bz0 = 1e-3;     // in T
+constexpr float Bz0 = 1e-3; // in T
 constexpr float Ez0 = 0;
-constexpr float a0 = 0.01e-3;       // typical dimensions of a cell in m
+constexpr float a0 = 0.01e-3;      // typical dimensions of a cell in m
 constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
@@ -38,9 +38,9 @@ constexpr unsigned int ncoeff = 8;
 constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum number of particles to output to file
 // const int nprtd=floor(n_partd/n_output_part);
 
-constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc = 1;//f1 * 1;      // number of times to calculate E and B between printouts
-constexpr int md_me = 60;       // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
+constexpr int ndatapoints = 30; // total number of time steps to calculate
+constexpr int nc = 1;            // f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
 #define Hist_max Temp_e / 11600 * 60 // in eV Kelvin to eV is divide by 11600
@@ -122,7 +122,7 @@ struct field // fields
 
 struct particles // particles
 {
-    float (*pos)[3][2][n_partd];//[2{previous-0,current-1}][3{x,y,z}][2{e,d}][n_partd]
+    float (*pos)[3][2][n_partd]; //[2{previous-0,current-1}][3{x,y,z}][2{e,d}][n_partd]
     float *pos0;
     float *pos1;
     float (*pos0x)[n_partd];
@@ -133,34 +133,23 @@ struct particles // particles
     float (*pos1z)[n_partd];
     int (*q)[n_partd];
     int (*m)[n_partd];
-
 };
 
-struct fields // particles
-{ //[{x,y,z}][k][j][i]
-    float (*E)[n_space_divz][n_space_divy][n_space_divx];                             // selfgenerated E field[3]
-    float (*Ee)[n_space_divz][n_space_divy][n_space_divx];                                                                             // External E field[3]
-    float (*Ea)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Electric field
-    float (*B)[n_space_divz][n_space_divy][n_space_divx]; 
+struct fields                                              // particles
+{                                                          //[{x,y,z}][k][j][i]
+    float (*E)[n_space_divz][n_space_divy][n_space_divx];  // selfgenerated E field[3]
+    float (*Ee)[n_space_divz][n_space_divy][n_space_divx]; // External E field[3]
+    float (*Ea)[n_space_divy][n_space_divx][3][ncoeff];    // coefficients for Trilinear interpolation Electric field
+    float (*B)[n_space_divz][n_space_divy][n_space_divx];
     float (*Be)[n_space_divz][n_space_divy][n_space_divx];
     float (*Ba)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
     float (*V)[n_space_divz][n_space_divy][n_space_divx];
     float (*np)[n_space_divz][n_space_divy][n_space_divx];
+    int (*npi)[n_space_divy][n_space_divx];
+    int (*np_centeri)[n_space_divz][n_space_divy][n_space_divx];
     float (*npt)[n_space_divy][n_space_divx];
     float (*currentj)[3][n_space_divz][n_space_divy][n_space_divx];
+    int (*cji)[n_space_divz][n_space_divy][n_space_divx];
+    int (*cj_centeri)[3][n_space_divz][n_space_divy][n_space_divx];
     float (*jc)[n_space_divz][n_space_divy][n_space_divx];
-/*    float E[3][n_space_divz][n_space_divy][n_space_divx];                             // selfgenerated E field[3]
-    float Ee[3][n_space_divz][n_space_divy][n_space_divx];                                                                             // External E field[3]
-    float Ea[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Electric field
-
-    float B[3][n_space_divz][n_space_divy][n_space_divx]; 
-    float Be[3][n_space_divz][n_space_divy][n_space_divx];
-    float Ba[n_space_divz][n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
-
-    float V[1][n_space_divz][n_space_divy][n_space_divx];
-    float np[2][n_space_divz][n_space_divy][n_space_divx];
-    float npt[n_space_divz][n_space_divy][n_space_divx];
-    float currentj[2][3][n_space_divz][n_space_divy][n_space_divx];
-    float jc[3][n_space_divz][n_space_divy][n_space_divx];*/
-
 };

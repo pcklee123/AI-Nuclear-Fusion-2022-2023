@@ -23,7 +23,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
     static auto *jc_center = static_cast<float(*)[2][3][n_space_divz][n_space_divy][n_space_divx][3]>(_aligned_malloc(2 * 2 * 3 * 3 * n_cells * sizeof(float), alignment));
 
     // set fields=0 in preparation// Could split into threads
-    fill(reinterpret_cast<float *>(fi->np), reinterpret_cast<float *>(fi->np) + n_cells, 0.f);
+  //  fill(reinterpret_cast<float *>(fi->np), reinterpret_cast<float *>(fi->np) + n_cells, 0.f);
     //   fill(reinterpret_cast<float *>(currentj), reinterpret_cast<float *>(currentj) + n_cells * 2 * 3, 0.f);
     fill(reinterpret_cast<float *>(ftemp), reinterpret_cast<float *>(ftemp) + n_cells * 7, 0.f);
     fill(reinterpret_cast<float *>(np_center), reinterpret_cast<float *>(np_center) + n_cells * 3 * 2, 0.f);
@@ -121,7 +121,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
                 for (int n = 0; n < par->n_part[p]; ++n)
                 {
                     unsigned int i = ii[p][0][n], j = ii[p][1][n], k = ii[p][2][n];
-                    fi->np[p][k][j][i] += (pt->q[p][n]);
+                    //fi->np[p][k][j][i] += (pt->q[p][n]);
                     np_center[p][k][j][i][0] += (pt->q[p][n]) * offset[p][0][n];
                     np_center[p][k][j][i][1] += (pt->q[p][n]) * offset[p][1][n];
                     np_center[p][k][j][i][2] += (pt->q[p][n]) * offset[p][2][n];
