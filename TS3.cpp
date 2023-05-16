@@ -61,12 +61,14 @@ int main()
         calcU(fi, pt, par);
         //                 cout << "U: " << timer.elapsed() << "s, ";
 #endif
+        cout << "savefiles" << endl;
         save_files(i_time, t, fi, pt, par);
+        cout << "logentry" << endl;
         log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 #pragma omp section
-      //  cout << "        calc_trilin_constants(fi, par)\n";
+        cout << "        calc_trilin_constants(fi, par)\n";
         calc_trilin_constants(fi, par);
-      //  cout << "        calc_trilin_constants(fi, par)\n";
+        //  cout << "        calc_trilin_constants(fi, par)\n";
     }
 #pragma omp barrier
 
@@ -86,8 +88,8 @@ int main()
 
             //  find number of particle and current density fields
             timer.mark();
-            get_densityfields(fi, pt, par);
-            cout << "density: " << timer.elapsed() << "s, ";
+            // get_densityfields(fi, pt, par);
+            //  cout << "density: " << timer.elapsed() << "s, ";
 
             timer.mark();
             // set externally applied fields this is inside time loop so we can set time varying E and B field
@@ -111,12 +113,17 @@ int main()
         // print out all files for paraview
 
 #ifdef Uon_
-        // cout << "calculate the total potential energy U\n";
+        cout << "calculate the total potential energy U\n";
         // timer.mark();// calculate the total potential energy U
         calcU(fi, pt, par); // cout << "U: " << timer.elapsed() << "s, ";
+        cout << "calculate the total potential energy U done\n";
 #endif
         timer.mark();
+        cout << "savefiles" << endl;
+
         save_files(i_time, t, fi, pt, par);
+        cout << "logentry" << endl;
+
         log_entry(i_time, 0, cdt, total_ncalc, t, par); // cout<<"log entry done"<<endl;
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
     }

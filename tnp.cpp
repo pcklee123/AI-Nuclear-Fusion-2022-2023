@@ -135,7 +135,7 @@ void tnp(fields *fi, particles *pt, par *par)
 
    queue.finish(); // wait for the end of the kernel program
    queue.enqueueReadBuffer(buff_np_e, CL_TRUE, 0, n_cellsf, fi->np[0]);
-   queue.enqueueReadBuffer(buff_currentj_e, CL_TRUE, 0, n_cellsf, fi->currentj[0]);
+   queue.enqueueReadBuffer(buff_currentj_e, CL_TRUE, 0, n_cellsf * 3, fi->currentj[0]);
    // ions next
    if (first)
    {
@@ -146,7 +146,7 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
       queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
 
-      queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[0]);
+      queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
    }
    queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
    queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
@@ -199,7 +199,7 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.enqueueReadBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
 
       queue.enqueueReadBuffer(buff_np_i, CL_TRUE, 0, n_cellsf, fi->np[1]);
-      queue.enqueueReadBuffer(buff_currentj_i, CL_TRUE, 0, n_cellsf, fi->currentj[1]);
+      queue.enqueueReadBuffer(buff_currentj_i, CL_TRUE, 0, n_cellsf * 3, fi->currentj[1]);
 #pragma omp parallel for simd num_threads(nthreads)
       for (unsigned int i = 0; i < n_cells; i++)
          (reinterpret_cast<float *>(fi->npt))[i] = (reinterpret_cast<float *>(fi->np[0]))[i] + (reinterpret_cast<float *>(fi->np[1]))[i];

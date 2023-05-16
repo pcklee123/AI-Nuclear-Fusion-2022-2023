@@ -33,7 +33,7 @@ void cl_set_build_options(par *par)
     add_build_option("NZ", (int)par->n_space_div[2]);
     // add_build_option("NC", n_cells);
 }
-// void cl_start(cl::Context &context1, cl::Device &default_device1, cl::Program &program1)
+
 void cl_start(par *par)
 {
     int AA[1] = {-1};
