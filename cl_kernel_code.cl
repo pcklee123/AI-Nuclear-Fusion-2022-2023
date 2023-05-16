@@ -222,8 +222,8 @@ void kernel tnp_k_implicit(global const float8 *a1,
   int offsety = (y / DY - YLOW / DY - j) * 256.0f;
   int offsetz = (z / DZ - ZLOW / DZ - k) * 256.0f;
   uint idx00 = k * NY * NX + j * NX + i;
-  uint idx01 = (k * NY * NX + j * NX + i) * 2;
-  uint idx02 = (k * NY * NX + j * NX + i) * 3;
+  uint idx01 = idx00 + NZ * NY * NX;
+  uint idx02 = idx01 + NZ * NY * NX;
   atomic_add(&npi[idx00], q[id]);
   atomic_add(&cji[idx00], ((x - xprev) * 65536.0f) * q[id]);
   atomic_add(&cji[idx01], ((y - yprev) * 65536.0f) * q[id]);
@@ -239,4 +239,59 @@ void kernel tnp_k_implicit(global const float8 *a1,
   x1[id] = x;
   y1[id] = y;
   z1[id] = z;
+}
+
+void kernel density(global const float8 *a1,
+                    global const float8 *a2, // E, B coeff
+                    global float *x0, global float *y0,
+                    global float *z0, // prev pos
+                    global float *x1, global float *y1,
+                    global float *z1, // current pos
+                    float Bcoef,
+                    float Ecoef, // Bcoeff, Ecoeff
+                    const unsigned int n,
+                    const unsigned int ncalc, // n, ncalc
+                    global float *np, global float *currentj, global int *npi,
+                    global int *np_centeri, global int *cji,
+                    global int *cj_centeri, global int *q) {
+  const float XL = XLOW + 1.5f * DX, YL = YLOW + 1.5f * DY,
+              ZL = ZLOW + 1.5f * DZ;
+  const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
+              ZH = ZHIGH - 1.5f * DZ;
+
+  uint id = get_global_id(0);
+  float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
+        z = z1[id];
+  xprev = x > XL ? xprev : XL;
+  xprev = x < XH ? xprev : XH;
+  yprev = y > YL ? yprev : YL;
+  yprev = y < YH ? yprev : YH;
+  zprev = z > ZL ? zprev : ZL;
+  zprev = z < ZH ? zprev : ZH;
+  q[id] = (x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH) ? q[id] : 0;
+  x = x > XL ? x : XL;
+  x = x < XH ? x : XH;
+  y = y > YL ? y : YL;
+  y = y < YH ? y : YH;
+  z = z > ZL ? z : ZL;
+  z = z < ZH ? z : ZH;
+
+  uint k = round((z - ZLOW) / DZ);
+  uint j = round((y - YLOW) / DY);
+  uint i = round((x - XLOW) / DX);
+  //  int offsetx = (x / DX - XLOW / DX - i) * 256.0f;
+  //  int offsety = (y / DY - YLOW / DY - j) * 256.0f;
+  //  int offsetz = (z / DZ - ZLOW / DZ - k) * 256.0f;
+  uint idx00 = k * NY * NX + j * NX + i;
+  uint idx01 = idx00 + NZ * NY * NX;
+  uint idx02 = idx01 + NZ * NY * NX;
+  atomic_add(&npi[idx00], q[id]);
+  atomic_add(&cji[idx00], ((x - xprev) * 65536.0f) * q[id]);
+  atomic_add(&cji[idx01], ((y - yprev) * 65536.0f) * q[id]);
+  atomic_add(&cji[idx02], ((z - zprev) * 65536.0f) * q[id]);
+
+  np[idx00] = npi[idx00];
+  currentj[idx00] = cji[idx00] / 65536.0f;
+  currentj[idx01] = cji[idx01] / 65536.0f;
+  currentj[idx02] = cji[idx02] / 65536.0f;
 }

@@ -1,9 +1,8 @@
 #include "include/traj.h"
 // Interpolate the value at a given point
-
+/*
 void get_densityfields(fields *fi, particles *pt, par *par)
 {
-    return;
     // find number of particle and current density fields
     // set limits beyond which particle is considered as "lost"
     static const float ddi[3] = {1.f / par->dd[0], 1.f / par->dd[1], 1.f / par->dd[2]}; // precalculate reciprocals
@@ -139,7 +138,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
 #pragma omp parallel for simd num_threads(nthreads)
             for (unsigned int i = 0; i < n_cells; i++)
                 (reinterpret_cast<float *>(fi->npt))[i] = (reinterpret_cast<float *>(fi->np[0]))[i] + (reinterpret_cast<float *>(fi->np[1]))[i];
-            //*/
+            //
         }
 #pragma omp section
         {
@@ -174,3 +173,5 @@ void get_densityfields(fields *fi, particles *pt, par *par)
         (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] + (reinterpret_cast<float *>(fi->currentj[1]))[i];
 #pragma omp barrier
 }
+
+*/
