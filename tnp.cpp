@@ -245,35 +245,15 @@ void get_densityfields(fields *fi, particles *pt, par *par)
          info_file << "No unified memory: " << temp << " ";
       fastIO = temp;
       //    fastIO = false;
-      ncalc_e = 0;
-      ncalc_i = 0;
    }
-   else
-   {
-      ncalc_e = par->ncalcp[0];
-      ncalc_i = par->ncalcp[1];
-   }
-#ifdef BFon_
-   par->Bcoef[0] = (float)qs[0] * e_charge_mass / (float)mp[0] * par->dt[0] * 0.5f;
-   par->Bcoef[1] = (float)qs[1] * e_charge_mass / (float)mp[1] * par->dt[1] * 0.5f;
-#else
-   par->Bcoef = {0, 0};
-#endif
-#ifdef EFon_
-   par->Ecoef[0] = par->Bcoef[0] * par->dt[0]; // multiply by dt because of the later portion of cl code
-   par->Ecoef[1] = par->Bcoef[1] * par->dt[1]; // multiply by dt because of the later portion of cl code
-#else
-   par->Ecoef = {0, 0};
-#endif
-   cout << " Bconst=" << par->Bcoef[0] << ", Econst=" << par->Ecoef[0] << endl;
+
    //  create buffers on the device
    /** IMPORTANT: do not use CL_MEM_USE_HOST_PTR if on dGPU **/
    /** HOST_PTR is only used so that memory is not copied, but instead shared between CPU and iGPU in RAM**/
    // Note that special alignment has been given to Ea, Ba, y0, z0, x0, x1, y1 in order to actually do this properly
 
    // Assume buffers A, B, I, J (Ea, Ba, ci, cf) will always be the same. Then we save a bit of time.
-   static cl::Buffer buff_Ea(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
-   static cl::Buffer buff_Ba(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
+
    static cl::Buffer buff_np_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf, fastIO ? fi->np[0] : NULL);
    static cl::Buffer buff_np_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf, fastIO ? fi->np[1] : NULL);
    static cl::Buffer buff_currentj_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf * 3, fastIO ? fi->currentj[0] : NULL);
@@ -303,7 +283,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
 
    static cl::Buffer buff_q_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->q[1] : NULL); // q
                                                                                                                                 // */
-    cout << "command q" << endl; //  create queue to which we will push commands for the device.
+   cout << "command q" << endl;                                                                                                 //  create queue to which we will push commands for the device.
 
    static cl::CommandQueue queue(context_g, default_device_g);
    cl::Kernel kernel_add = cl::Kernel(program_g, "density"); // select the kernel program to run
@@ -312,99 +292,81 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    { // is mapping required? // Yes we might need to map because OpenCL does not guarantee that the data will be shared, alternatively use SVM
      // auto * mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_WRITE, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
    }
-   else
-   {
-      //  cout << "write buffer" << endl;
-      queue.enqueueWriteBuffer(buff_Ea, CL_TRUE, 0, sizeof(float) * nc, fi->Ea);
-      queue.enqueueWriteBuffer(buff_Ba, CL_TRUE, 0, sizeof(float) * nc, fi->Ba);
 
-      queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
-      queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
-      queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
-      queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
+   //  cout << "write buffer" << endl;
 
-      if (first)
-      {
-         queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
-         queue.enqueueWriteBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
-         queue.enqueueWriteBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
-         queue.enqueueWriteBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
-         queue.enqueueWriteBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
-         queue.enqueueWriteBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
+   queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
+   queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
+   queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
+   queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
 
-         queue.enqueueWriteBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
-         // queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4 * 6 * 2, pt->pos0x[0]);
-      }
-   }
-   // return;
+   queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
+   queue.enqueueWriteBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
+   queue.enqueueWriteBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
+   queue.enqueueWriteBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
+   queue.enqueueWriteBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
+   queue.enqueueWriteBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
+
+   queue.enqueueWriteBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
+   // queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4 * 6 * 2, pt->pos0x[0]);
+
    //  set arguments to be fed into the kernel program
-    cout << "kernel arguments for electron" << endl;
+   cout << "kernel arguments for electron" << endl;
 
-   kernel_add.setArg(0, buff_Ea);                        // the 1st argument to the kernel program Ea
-   kernel_add.setArg(1, buff_Ba);                        // Ba
-   kernel_add.setArg(2, buff_x0_e);                      // x0
-   kernel_add.setArg(3, buff_y0_e);                      // y0
-   kernel_add.setArg(4, buff_z0_e);                      // z0
-   kernel_add.setArg(5, buff_x1_e);                      // x1
-   kernel_add.setArg(6, buff_y1_e);                      // y1
-   kernel_add.setArg(7, buff_z1_e);                      // z1
-   kernel_add.setArg(8, sizeof(float), &par->Bcoef[0]);  // Bconst
-   kernel_add.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
-   kernel_add.setArg(10, sizeof(int), &par->n_partp[0]); // npart
-   kernel_add.setArg(11, sizeof(int), &ncalc_e);         // ncalc
-   kernel_add.setArg(12, buff_np_e);                     // np
-   kernel_add.setArg(13, buff_currentj_e);               // current
-   kernel_add.setArg(14, buff_npi);                      // npt
-   kernel_add.setArg(15, buff_np_centeri);               // npt
-   kernel_add.setArg(16, buff_cji);                      // current
-   kernel_add.setArg(17, buff_cj_centeri);               // npt
-   kernel_add.setArg(18, buff_q_e);                      // q
-                                                         // kernel_add.setArg(14, sizeof(int), n_cells);          // ncells
+   kernel_add.setArg(0, buff_x0_e);        // x0
+   kernel_add.setArg(1, buff_y0_e);        // y0
+   kernel_add.setArg(2, buff_z0_e);        // z0
+   kernel_add.setArg(3, buff_x1_e);        // x1
+   kernel_add.setArg(4, buff_y1_e);        // y1
+   kernel_add.setArg(5, buff_z1_e);        // z1
+   kernel_add.setArg(6, buff_np_e);        // np
+   kernel_add.setArg(7, buff_currentj_e);  // current
+   kernel_add.setArg(8, buff_npi);         // npt
+   kernel_add.setArg(9, buff_np_centeri);  // npt
+   kernel_add.setArg(10, buff_cji);        // current
+   kernel_add.setArg(11, buff_cj_centeri); // npt
+   kernel_add.setArg(12, buff_q_e);        // q
+                                           // kernel_add.setArg(14, sizeof(int), n_cells);          // ncells
    cout << "run kernel for electron" << endl;
 
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
    cout << "run kernel for electron done" << endl;
    queue.finish(); // wait for the end of the kernel program
-   cout <<"read electron density" << endl;
+   cout << "read electron density" << endl;
    queue.enqueueReadBuffer(buff_np_e, CL_TRUE, 0, n_cellsf, fi->np[0]);
    queue.enqueueReadBuffer(buff_currentj_e, CL_TRUE, 0, n_cellsf * 3, fi->currentj[0]);
    // ions next
-   if (first)
-   {
-      queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
-      queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
-      queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
-      queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
-      queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
-      queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
 
-      queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
-   }
+   queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
+   queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
+   queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
+   queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
+   queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
+   queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
+
+   queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
+
    queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
    queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
    queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
    queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
    //  set arguments to be fed into the kernel program
-   kernel_add.setArg(0, buff_Ea);                        // the 1st argument to the kernel program Ea
-   kernel_add.setArg(1, buff_Ba);                        // Ba
-   kernel_add.setArg(2, buff_x0_i);                      // x0
-   kernel_add.setArg(3, buff_y0_i);                      // y0
-   kernel_add.setArg(4, buff_z0_i);                      // z0
-   kernel_add.setArg(5, buff_x1_i);                      // x1
-   kernel_add.setArg(6, buff_y1_i);                      // y1
-   kernel_add.setArg(7, buff_z1_i);                      // z1
-   kernel_add.setArg(8, sizeof(float), &par->Bcoef[1]);  // Bconst
-   kernel_add.setArg(9, sizeof(float), &par->Ecoef[1]);  // Econst
-   kernel_add.setArg(10, sizeof(int), &par->n_partp[1]); // npart
-   kernel_add.setArg(11, sizeof(int), &ncalc_i);         //
-   kernel_add.setArg(12, buff_np_i);                     // npt
-   kernel_add.setArg(13, buff_currentj_i);               // current
-   kernel_add.setArg(14, buff_npi);                      // npt
-   kernel_add.setArg(15, buff_np_centeri);               // npt
-   kernel_add.setArg(16, buff_cji);                      // current
-   kernel_add.setArg(17, buff_cj_centeri);               // npt
-   kernel_add.setArg(18, buff_q_i);                      // q
+
+   kernel_add.setArg(0, buff_x0_i);                      // x0
+   kernel_add.setArg(1, buff_y0_i);                      // y0
+   kernel_add.setArg(2, buff_z0_i);                      // z0
+   kernel_add.setArg(3, buff_x1_i);                      // x1
+   kernel_add.setArg(4, buff_y1_i);                      // y1
+   kernel_add.setArg(5, buff_z1_i);                      // z1
+
+   kernel_add.setArg(6, buff_np_i);                     // npt
+   kernel_add.setArg(7, buff_currentj_i);               // current
+   kernel_add.setArg(8, buff_npi);                      // npt
+   kernel_add.setArg(9, buff_np_centeri);               // npt
+   kernel_add.setArg(10, buff_cji);                      // current
+   kernel_add.setArg(11, buff_cj_centeri);               // npt
+   kernel_add.setArg(12, buff_q_i);                      // q
                                                          // kernel_add.setArg(14, sizeof(int), &n_cells);          // ncells
    cout << "run kernel for ions" << endl;
    //  run the kernel
