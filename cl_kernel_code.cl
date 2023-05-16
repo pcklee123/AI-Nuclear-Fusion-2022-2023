@@ -98,6 +98,11 @@ void kernel tnp_k_implicit(global const float8 *a1,
   float8 store0, store1, store2, store3, store4, store5;
   const float Bcoeff = Bcoef / r1;
   const float Ecoeff = Ecoef / r1;
+  const float XL = XLOW + 1.5f * DX, YL = YLOW + 1.5f * DY,
+              ZL = ZLOW + 1.5f * DZ;
+  const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
+              ZH = ZHIGH - 1.5f * DZ;
+
   for (int t = 0; t < ncalc; t++) {
 
     // if (x <= XLOW || x >= XHIGH || y <= YLOW || y >= YHIGH || z <= ZLOW ||
@@ -177,12 +182,26 @@ void kernel tnp_k_implicit(global const float8 *a1,
              fma(vxxe, yP + xzP,
                  fma(vyye, yzP - xP, fma(-vz, xxP + yyP, fma(zzP, zE, zE)))),
              vz);
-    clamp(xprev, XLOW + DX, XHIGH - DX);
-    clamp(yprev, YLOW + DY, YHIGH - DY);
-    clamp(zprev, ZLOW + DZ, ZHIGH - DZ);
-    clamp(x, XLOW + DX, XHIGH - DX);
-    clamp(y, YLOW + DY, YHIGH - DY);
-    clamp(z, ZLOW + DZ, ZHIGH - DZ);
+    xprev = x > XL ? xprev : XL;
+    xprev = x < XH ? xprev : XH;
+    yprev = y > YL ? yprev : YL;
+    yprev = y < YH ? yprev : YH;
+    zprev = z > ZL ? zprev : ZL;
+    zprev = z < ZH ? zprev : ZH;
+    q[id] = x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH ? q[id] : 0;
+    x = x > XL ? x : XL;
+    x = x < XH ? x : XH;
+    y = y > YL ? y : YL;
+    y = y < YH ? y : YH;
+    z = z > ZL ? z : ZL;
+    z = z < ZH ? z : ZH;
+
+    // clamp(xprev, (float)(XLOW + 1.5f*DX), XHIGH - 1.5f*DX);
+    //  clamp(yprev, YLOW + 1.5f*DY, YHIGH - 1.5f*DY);
+    //  clamp(zprev, ZLOW + 1.5f*DZ, ZHIGH - 1.5f*DZ);
+    //  clamp(x, XLOW + 1.5f*DX, XHIGH - 1.5f*DX);
+    //  clamp(y, YLOW + 1.5f*DY, YHIGH - 1.5f*DY);
+    //  clamp(z, ZLOW + 1.5f*DZ, ZHIGH - 1.5f*DZ);
   }
   /*
   uint idx =
@@ -190,12 +209,12 @@ void kernel tnp_k_implicit(global const float8 *a1,
       (uint)((x - XLOW) / DX); // round down the cells - this is intentional
   idx *= 3;
   */
-  //clamp(xprev, XLOW + DX, XHIGH - DX);
-  //clamp(yprev, YLOW + DY, YHIGH - DY);
-  //clamp(zprev, ZLOW + DZ, ZHIGH - DZ);
-  //clamp(x, XLOW + DX, XHIGH - DX);
-  //clamp(y, YLOW + DY, YHIGH - DY);
-  //clamp(z, ZLOW + DZ, ZHIGH - DZ);
+  // clamp(xprev, XLOW + DX, XHIGH - DX);
+  // clamp(yprev, YLOW + DY, YHIGH - DY);
+  // clamp(zprev, ZLOW + DZ, ZHIGH - DZ);
+  // clamp(x, XLOW + DX, XHIGH - DX);
+  // clamp(y, YLOW + DY, YHIGH - DY);
+  // clamp(z, ZLOW + DZ, ZHIGH - DZ);
   uint k = round((z - ZLOW) / DZ);
   uint j = round((y - YLOW) / DY);
   uint i = round((x - XLOW) / DX);

@@ -113,16 +113,16 @@ int main()
         // print out all files for paraview
 
 #ifdef Uon_
-        cout << "calculate the total potential energy U\n";
+        //        cout << "calculate the total potential energy U\n";
         // timer.mark();// calculate the total potential energy U
         calcU(fi, pt, par); // cout << "U: " << timer.elapsed() << "s, ";
-        cout << "calculate the total potential energy U done\n";
+                            //       cout << "calculate the total potential energy U done\n";
 #endif
         timer.mark();
-        cout << "savefiles" << endl;
+        //      cout << "savefiles" << endl;
 
         save_files(i_time, t, fi, pt, par);
-        cout << "logentry" << endl;
+        //        cout << "logentry" << endl;
 
         log_entry(i_time, 0, cdt, total_ncalc, t, par); // cout<<"log entry done"<<endl;
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
