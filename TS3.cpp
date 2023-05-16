@@ -50,7 +50,6 @@ int main()
     int i_time = 0;
     get_densityfields(fi, pt, par);
     cout << "tnp " << endl;
-    //tnp(fi, pt, par);
     //cout << "tnp done" << endl;
     int cdt = calcEBV(fi, par);
     // int cdt=0;
