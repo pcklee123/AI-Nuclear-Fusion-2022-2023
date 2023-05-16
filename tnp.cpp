@@ -42,9 +42,10 @@ void tnp(fields *fi, particles *pt, par *par)
    // Assume buffers A, B, I, J (Ea, Ba, ci, cf) will always be the same. Then we save a bit of time.
    static cl::Buffer buff_Ea(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
    static cl::Buffer buff_Ba(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
-   static cl::Buffer buff_npele(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf, fastIO ? fi->np[0] : NULL);
-   static cl::Buffer buff_npion(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf, fastIO ? fi->np[1] : NULL);
-   static cl::Buffer buff_currentj(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf * 3, fastIO ? fi->currentj : NULL);
+   static cl::Buffer buff_np_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf, fastIO ? fi->np[0] : NULL);
+   static cl::Buffer buff_np_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf, fastIO ? fi->np[1] : NULL);
+   static cl::Buffer buff_currentj_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf * 3, fastIO ? fi->currentj[0] : NULL);
+   static cl::Buffer buff_currentj_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * n_cellsf * 3, fastIO ? fi->currentj[1] : NULL);
 
    static cl::Buffer buff_npi(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(int) * n_cellsi, fastIO ? fi->npi : NULL);
    static cl::Buffer buff_cji(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(int) * n_cellsi * 3, fastIO ? fi->cji : NULL);
@@ -85,8 +86,10 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.enqueueWriteBuffer(buff_Ea, CL_TRUE, 0, sizeof(float) * nc, fi->Ea);
       queue.enqueueWriteBuffer(buff_Ba, CL_TRUE, 0, sizeof(float) * nc, fi->Ba);
 
-      queue.enqueueFillBuffer(buff_npi, 0, 0, sizeof(int) * n_cellsi);
-      queue.enqueueFillBuffer(buff_np_centeri, 0, 0, sizeof(int) * n_cellsi * 3);
+      queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
+      queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
+      queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
+      queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
 
       if (first)
       {
@@ -117,21 +120,22 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_add.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp[0]); // npart
    kernel_add.setArg(11, sizeof(int), &par->ncalcp[0]);  // ncalc
-   kernel_add.setArg(12, buff_npele);                    // np
-   kernel_add.setArg(13, buff_currentj);                 // current
+   kernel_add.setArg(12, buff_np_e);                     // np
+   kernel_add.setArg(13, buff_currentj_e);               // current
    kernel_add.setArg(14, buff_npi);                      // npt
    kernel_add.setArg(15, buff_np_centeri);               // npt
    kernel_add.setArg(16, buff_cji);                      // current
    kernel_add.setArg(17, buff_cj_centeri);               // npt
    kernel_add.setArg(18, buff_q_e);                      // q
                                                          // kernel_add.setArg(14, sizeof(int), n_cells);          // ncells
-   cout << "run kernel for electron" << endl;
+   // cout << "run kernel for electron" << endl;
 
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
 
    queue.finish(); // wait for the end of the kernel program
-   queue.enqueueReadBuffer(buff_npele, CL_TRUE, 0, n_cellsf, fi->np[0]);
+   queue.enqueueReadBuffer(buff_np_e, CL_TRUE, 0, n_cellsf, fi->np[0]);
+   queue.enqueueReadBuffer(buff_currentj_e, CL_TRUE, 0, n_cellsf, fi->currentj[0]);
    // ions next
    if (first)
    {
@@ -146,6 +150,8 @@ void tnp(fields *fi, particles *pt, par *par)
    }
    queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
    queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
+   queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
+   queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
    //  set arguments to be fed into the kernel program
    kernel_add.setArg(0, buff_Ea);                        // the 1st argument to the kernel program Ea
    kernel_add.setArg(1, buff_Ba);                        // Ba
@@ -159,16 +165,16 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_add.setArg(9, sizeof(float), &par->Ecoef[1]);  // Econst
    kernel_add.setArg(10, sizeof(int), &par->n_partp[1]); // npart
    kernel_add.setArg(11, sizeof(int), &par->ncalcp[1]);  //
-   kernel_add.setArg(12, buff_npion);                    // npt
-   kernel_add.setArg(13, buff_currentj);                 // current
+   kernel_add.setArg(12, buff_np_i);                     // npt
+   kernel_add.setArg(13, buff_currentj_i);               // current
    kernel_add.setArg(14, buff_npi);                      // npt
    kernel_add.setArg(15, buff_np_centeri);               // npt
    kernel_add.setArg(16, buff_cji);                      // current
    kernel_add.setArg(17, buff_cj_centeri);               // npt
    kernel_add.setArg(18, buff_q_i);                      // q
                                                          // kernel_add.setArg(14, sizeof(int), &n_cells);          // ncells
-   cout << "run kernel for ions" << endl;
-   // run the kernel
+   // cout << "run kernel for ions" << endl;
+   //  run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
    queue.finish(); // wait for the end of the kernel program
    // read result arrays from the device to main memory
@@ -192,7 +198,16 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.enqueueReadBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
       queue.enqueueReadBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
 
-      queue.enqueueReadBuffer(buff_npion, CL_TRUE, 0, n_cellsf, fi->np[1]);
+      queue.enqueueReadBuffer(buff_np_i, CL_TRUE, 0, n_cellsf, fi->np[1]);
+      queue.enqueueReadBuffer(buff_currentj_i, CL_TRUE, 0, n_cellsf, fi->currentj[1]);
+#pragma omp parallel for simd num_threads(nthreads)
+      for (unsigned int i = 0; i < n_cells; i++)
+         (reinterpret_cast<float *>(fi->npt))[i] = (reinterpret_cast<float *>(fi->np[0]))[i] + (reinterpret_cast<float *>(fi->np[1]))[i];
+
+#pragma omp parallel for simd num_threads(nthreads)
+      for (unsigned int i = 0; i < n_cells * 3; i++)
+         (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] + (reinterpret_cast<float *>(fi->currentj[1]))[i];
+#pragma omp barrier
    }
    first = false;
 }

@@ -3,6 +3,7 @@
 
 void get_densityfields(fields *fi, particles *pt, par *par)
 {
+    return;
     // find number of particle and current density fields
     // set limits beyond which particle is considered as "lost"
     static const float ddi[3] = {1.f / par->dd[0], 1.f / par->dd[1], 1.f / par->dd[2]}; // precalculate reciprocals
