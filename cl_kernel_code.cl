@@ -188,7 +188,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
     yprev = y < YH ? yprev : YH;
     zprev = z > ZL ? zprev : ZL;
     zprev = z < ZH ? zprev : ZH;
-    q[id] = x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH ? q[id] : 0;
+    q[id] = (x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH) ? q[id] : 0;
     x = x > XL ? x : XL;
     x = x < XH ? x : XH;
     y = y > YL ? y : YL;
