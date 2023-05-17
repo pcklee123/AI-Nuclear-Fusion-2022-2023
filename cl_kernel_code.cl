@@ -196,25 +196,8 @@ void kernel tnp_k_implicit(global const float8 *a1,
     z = z > ZL ? z : ZL;
     z = z < ZH ? z : ZH;
 
-    // clamp(xprev, (float)(XLOW + 1.5f*DX), XHIGH - 1.5f*DX);
-    //  clamp(yprev, YLOW + 1.5f*DY, YHIGH - 1.5f*DY);
-    //  clamp(zprev, ZLOW + 1.5f*DZ, ZHIGH - 1.5f*DZ);
-    //  clamp(x, XLOW + 1.5f*DX, XHIGH - 1.5f*DX);
-    //  clamp(y, YLOW + 1.5f*DY, YHIGH - 1.5f*DY);
-    //  clamp(z, ZLOW + 1.5f*DZ, ZHIGH - 1.5f*DZ);
   }
-  /*
-  uint idx =
-      ((uint)((z - ZLOW) / DZ) * NZ + (uint)((y - YLOW) / DY)) * NY +
-      (uint)((x - XLOW) / DX); // round down the cells - this is intentional
-  idx *= 3;
-  */
-  // clamp(xprev, XLOW + DX, XHIGH - DX);
-  // clamp(yprev, YLOW + DY, YHIGH - DY);
-  // clamp(zprev, ZLOW + DZ, ZHIGH - DZ);
-  // clamp(x, XLOW + DX, XHIGH - DX);
-  // clamp(y, YLOW + DY, YHIGH - DY);
-  // clamp(z, ZLOW + DZ, ZHIGH - DZ);
+
   uint k = round((z - ZLOW) / DZ);
   uint j = round((y - YLOW) / DY);
   uint i = round((x - XLOW) / DX);

@@ -207,6 +207,10 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.enqueueReadBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
       queue.enqueueReadBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
 
+      
+      queue.enqueueReadBuffer(buff_np_e, CL_TRUE, 0, n4, pt->q[0]);
+      queue.enqueueReadBuffer(buff_np_i, CL_TRUE, 0, n4, pt->q[1]);
+
       queue.enqueueReadBuffer(buff_np_i, CL_TRUE, 0, n_cellsf, fi->np[1]);
       queue.enqueueReadBuffer(buff_currentj_i, CL_TRUE, 0, n_cellsf * 3, fi->currentj[1]);
 #pragma omp parallel for simd num_threads(nthreads)
@@ -353,21 +357,21 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
    //  set arguments to be fed into the kernel program
 
-   kernel_add.setArg(0, buff_x0_i);                      // x0
-   kernel_add.setArg(1, buff_y0_i);                      // y0
-   kernel_add.setArg(2, buff_z0_i);                      // z0
-   kernel_add.setArg(3, buff_x1_i);                      // x1
-   kernel_add.setArg(4, buff_y1_i);                      // y1
-   kernel_add.setArg(5, buff_z1_i);                      // z1
+   kernel_add.setArg(0, buff_x0_i); // x0
+   kernel_add.setArg(1, buff_y0_i); // y0
+   kernel_add.setArg(2, buff_z0_i); // z0
+   kernel_add.setArg(3, buff_x1_i); // x1
+   kernel_add.setArg(4, buff_y1_i); // y1
+   kernel_add.setArg(5, buff_z1_i); // z1
 
-   kernel_add.setArg(6, buff_np_i);                     // npt
-   kernel_add.setArg(7, buff_currentj_i);               // current
-   kernel_add.setArg(8, buff_npi);                      // npt
-   kernel_add.setArg(9, buff_np_centeri);               // npt
-   kernel_add.setArg(10, buff_cji);                      // current
-   kernel_add.setArg(11, buff_cj_centeri);               // npt
-   kernel_add.setArg(12, buff_q_i);                      // q
-                                                         // kernel_add.setArg(14, sizeof(int), &n_cells);          // ncells
+   kernel_add.setArg(6, buff_np_i);        // npt
+   kernel_add.setArg(7, buff_currentj_i);  // current
+   kernel_add.setArg(8, buff_npi);         // npt
+   kernel_add.setArg(9, buff_np_centeri);  // npt
+   kernel_add.setArg(10, buff_cji);        // current
+   kernel_add.setArg(11, buff_cj_centeri); // npt
+   kernel_add.setArg(12, buff_q_i);        // q
+                                           // kernel_add.setArg(14, sizeof(int), &n_cells);          // ncells
    cout << "run kernel for ions" << endl;
    //  run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
@@ -386,12 +390,16 @@ void get_densityfields(fields *fi, particles *pt, par *par)
       queue.enqueueReadBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
       queue.enqueueReadBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
 
+      queue.enqueueReadBuffer(buff_np_e, CL_TRUE, 0, n4, pt->q[0]);
+
       queue.enqueueReadBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
       queue.enqueueReadBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
       queue.enqueueReadBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
       queue.enqueueReadBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
       queue.enqueueReadBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
       queue.enqueueReadBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
+
+      queue.enqueueReadBuffer(buff_np_i, CL_TRUE, 0, n4, pt->q[1]);
 
       queue.enqueueReadBuffer(buff_np_i, CL_TRUE, 0, n_cellsf, fi->np[1]);
       queue.enqueueReadBuffer(buff_currentj_i, CL_TRUE, 0, n_cellsf * 3, fi->currentj[1]);

@@ -1,6 +1,6 @@
 _DEPS = traj.h traj_physics.h
-_OBJ = utils.o TS3.o tnp.o generate.o generaterandp.o  save.o get_densityfields.o cl_code.o changedt.o calcEBV_FFT.o calcU.o calc_trilin_constants.o smoothfield.o
-#sel_part_print.o
+_OBJ = utils.o TS3.o tnp.o generate.o generaterandp.o  save.o cl_code.o changedt.o calcEBV_FFT.o calcU.o calc_trilin_constants.o smoothfield.o
+#sel_part_print.o get_densityfields.o
 IDIR = include
 
 #https://stackoverflow.com/questions/14492436/g-optimization-beyond-o3-ofast
