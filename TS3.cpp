@@ -48,9 +48,9 @@ int main()
     fftwf_init_threads();
 
     int i_time = 0;
+    cout << "get_densityfields " << endl;
     get_densityfields(fi, pt, par);
-    cout << "tnp " << endl;
-    //cout << "tnp done" << endl;
+    cout << "get_densityfields done" << endl;
     int cdt = calcEBV(fi, par);
     // int cdt=0;
 #pragma omp parallel sections

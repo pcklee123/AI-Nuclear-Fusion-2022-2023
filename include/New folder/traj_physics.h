@@ -5,7 +5,7 @@
 #define cylinder        // do hot rod problem
 #define Temp_e 1e7      // in Kelvin
 #define Temp_d 1e7      // in Kelvin
-constexpr float f1 = 32; // make bigger to make smaller time steps
+constexpr float f1 = 1; // make bigger to make smaller time steps
 constexpr float f2 = f1 * 2;
 constexpr float incf = 1.2; // increment
 constexpr float decf = 0.8; // decrement factor
