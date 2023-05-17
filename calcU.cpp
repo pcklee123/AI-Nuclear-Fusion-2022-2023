@@ -44,7 +44,7 @@ void calcU(fields *fi, particles *pt, par *par)
            // cout << p << "EUtot" << EUtot << endl;
         }
         EUtot *= 0.5f * e_charge;
-        // EUtot *= r_part_spart; // scale to target particles
+        EUtot *= r_part_spart; // scale to target particles
     }
 
 // Calculate energy between particles when they are in the same cell
@@ -121,7 +121,7 @@ void calcU(fields *fi, particles *pt, par *par)
             E2tot += e * e; // Why can we do this? Because E^2 = Ex^2 + Ey^2 + Ez^2
         }
         E2tot *= 0.5f * epsilon0 * (par->dd[0] * par->dd[1] * par->dd[2]); // dV
-        EUtot += E2tot;
+ //       EUtot += E2tot;
     }
 #endif
 

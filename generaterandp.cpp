@@ -53,10 +53,10 @@ void generate_rand_sphere(particles *pt, par *par)
         int na = 0;
         for (int n = 0; n < nback; ++n) // set number of particles per cell in background
         {
-            for (int k = 1; k < n_space_divz - 1; ++k)
+            for (int k = 2; k < n_space_divz - 2; ++k)
             {
-                for (int j = 1; j < n_space_divy - 1; ++j)
-                    for (int i = 1; i < n_space_divx - 1; ++i)
+                for (int j = 2; j < n_space_divy - 2; ++j)
+                    for (int i = 2; i < n_space_divx - 2; ++i)
                     {
                         pt->pos0x[p][na] = ((float)(i - n_space_divx / 2) + (float)rand() / RAND_MAX) * a0;
                         pt->pos0y[p][na] = ((float)(j - n_space_divy / 2) + (float)rand() / RAND_MAX) * a0;

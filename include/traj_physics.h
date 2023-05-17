@@ -5,7 +5,7 @@
                       // #define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
 #define Temp_d 1e7    // in Kelvin
-constexpr int f1 = 1; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
@@ -21,7 +21,7 @@ constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 10;   // in T
-constexpr float Emax0 = 1e14; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float Emax0 = 1e12; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 1e-3; // in T
 constexpr float Ez0 = 0;
