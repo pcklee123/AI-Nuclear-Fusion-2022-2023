@@ -195,7 +195,6 @@ void kernel tnp_k_implicit(global const float8 *a1,
     y = y < YH ? y : YH;
     z = z > ZL ? z : ZL;
     z = z < ZH ? z : ZH;
-
   }
 
   uint k = round((z - ZLOW) / DZ);
@@ -224,14 +223,13 @@ void kernel tnp_k_implicit(global const float8 *a1,
   z1[id] = z;
 }
 
-void kernel density(
-                    global float *x0, global float *y0,
+void kernel density(global float *x0, global float *y0,
                     global float *z0, // prev pos
                     global float *x1, global float *y1,
-                    global float *z1, // current pos
-                    global float *np, global float *currentj, global int *npi,
-                    global int *np_centeri, global int *cji,
-                    global int *cj_centeri, global int *q) {
+                    global float *z1,                         // current pos
+                    global float *np, global float *currentj, //
+                    global int *npi, global int *np_centeri,  //
+                    global int *cji, global int *cj_centeri, global int *q) {
   const float XL = XLOW + 1.5f * DX, YL = YLOW + 1.5f * DY,
               ZL = ZLOW + 1.5f * DZ;
   const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
