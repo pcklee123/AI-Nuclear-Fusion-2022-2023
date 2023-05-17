@@ -224,16 +224,11 @@ void kernel tnp_k_implicit(global const float8 *a1,
   z1[id] = z;
 }
 
-void kernel density(global const float8 *a1,
-                    global const float8 *a2, // E, B coeff
+void kernel density(
                     global float *x0, global float *y0,
                     global float *z0, // prev pos
                     global float *x1, global float *y1,
                     global float *z1, // current pos
-                    float Bcoef,
-                    float Ecoef, // Bcoeff, Ecoeff
-                    const unsigned int n,
-                    const unsigned int ncalc, // n, ncalc
                     global float *np, global float *currentj, global int *npi,
                     global int *np_centeri, global int *cji,
                     global int *cj_centeri, global int *q) {
