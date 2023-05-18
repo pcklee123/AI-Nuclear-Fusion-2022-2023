@@ -28,7 +28,7 @@ void save_hist(int i_time, double t, particles *pt, par *par)
     }
     par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass * par->dt[p] * par->dt[p]) * r_part_spart; // as if these particles were actually samples of the greater thing
     par->nt[p] = nt * r_part_spart;
-    cout << "p = " << p << ", KE = " << par->KEtot[p] << ", npart[p]" << par->n_part[p] << endl;
+ //   cout << "p = " << p << ", KE = " << par->KEtot[p] << ", npart[p]" << par->n_part[p] << endl;
   }
 
   // Create a vtkPolyData object

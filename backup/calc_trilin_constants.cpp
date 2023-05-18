@@ -4,9 +4,11 @@ void calc_trilin_constants(fields *fi, par *par)
 {
     float dV = -par->dd[0] * par->dd[1] * par->dd[2];
     const float dV1 = 1 / dV;
+
     // const int c_skip = n_cells;
     static const int i_skip = 1, j_skip = n_space_divx * i_skip, k_skip = n_space_divy * j_skip, c_skip = n_space_divz * k_skip;
     static const int ij_skip = i_skip + j_skip, jk_skip = j_skip + k_skip, ik_skip = i_skip + k_skip, ijk_skip = i_skip + j_skip + k_skip;
+
     // #pragma omp parallel for num_threads(2)
     for (int a = 0; a < 2; ++a)
     {
@@ -65,7 +67,8 @@ void calc_trilin_constants(fields *fi, par *par)
                         const float c101 = E_flat[offset + ik_skip];  // E[c][k1][j][i1];
                         const float c110 = E_flat[offset + ij_skip];  // E[c][k][j1][i1];
                         const float c111 = E_flat[offset + ijk_skip]; // E[c][k1][j1][i1];
-                        int oa = (offset) * 8;
+                        int oa = (offset)*8;
+
                         Ea[oa] = (-c000 * x1y1z1 + c001 * x1y1z0 + c010 * x1y0z1 - c011 * x1y0z0 + c100 * x0y1z1 - c101 * x0y1z0 - c110 * x0y0z1 + c111 * x0y0z0) * dV1;
                         // x
                         Ea[oa + 1] = ((c000 - c100) * y1z1 + (-c001 + c101) * y1z0 + (-c010 + c110) * y0z1 + (c011 - c111) * y0z0) * dV1;
@@ -80,7 +83,7 @@ void calc_trilin_constants(fields *fi, par *par)
                         // yz
                         Ea[oa + 6] = ((-c000 + c001 + c010 - c011) * x1 + (c100 - c101 - c110 + c111) * x0) * dV1;
                         Ea[oa + 7] = (c000 - c001 - c010 + c011 - c100 + c101 + c110 - c111) * dV1;
-                       // cout << oa << " ";
+                        // cout << oa << " ";
                     }
                     ++E_idx;
                 }

@@ -93,21 +93,15 @@ void kernel tnp_k_implicit(global const float8 *a1,
   float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
         z = z1[id];
   float8 temp, pos;
-  float r1 = 1.0f;
+  float r1 = 100.0f;
   float r2 = r1 * r1;
   float8 store0, store1, store2, store3, store4, store5;
   const float Bcoeff = Bcoef / r1;
   const float Ecoeff = Ecoef / r1;
-  const float XL = XLOW + 1.5f * DX, YL = YLOW + 1.5f * DY,
-              ZL = ZLOW + 1.5f * DZ;
-  const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
-              ZH = ZHIGH - 1.5f * DZ;
-
   for (int t = 0; t < ncalc; t++) {
-
-    // if (x <= XLOW || x >= XHIGH || y <= YLOW || y >= YHIGH || z <= ZLOW ||
-    //  z >= ZHIGH)
-    // break;
+    if (x <= XLOW || x >= XHIGH || y <= YLOW || y >= YHIGH || z <= ZLOW ||
+        z >= ZHIGH)
+      break;
     float xy = x * y, xz = x * z, yz = y * z, xyz = x * yz;
     uint idx =
         ((uint)((z - ZLOW) / DZ) * NZ + (uint)((y - YLOW) / DY)) * NY +
@@ -183,158 +177,121 @@ void kernel tnp_k_implicit(global const float8 *a1,
                  fma(vyye, yzP - xP, fma(-vz, xxP + yyP, fma(zzP, zE, zE)))),
              vz);
   }
-  xprev = x > XL ? xprev : XL;
-  xprev = x < XH ? xprev : XH;
-  yprev = y > YL ? yprev : YL;
-  yprev = y < YH ? yprev : YH;
-  zprev = z > ZL ? zprev : ZL;
-  zprev = z < ZH ? zprev : ZH;
-  q[id] = (x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH) ? q[id] : 0;
-  x = x > XL ? x : XL;
-  x = x < XH ? x : XH;
-  y = y > YL ? y : YL;
-  y = y < YH ? y : YH;
-  z = z > ZL ? z : ZL;
-  z = z < ZH ? z : ZH;
+    uint idx =
+        ((uint)((z - ZLOW) / DZ) * NZ + (uint)((y - YLOW) / DY)) * NY +
+        (uint)((x - XLOW) / DX); // round down the cells - this is intentional
+  uint k = round((z - ZLOW) / DZ);
+  uint j = round((y - YLOW) / DY);
+  uint i = round((x - XLOW) / DX);
+  int offsetx = (x / DX - XLOW / DX - i) * 256.0f;
+  int offsety = (y / DY - YLOW / DY - j) * 256.0f;
+  int offsetz = (z / DZ - ZLOW / DZ - k) * 256.0f;
+  uint idx0 = k * NY * NX + j * NX + i;
+  atomic_add(&npi[idx0], q[id]);
+  atomic_add(&np_centeri[idx0 * 3 + 0], q[id] * offsetx);
+  atomic_add(&np_centeri[idx0 * 3 + 1], q[id] * offsety);
+  atomic_add(&np_centeri[idx0 * 3 + 2], q[id] * offsetz);
+
+  np_centeri[idx0 * 3 + 0] /= np[idx0];
+  np_centeri[idx0 * 3 + 1] /= np[idx0];
+  np_centeri[idx0 * 3 + 2] /= np[idx0];
+
+  sw = ((int)(np_centeri[idx0 * 3 + 2] > 0) << 2) +
+       ((int)(np_centeri[idx0 * 3 + 1] > 0) << 1) +
+       (int)(np_centeri[idx0 * 3] > 0);
+  switch (sw) {
+  case 0: // 000 zyx
+    idx1 = idx0 - NX * NY - NX - 1;
+    // k1 = k0 - 1; j1 = j0 - 1;    i1 = i0 - 1;
+    fz0 = -np_centeri[idx1 * 3 + 2];
+    fz1 = 256 + np_centeri[idx1 * 3 + 2];
+    fy0 = -np_centeri[idx1 * 3 + 1];
+    fy1 = 256 + np_centeri[idx1 * 3 + 1];
+    fx0 = -np_centeri[idx1 * 3];
+    fx1 = 256 + np_centeri[idx1 * 3];
+    break;
+  case 1: // 001
+    idx1 = idx0 - NX * NY - NX + 1;
+    //    k1 = k0 - 1;    j1 = j0 - 1;    i1 = i0 + 1;
+    fz0 = -np_centeri[idx1 * 3 + 2];
+    fz1 = 256 + np_centeri[idx1 * 3 + 2];
+    fy0 = -np_centeri[idx1 * 3 + 1];
+    fy1 = 256 + np_centeri[idx1 * 3 + 1];
+    fx0 = np_centeri[idx1 * 3];
+    fx1 = 256 - np_centeri[idx1 * 3];
+    break;
+  case 2: // 010
+    idx1 = idx0 - NX * NY + NX - 1;
+    // k1 = k0 - 1;j1 = j0 + 1;    i1 = i0 - 1;
+    fz0 = -np_centeri[idx1 * 3 + 2];
+    fz1 = 256 + np_centeri[idx1 * 3 + 2];
+    fy0 = np_centeri[idx1 * 3 + 1];
+    fy1 = 256 - np_centeri[idx1 * 3 + 1];
+    fx0 = -np_centeri[idx1 * 3];
+    fx1 = 256 + np_centeri[idx1 * 3];
+    break;
+  case 3: // 011
+    idx1 = idx0 - NX * NY + NX + 1;
+    fz0 = -np_centeri[idx1 * 3 + 2];
+    fz1 = 256 + np_centeri[idx1 * 3 + 2];
+    fy0 = np_centeri[idx1 * 3 + 1];
+    fy1 = 256 - np_centeri[idx1 * 3 + 1];
+    fx0 = np_centeri[idx1 * 3];
+    fx1 = 256 - np_centeri[idx1 * 3];
+    break;
+  case 4: // 100
+    idx1 = idx0 + NX * NY - NX - 1;
+    fz0 = np_centeri[idx1 * 3 + 2];
+    fz1 = 256 - np_centeri[idx1 * 3 + 2];
+    fy0 = -np_centeri[idx1 * 3 + 1];
+    fy1 = 256 + np_centeri[idx1 * 3 + 1];
+    fx0 = -np_centeri[idx1 * 3];
+    fx1 = 256 + np_centeri[idx1 * 3];
+    break;
+  case 5: // 101
+    idx1 = idx0 + NX * NY - NX + 1;
+    fz0 = np_centeri[idx1 * 3 + 2];
+    fz1 = 256 - np_centeri[idx1 * 3 + 2];
+    fy0 = -np_centeri[idx1 * 3 + 1];
+    fy1 = 256 + np_centeri[idx1 * 3 + 1];
+    fx0 = np_centeri[idx1 * 3];
+    fx1 = 256 - np_centeri[idx1 * 3];
+    break;
+  case 6: // 110
+    idx1 = idx0 + NX * NY + NX - 1;
+    fz0 = np_centeri[idx1 * 3 + 2];
+    fz1 = 256 - np_centeri[idx1 * 3 + 2];
+    fy0 = np_centeri[idx1 * 3 + 1];
+    fy1 = 256 - np_centeri[idx1 * 3 + 1];
+    fx0 = -np_centeri[idx1 * 3];
+    fx1 = 256 + np_centeri[idx1 * 3];
+    break;
+  case 7: // 111
+    idx1 = idx0 + NX * NY + NX + 1;
+    fz0 = np_centeri[idx1 * 3 + 2];
+    fz1 = 256 - np_centeri[idx1 * 3 + 2];
+    fy0 = np_centeri[idx1 * 3 + 1];
+    fy1 = 256 - np_centeri[idx1 * 3 + 1];
+    fx0 = np_centeri[idx1 * 3];
+    fx1 = 256 - np_centeri[idx1 * 3];
+    break;
+  default:
+  }
+  atomic_add(&np_tempi[idx1], npi[idx0] * fz1 * fy1 * fx1);
+  atomic_add(&np_tempi[idx1], npi[idx0] * fz0 * fy1 * fx1);
+  ftemp[k0][j0][i0] += f[k0][j0][i0] * fz1 * fy1 * fx1;
+  ftemp[k1][j0][i0] += f[k0][j0][i0] * fz0 * fy1 * fx1;
+  ftemp[k0][j1][i0] += f[k0][j0][i0] * fz1 * fy0 * fx1;
+  ftemp[k1][j1][i0] += f[k0][j0][i0] * fz0 * fy0 * fx1;
+  ftemp[k0][j0][i1] += f[k0][j0][i0] * fz1 * fy1 * fx0;
+  ftemp[k1][j0][i1] += f[k0][j0][i0] * fz0 * fy1 * fx0;
+  ftemp[k0][j1][i1] += f[k0][j0][i0] * fz1 * fy0 * fx0;
+  ftemp[k1][j1][i1] += f[k0][j0][i0] * fz0 * fy0 * fx0;
+  np[idx1] = (float)npi[idx1] / (256.0f * 256.0f * 256.0f);
   x0[id] = xprev;
   y0[id] = yprev;
   z0[id] = zprev;
   x1[id] = x;
   y1[id] = y;
   z1[id] = z;
-  uint k = round((z - ZLOW) / DZ);
-  uint j = round((y - YLOW) / DY);
-  uint i = round((x - XLOW) / DX);
-  int ofx = ((x - XLOW) / DX - i) * 256.0f;
-  int ofy = ((y - YLOW) / DY - j) * 256.0f;
-  int ofz = ((z - ZLOW) / DZ - k) * 256.0f;
-  // oct 000,001,010,011,100,101,110,111
-  int odx000 = 0;
-  int odx001 = ofx > 0 ? 1 : -1;
-  int odx010 = ofy > 0 ? NX : -NX;
-  int odx011 = odx001 + odx010;
-  int odx100 = ofz > 0 ? NX * NY : -NX * NY;
-  int odx101 = odx100 + odx001;
-  int odx110 = odx100 + odx010;
-  int odx111 = odx100 + odx011;
-
-  int fx0 = abs(ofx);
-  int fy0 = abs(ofy);
-  int fz0 = abs(ofz);
-  int fx1 = 128 - fx0;
-  int fy1 = 128 - fy0;
-  int fz1 = 128 - fz0;
-  uint idx00 = k * NY * NX + j * NX + i;
-  uint idx01 = idx00 + NZ * NY * NX;
-  uint idx02 = idx01 + NZ * NY * NX;
-
-  int f000 = (fx1 * fy1 * fz1) / 16384;
-  int f001 = (fz1 * fy1 * fx0) / 16384;
-  int f010 = (fz1 * fy0 * fx1) / 16384;
-  int f011 = (fz1 * fy0 * fx0) / 16384;
-  int f100 = (fz0 * fy1 * fx1) / 16384;
-  int f101 = (fz0 * fy1 * fx0) / 16384;
-  int f110 = (fz0 * fy0 * fx1) / 16384;
-  int f111 = (fz0 * fy0 * fx0) / 16384;
-
-  atomic_add(&npi[idx00 + odx000], q[id] * f000);
-  atomic_add(&npi[idx00 + odx001], q[id] * f001);
-  atomic_add(&npi[idx00 + odx010], q[id] * f010);
-  atomic_add(&npi[idx00 + odx011], q[id] * f011);
-  atomic_add(&npi[idx00 + odx100], q[id] * f100);
-  atomic_add(&npi[idx00 + odx101], q[id] * f101);
-  atomic_add(&npi[idx00 + odx110], q[id] * f110);
-  atomic_add(&npi[idx00 + odx111], q[id] * f111);
-
-  atomic_add(&cji[idx00], ((x - xprev) * 65536.0f) * q[id]);
-  atomic_add(&cji[idx01], ((y - yprev) * 65536.0f) * q[id]);
-  atomic_add(&cji[idx02], ((z - zprev) * 65536.0f) * q[id]);
-
-  np[idx00] = npi[idx00] / 128.0f;
-  currentj[idx00] = cji[idx00] / 65536.0f;
-  currentj[idx01] = cji[idx01] / 65536.0f;
-  currentj[idx02] = cji[idx02] / 65536.0f;
-}
-
-void kernel density(global float *x0, global float *y0,
-                    global float *z0, // prev pos
-                    global float *x1, global float *y1,
-                    global float *z1,                         // current pos
-                    global float *np, global float *currentj, //
-                    global int *npi, global int *np_centeri,  //
-                    global int *cji, global int *cj_centeri, global int *q) {
-  const float XL = XLOW + 1.5f * DX, YL = YLOW + 1.5f * DY,
-              ZL = ZLOW + 1.5f * DZ;
-  const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
-              ZH = ZHIGH - 1.5f * DZ;
-
-  uint id = get_global_id(0);
-  float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
-        z = z1[id];
-  xprev = x > XL ? xprev : XL;
-  xprev = x < XH ? xprev : XH;
-  yprev = y > YL ? yprev : YL;
-  yprev = y < YH ? yprev : YH;
-  zprev = z > ZL ? zprev : ZL;
-  zprev = z < ZH ? zprev : ZH;
-  q[id] = (x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH) ? q[id] : 0;
-  x = x > XL ? x : XL;
-  x = x < XH ? x : XH;
-  y = y > YL ? y : YL;
-  y = y < YH ? y : YH;
-  z = z > ZL ? z : ZL;
-  z = z < ZH ? z : ZH;
-
-  uint k = round((z - ZLOW) / DZ);
-  uint j = round((y - YLOW) / DY);
-  uint i = round((x - XLOW) / DX);
-  int ofx = ((x - XLOW) / DX - i) * 256.0f;
-  int ofy = ((y - YLOW) / DY - j) * 256.0f;
-  int ofz = ((z - ZLOW) / DZ - k) * 256.0f;
-  // oct 000,001,010,011,100,101,110,111
-  int odx000 = 0;
-  int odx001 = ofx > 0 ? 1 : -1;
-  int odx010 = ofy > 0 ? NX : -NX;
-  int odx011 = odx001 + odx010;
-  int odx100 = ofz > 0 ? NX * NY : -NX * NY;
-  int odx101 = odx100 + odx001;
-  int odx110 = odx100 + odx010;
-  int odx111 = odx100 + odx011;
-
-  int fx0 = abs(ofx);
-  int fy0 = abs(ofy);
-  int fz0 = abs(ofz);
-  int fx1 = 128 - fx0;
-  int fy1 = 128 - fy0;
-  int fz1 = 128 - fz0;
-  uint idx00 = k * NY * NX + j * NX + i;
-  uint idx01 = idx00 + NZ * NY * NX;
-  uint idx02 = idx01 + NZ * NY * NX;
-
-  int f000 = (fx1 * fy1 * fz1) / 16384;
-  int f001 = (fz1 * fy1 * fx0) / 16384;
-  int f010 = (fz1 * fy0 * fx1) / 16384;
-  int f011 = (fz1 * fy0 * fx0) / 16384;
-  int f100 = (fz0 * fy1 * fx1) / 16384;
-  int f101 = (fz0 * fy1 * fx0) / 16384;
-  int f110 = (fz0 * fy0 * fx1) / 16384;
-  int f111 = (fz0 * fy0 * fx0) / 16384;
-
-  atomic_add(&npi[idx00 + odx000], q[id] * f000);
-  atomic_add(&npi[idx00 + odx001], q[id] * f001);
-  atomic_add(&npi[idx00 + odx010], q[id] * f010);
-  atomic_add(&npi[idx00 + odx011], q[id] * f011);
-  atomic_add(&npi[idx00 + odx100], q[id] * f100);
-  atomic_add(&npi[idx00 + odx101], q[id] * f101);
-  atomic_add(&npi[idx00 + odx110], q[id] * f110);
-  atomic_add(&npi[idx00 + odx111], q[id] * f111);
-
-  atomic_add(&cji[idx00], ((x - xprev) * 65536.0f) * q[id]);
-  atomic_add(&cji[idx01], ((y - yprev) * 65536.0f) * q[id]);
-  atomic_add(&cji[idx02], ((z - zprev) * 65536.0f) * q[id]);
-
-  np[idx00] = npi[idx00] / 128.0f;
-  currentj[idx00] = cji[idx00] / 65536.0f;
-  currentj[idx01] = cji[idx01] / 65536.0f;
-  currentj[idx02] = cji[idx02] / 65536.0f;
 }
