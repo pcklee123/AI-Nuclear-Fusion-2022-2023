@@ -210,7 +210,7 @@ void tnp(fields *fi, particles *pt, par *par)
 
 #pragma omp parallel for simd num_threads(nthreads)
    for (unsigned int i = 0; i < n_cells * 3; i++)
-      (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] + (reinterpret_cast<float *>(fi->currentj[1]))[i];
+         (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i]/par->dt[0] + (reinterpret_cast<float *>(fi->currentj[1]))[i]/par->dt[1];
 #pragma omp barrier
    first = false;
 }

@@ -200,27 +200,52 @@ void kernel tnp_k_implicit(global const float8 *a1,
   uint k = round((z - ZLOW) / DZ);
   uint j = round((y - YLOW) / DY);
   uint i = round((x - XLOW) / DX);
-  int offsetx = (x / DX - XLOW / DX - i) * 256.0f;
-  int offsety = (y / DY - YLOW / DY - j) * 256.0f;
-  int offsetz = (z / DZ - ZLOW / DZ - k) * 256.0f;
+  int ofx = ((x - XLOW) / DX - i) * 256.0f;
+  int ofy = ((y - YLOW) / DY - j) * 256.0f;
+  int ofz = ((z - ZLOW) / DZ - k) * 256.0f;
+  // oct 000,001,010,011,100,101,110,111
+  int odx000 = 0;
+  int odx001 = ofx > 0 ? 1 : -1;
+  int odx010 = ofy > 0 ? NX : -NX;
+  int odx011 = odx001 + odx010;
+  int odx100 = ofz > 0 ? NX * NY : -NX * NY;
+  int odx101 = odx100 + odx001;
+  int odx110 = odx100 + odx010;
+  int odx111 = odx100 + odx011;
+
+  int fx0 = abs(ofx);
+  int fy0 = abs(ofy);
+  int fz0 = abs(ofz);
+  int fx1 = 128 - fx0;
+  int fy1 = 128 - fy0;
+  int fz1 = 128 - fz0;
   uint idx00 = k * NY * NX + j * NX + i;
   uint idx01 = idx00 + NZ * NY * NX;
   uint idx02 = idx01 + NZ * NY * NX;
-  atomic_add(&npi[idx00], q[id]);
+
+  int f000 = (fx1 * fy1 * fz1) / 16384;
+  int f001 = (fz1 * fy1 * fx0) / 16384;
+  int f010 = (fz1 * fy0 * fx1) / 16384;
+  int f011 = (fz1 * fy0 * fx0) / 16384;
+  int f100 = (fz0 * fy1 * fx1) / 16384;
+  int f101 = (fz0 * fy1 * fx0) / 16384;
+  int f110 = (fz0 * fy0 * fx1) / 16384;
+  int f111 = (fz0 * fy0 * fx0) / 16384;
+
+  atomic_add(&npi[idx00 + odx000], q[id] * f000);
+  atomic_add(&npi[idx00 + odx001], q[id] * f001);
+  atomic_add(&npi[idx00 + odx010], q[id] * f010);
+  atomic_add(&npi[idx00 + odx011], q[id] * f011);
+  atomic_add(&npi[idx00 + odx100], q[id] * f100);
+  atomic_add(&npi[idx00 + odx101], q[id] * f101);
+  atomic_add(&npi[idx00 + odx110], q[id] * f110);
+  atomic_add(&npi[idx00 + odx111], q[id] * f111);
+
   atomic_add(&cji[idx00], ((x - xprev) * 65536.0f) * q[id]);
   atomic_add(&cji[idx01], ((y - yprev) * 65536.0f) * q[id]);
   atomic_add(&cji[idx02], ((z - zprev) * 65536.0f) * q[id]);
 
-  np[idx00] = npi[idx00];
-  currentj[idx00] = cji[idx00] / 65536.0f;
-  currentj[idx01] = cji[idx01] / 65536.0f;
-  currentj[idx02] = cji[idx02] / 65536.0f;
-  x0[id] = xprev;
-  y0[id] = yprev;
-  z0[id] = zprev;
-  x1[id] = x;
-  y1[id] = y;
-  z1[id] = z;
+  np[idx00] = npi[idx00] / 128.0f;
 }
 
 void kernel density(global float *x0, global float *y0,
@@ -261,7 +286,7 @@ void kernel density(global float *x0, global float *y0,
   // oct 000,001,010,011,100,101,110,111
   int odx000 = 0;
   int odx001 = ofx > 0 ? 1 : -1;
-  int odx010 = ofy > 0 ? NX : -NY;
+  int odx010 = ofy > 0 ? NX : -NX;
   int odx011 = odx001 + odx010;
   int odx100 = ofz > 0 ? NX * NY : -NX * NY;
   int odx101 = odx100 + odx001;
@@ -278,14 +303,14 @@ void kernel density(global float *x0, global float *y0,
   uint idx01 = idx00 + NZ * NY * NX;
   uint idx02 = idx01 + NZ * NY * NX;
 
-  int f000 = fx1 * fy1 * fz1 / 16384;
-  int f001 = fz1 * fy1 * fx0 / 16384;
-  int f010 = fz1 * fy0 * fx1 / 16384;
-  int f011 = fz1 * fy0 * fx0 / 16384;
-  int f100 = fz0 * fy1 * fx1 / 16384;
-  int f101 = fz0 * fy1 * fx0 / 16384;
-  int f110 = fz0 * fy0 * fx1 / 16384;
-  int f111 = fz0 * fy0 * fx0 / 16384;
+  int f000 = (fx1 * fy1 * fz1) / 16384;
+  int f001 = (fz1 * fy1 * fx0) / 16384;
+  int f010 = (fz1 * fy0 * fx1) / 16384;
+  int f011 = (fz1 * fy0 * fx0) / 16384;
+  int f100 = (fz0 * fy1 * fx1) / 16384;
+  int f101 = (fz0 * fy1 * fx0) / 16384;
+  int f110 = (fz0 * fy0 * fx1) / 16384;
+  int f111 = (fz0 * fy0 * fx0) / 16384;
 
   atomic_add(&npi[idx00 + odx000], q[id] * f000);
   atomic_add(&npi[idx00 + odx001], q[id] * f001);
@@ -294,7 +319,7 @@ void kernel density(global float *x0, global float *y0,
   atomic_add(&npi[idx00 + odx100], q[id] * f100);
   atomic_add(&npi[idx00 + odx101], q[id] * f101);
   atomic_add(&npi[idx00 + odx110], q[id] * f110);
-  atomic_add(&npi[idx00 + odx111], q[id] * f110);
+  atomic_add(&npi[idx00 + odx111], q[id] * f111);
 
   atomic_add(&cji[idx00], ((x - xprev) * 65536.0f) * q[id]);
   atomic_add(&cji[idx01], ((y - yprev) * 65536.0f) * q[id]);

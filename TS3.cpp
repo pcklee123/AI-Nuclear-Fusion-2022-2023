@@ -48,31 +48,29 @@ int main()
     fftwf_init_threads();
 
     int i_time = 0;
-    cout << "get_densityfields " << endl;
+    //  cout << "get_densityfields " << endl;
     get_densityfields(fi, pt, par);
-    cout << "get_densityfields done" << endl;
+    //  cout << "get_densityfields done" << endl;
     int cdt = calcEBV(fi, par);
     // int cdt=0;
-#pragma omp parallel sections
-    {
-#pragma omp section
-        changedt(pt, cdt, par); /* change time step if E or B too big*/
-#pragma omp section
+
+ //   changedt(pt, cdt, par); /* change time step if E or B too big*/
+
 #ifdef Uon_
-        // cout << "calculate the total potential energy U\n";
-        //                  timer.mark();
-        calcU(fi, pt, par);
-        //                 cout << "U: " << timer.elapsed() << "s, ";
+    // cout << "calculate the total potential energy U\n";
+    //                  timer.mark();
+    calcU(fi, pt, par);
+    // cout << "U: " << timer.elapsed() << "s, ";
 #endif
-        cout << "savefiles" << endl;
-        save_files(i_time, t, fi, pt, par);
-        cout << "logentry" << endl;
-        log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
-#pragma omp section
-        cout << "        calc_trilin_constants(fi, par)\n";
-        calc_trilin_constants(fi, par);
-        //  cout << "        calc_trilin_constants(fi, par)\n";
-    }
+    // cout << "savefiles" << endl;
+    save_files(i_time, t, fi, pt, par);
+    //    cout << "logentry" << endl;
+    log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
+
+    // cout << "        calc_trilin_constants(fi, par)\n";
+    calc_trilin_constants(fi, par);
+    // cout << "        calc_trilin_constants(fi, par)\n";
+
 #pragma omp barrier
 
     cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << 0 << ")\n";
@@ -102,14 +100,11 @@ int main()
 
             // calculate constants for each cell for trilinear interpolation
             timer.mark();
-#pragma omp parallel sections
-            {
-#pragma omp section
-                changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
-#pragma omp section
-                calc_trilin_constants(fi, par);
-            }
-#pragma omp barrier
+
+        //    changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
+
+            calc_trilin_constants(fi, par);
+
             cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";
             cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
         }

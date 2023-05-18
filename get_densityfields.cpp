@@ -74,11 +74,6 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    {
       //  cout << "write buffer" << endl;
 
-      queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
-      queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
-      queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
-      queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
-
       queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
       queue.enqueueWriteBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
       queue.enqueueWriteBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
@@ -90,6 +85,10 @@ void get_densityfields(fields *fi, particles *pt, par *par)
       // queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4 * 6 * 2, pt->pos0x[0]);
    }
 
+   queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
+   queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
+   queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
+   queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
    //  set arguments to be fed into the kernel program
    cout << "kernel arguments for electron" << endl;
 
@@ -115,19 +114,25 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    cout << "run kernel for electron done" << endl;
    queue.finish(); // wait for the end of the kernel program
    cout << "read electron density" << endl;
-   queue.enqueueReadBuffer(buff_np_e, CL_TRUE, 0, n_cellsf, fi->np[0]);
-   queue.enqueueReadBuffer(buff_currentj_e, CL_TRUE, 0, n_cellsf * 3, fi->currentj[0]);
-   // ions next
+   if (fastIO)
+   { // is mapping required?
+     // mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
+   }
+   else
+   {
+      queue.enqueueReadBuffer(buff_np_e, CL_TRUE, 0, n_cellsf, fi->np[0]);
+      queue.enqueueReadBuffer(buff_currentj_e, CL_TRUE, 0, n_cellsf * 3, fi->currentj[0]);
+      // ions next
 
-   queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
-   queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
-   queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
-   queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
-   queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
-   queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
+      queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
+      queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
+      queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
+      queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
+      queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
+      queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
 
-   queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
-
+      queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
+   }
    queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
    queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
    queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
@@ -160,8 +165,8 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    }
    else
    {
-      // queue.enqueueReadBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
-      //  queue.enqueueReadBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
+      queue.enqueueReadBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
+      queue.enqueueReadBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
 
       queue.enqueueReadBuffer(buff_np_i, CL_TRUE, 0, n_cellsf, fi->np[1]);
       queue.enqueueReadBuffer(buff_currentj_i, CL_TRUE, 0, n_cellsf * 3, fi->currentj[1]);
@@ -171,7 +176,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
 
 #pragma omp parallel for simd num_threads(nthreads)
       for (unsigned int i = 0; i < n_cells * 3; i++)
-         (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] + (reinterpret_cast<float *>(fi->currentj[1]))[i];
+         (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] / par->dt[0] + (reinterpret_cast<float *>(fi->currentj[1]))[i] / par->dt[1];
 #pragma omp barrier
    }
 
