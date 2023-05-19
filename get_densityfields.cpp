@@ -21,7 +21,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
       else
          info_file << "No unified memory: " << temp << " ";
       fastIO = temp;
-      fastIO = false;
+    //  fastIO = false;
    }
 
    //  create buffers on the device

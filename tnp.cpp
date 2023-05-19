@@ -21,7 +21,7 @@ void tnp(fields *fi, particles *pt, par *par)
       else
          info_file << "No unified memory: " << temp << " ";
       fastIO = temp;
-      fastIO = false;
+      //fastIO = false;
    }
    //  create buffers on the device
    /** IMPORTANT: do not use CL_MEM_USE_HOST_PTR if on dGPU **/
