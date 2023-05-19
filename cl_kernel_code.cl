@@ -164,12 +164,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
     zprev = z;
 
     float vxxe = vx + xE, vyye = vy + yE, vzze = vz + zE;
-    // x += vx + b_det * (-vx * (yyP + zzP) + vyye * (zP + xyP) + vzze * (xzP -
-    // yP) + (1.f + xxP) * xE); y += vy + b_det * (vxxe * (xyP - zP) -  vy *
-    // (xxP + zzP) + vzze * (xP + yzP) + (1.f + yyP) * yE); z += vz + b_det *
-    // (vxxe * (yP + xzP) + vyye * (yzP - xP) -  vz * (xxP + yyP) + (1.f * zzP)
-    // * zE);
-    //   do fma
+
     x += fma(b_det,
              fma(-vx, yyP + zzP,
                  fma(vyye, zP + xyP, fma(vzze, xzP - yP, fma(xxP, xE, xE)))),
@@ -337,4 +332,10 @@ void kernel density(global float *x0, global float *y0,
   currentj[idx00] = cji[idx00] / 65536.0f;
   currentj[idx01] = cji[idx01] / 65536.0f;
   currentj[idx02] = cji[idx02] / 65536.0f;
+}
+
+void kernel trilin_k(global const float8 *a1, // E, B coeff 8 coefficients per component per cell
+                     global const float *a2 // E or B 3 components per cell
+) {
+  uint id = get_global_id(0);
 }

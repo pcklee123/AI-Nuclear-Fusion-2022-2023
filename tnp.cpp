@@ -117,13 +117,14 @@ void tnp(fields *fi, particles *pt, par *par)
    }
 
    kernel_trilin.setArg(0, buff_Ea); // the 1st argument to the kernel program Ea
-   kernel_trilin.setArg(1, buff_E); // Ba
-
-                                    // run the kernel
+   kernel_trilin.setArg(1, buff_E);  // Ba
+   // run the kernel
    queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+   queue.finish(); // wait for the end of the kernel program
+   
    kernel_trilin.setArg(0, buff_Ba); // the 1st argument to the kernel program Ea
-   kernel_trilin.setArg(1, buff_B); // Ba
-      queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+   kernel_trilin.setArg(1, buff_B);  // Ba
+   queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n0), cl::NullRange);
    queue.finish(); // wait for the end of the kernel program
 
    queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
