@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 1
+#define cldevice 0
 #define sphere        // do hot spot  problem
                       // #define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
@@ -10,7 +10,7 @@ constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
-constexpr int n_space = 64;                                      // must be 2 to power of n
+constexpr int n_space = 32;                                      // must be 2 to power of n
 constexpr float nback = 8;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
@@ -20,7 +20,7 @@ constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 1;   // in T
+constexpr float Bmax0 = 1;    // in T
 constexpr float Emax0 = 1e7; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 1e-3; // in T
@@ -39,7 +39,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc = 10;            // f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int nc = 1;            // f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
@@ -137,19 +137,23 @@ struct particles // particles
 
 struct fields                                              // particles
 {                                                          //[{x,y,z}][k][j][i]
-    float (*E)[n_space_divz][n_space_divy][n_space_divx];  // selfgenerated E field[3]
-    float (*Ee)[n_space_divz][n_space_divy][n_space_divx]; // External E field[3]
-    float (*Ea)[n_space_divy][n_space_divx][3][ncoeff];    // coefficients for Trilinear interpolation Electric field
+    float (*E)[n_space_divz][n_space_divy][n_space_divx];  // selfgenerated E field[3][k][j][i]
+    float (*Ee)[n_space_divz][n_space_divy][n_space_divx]; // External E field[3][k][j][i]
+
+    // float (*Ea)[n_space_divy][n_space_divx][3][ncoeff];    // coefficients for Trilinear interpolation Electric field Ea[k][j][i][3][8] or Ea[3][k][j][i][8]
+    float (*Ea)[n_space_divz][n_space_divy][n_space_divx][ncoeff]; // coefficients for Trilinear interpolation Electric field Ea[k][j][i][3][8] or Ea[3][k][j][i][8]
+
     float (*B)[n_space_divz][n_space_divy][n_space_divx];
     float (*Be)[n_space_divz][n_space_divy][n_space_divx];
-    float (*Ba)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
+    // float (*Ba)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
+    float (*Ba)[n_space_divz][n_space_divy][n_space_divx][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
     float (*V)[n_space_divz][n_space_divy][n_space_divx];
     float (*np)[n_space_divz][n_space_divy][n_space_divx];
     int (*npi)[n_space_divy][n_space_divx];
     int (*np_centeri)[n_space_divz][n_space_divy][n_space_divx];
     float (*npt)[n_space_divy][n_space_divx];
     float (*currentj)[3][n_space_divz][n_space_divy][n_space_divx];
-    int (*cji)[n_space_divz][n_space_divy][n_space_divx];//[3][z][y][x]
+    int (*cji)[n_space_divz][n_space_divy][n_space_divx]; //[3][z][y][x]
     int (*cj_centeri)[3][n_space_divz][n_space_divy][n_space_divx];
     float (*jc)[n_space_divz][n_space_divy][n_space_divx];
 };

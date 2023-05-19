@@ -54,7 +54,7 @@ int main()
     int cdt = calcEBV(fi, par);
     // int cdt=0;
 
- //   changedt(pt, cdt, par); /* change time step if E or B too big*/
+    changedt(pt, cdt, par); /* change time step if E or B too big*/
 
 #ifdef Uon_
     // cout << "calculate the total potential energy U\n";
@@ -68,7 +68,7 @@ int main()
     log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 
     // cout << "        calc_trilin_constants(fi, par)\n";
-    calc_trilin_constants(fi, par);
+    // calc_trilin_constants(fi, par);
     // cout << "        calc_trilin_constants(fi, par)\n";
 
 #pragma omp barrier
@@ -88,7 +88,7 @@ int main()
             t += par->dt[0] * par->ncalcp[0];
 
             //  find number of particle and current density fields
-            timer.mark();
+            //  timer.mark();
             // get_densityfields(fi, pt, par);
             //  cout << "density: " << timer.elapsed() << "s, ";
 
@@ -101,9 +101,9 @@ int main()
             // calculate constants for each cell for trilinear interpolation
             timer.mark();
 
-        //    changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
+            changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
 
-            calc_trilin_constants(fi, par);
+            //  calc_trilin_constants(fi, par);
 
             cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";
             cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";

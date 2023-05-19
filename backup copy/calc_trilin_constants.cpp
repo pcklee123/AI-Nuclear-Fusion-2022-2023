@@ -2,6 +2,7 @@
 // calculate constants for each cell for trilinear interpolation
 void calc_trilin_constants(fields *fi, par *par)
 {
+    return;
     float dV = -par->dd[0] * par->dd[1] * par->dd[2];
     const float dV1 = 1 / dV;
     // const int c_skip = n_cells;
