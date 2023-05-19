@@ -335,20 +335,12 @@ void kernel density(global float *x0, global float *y0,
 }
 
 void kernel trilin_k(
-    global float8 *Ea, // E, B coeff 8 coefficients per component per cell
-                       // Ea[k][j][i][3][8] or   Ea[3][k][j][i][8]
+    global float8 *Ea, // E, B coeff Ea[k][j][i][3][8] according to tnp_k
     global const float *E_flat // E or B 3 components per cell E[3][k][j][i]
 ) {
   const float dV = DX * DY * DZ;
   const float dV1 = 1.0f / dV;
-  const int odx000 = 0;
-  const int odx001 = 1;  // iskip
-  const int odx010 = NX; // jskip
-  const int odx011 = odx001 + odx010;
-  const int odx100 = NY * NX;
-  const int odx101 = odx100 + odx001;
-  const int odx110 = odx100 + odx010;
-  const int odx111 = odx100 + odx011;
+
   const unsigned int n_cells = NX * NY * NZ;
   int offset = get_global_id(0);
   int co = 0;
@@ -356,19 +348,23 @@ void kernel trilin_k(
     unsigned int k = offset / (NX * NY);
     unsigned int j = offset / NX;
     unsigned int i = offset % NX;
-    // const unsigned int z_offset = k * NX * NY;
-    //    const unsigned int y_offset = j * NX;
+    const int odx000 = 0;
+    const int odx001 = i < NX ? 1 : 0;  // iskip
+    const int odx010 = j < NY ? NX : 0; // jskip
+    const int odx011 = odx001 + odx010;
+    const int odx100 = k < NZ ? NY * NX : 0;
+    const int odx101 = odx100 + odx001;
+    const int odx110 = odx100 + odx010;
+    const int odx111 = odx100 + odx011;
 
     const float z0 = k * DZ + ZLOW;
     const float z1 = z0 + DZ;
     const float y0 = j * DY + YLOW;
     const float y1 = y0 + DY;
-    const float y0z0 = y0 * z0, y0z1 = y0 * z1, y1z0 = y1 * z0, y1z1 = y1 * z1;
-
-    //  offset += z_offset + y_offset;
-
     const float x0 = i * DX + XLOW;
     const float x1 = x0 + DX;
+
+    const float y0z0 = y0 * z0, y0z1 = y0 * z1, y1z0 = y1 * z0, y1z1 = y1 * z1;
     const float x0y0z0 = x0 * y0z0, x0y0z1 = x0 * y0z1, x0y1z0 = x0 * y1z0,
                 x0y1z1 = x0 * y1z1;
     const float x1y0z0 = x1 * y0z0, x1y0z1 = x1 * y0z1, x1y1z0 = x1 * y1z0,
@@ -385,28 +381,29 @@ void kernel trilin_k(
     const float c110 = E_flat[offset + co + odx011]; // E[c][k][j1][i1];
     const float c111 = E_flat[offset + co + odx111]; // E[c][k1][j1][i1];
 
-    int oa = (offset + co) * 8;
-    Ea[oa] = (-c000 * x1y1z1 + c001 * x1y1z0 + c010 * x1y0z1 - c011 * x1y0z0 +
-              c100 * x0y1z1 - c101 * x0y1z0 - c110 * x0y0z1 + c111 * x0y0z0) *
-             dV1;
-    Ea[oa + 1] = ((c000 - c100) * y1z1 + (-c001 + c101) * y1z0 +
-                  (-c010 + c110) * y0z1 + (c011 - c111) * y0z0) *
-                 dV1;
-    Ea[oa + 2] = ((c000 - c010) * x1z1 + (-c001 + c011) * x1z0 +
-                  (-c100 + c110) * x0z1 + (c101 - c111) * x0z0) *
-                 dV1;
-    Ea[oa + 3] = ((c000 - c001) * x1y1 + (-c010 + c011) * x1y0 +
-                  (-c100 + c101) * x0y1 + (c110 - c111) * x0y0) *
-                 dV1;
-    Ea[oa + 4] =
+    int oa = (offset * 3 + c);
+    Ea[oa].s0 =
+        (-c000 * x1y1z1 + c001 * x1y1z0 + c010 * x1y0z1 - c011 * x1y0z0 +
+         c100 * x0y1z1 - c101 * x0y1z0 - c110 * x0y0z1 + c111 * x0y0z0) *
+        dV1;
+    Ea[oa].s1 = ((c000 - c100) * y1z1 + (-c001 + c101) * y1z0 +
+                 (-c010 + c110) * y0z1 + (c011 - c111) * y0z0) *
+                dV1;
+    Ea[oa].s2 = ((c000 - c010) * x1z1 + (-c001 + c011) * x1z0 +
+                 (-c100 + c110) * x0z1 + (c101 - c111) * x0z0) *
+                dV1;
+    Ea[oa].s3 = ((c000 - c001) * x1y1 + (-c010 + c011) * x1y0 +
+                 (-c100 + c101) * x0y1 + (c110 - c111) * x0y0) *
+                dV1;
+    Ea[oa].s4 =
         ((-c000 + c010 + c100 - c110) * z1 + (c001 - c011 - c101 + c111) * z0) *
         dV1;
-    Ea[oa + 5] =
+    Ea[oa].s5 =
         ((-c000 + c001 + c100 - c101) * y1 + (c010 - c011 - c110 + c111) * y0) *
         dV1;
-    Ea[oa + 6] =
+    Ea[oa].s6 =
         ((-c000 + c001 + c010 - c011) * x1 + (c100 - c101 - c110 + c111) * x0) *
         dV1;
-    Ea[oa + 7] = (c000 - c001 - c010 + c011 - c100 + c101 + c110 - c111) * dV1;
+    Ea[oa].s7 = (c000 - c001 - c010 + c011 - c100 + c101 + c110 - c111) * dV1;
   }
 }

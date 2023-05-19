@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 1
+#define cldevice 0
 #define sphere        // do hot spot  problem
                       // #define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
@@ -20,7 +20,7 @@ constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 1;   // in T
+constexpr float Bmax0 = 1;    // in T
 constexpr float Emax0 = 1e7; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 1e-3; // in T
@@ -139,17 +139,21 @@ struct fields                                              // particles
 {                                                          //[{x,y,z}][k][j][i]
     float (*E)[n_space_divz][n_space_divy][n_space_divx];  // selfgenerated E field[3][k][j][i]
     float (*Ee)[n_space_divz][n_space_divy][n_space_divx]; // External E field[3][k][j][i]
-    float (*Ea)[n_space_divy][n_space_divx][3][ncoeff];    // coefficients for Trilinear interpolation Electric field Ea[k][j][i][3][8]
+
+    // float (*Ea)[n_space_divy][n_space_divx][3][ncoeff];    // coefficients for Trilinear interpolation Electric field Ea[k][j][i][3][8] or Ea[3][k][j][i][8]
+    float (*Ea)[n_space_divz][n_space_divy][n_space_divx][ncoeff]; // coefficients for Trilinear interpolation Electric field Ea[k][j][i][3][8] or Ea[3][k][j][i][8]
+
     float (*B)[n_space_divz][n_space_divy][n_space_divx];
     float (*Be)[n_space_divz][n_space_divy][n_space_divx];
-    float (*Ba)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
+    // float (*Ba)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
+    float (*Ba)[n_space_divz][n_space_divy][n_space_divx][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
     float (*V)[n_space_divz][n_space_divy][n_space_divx];
     float (*np)[n_space_divz][n_space_divy][n_space_divx];
     int (*npi)[n_space_divy][n_space_divx];
     int (*np_centeri)[n_space_divz][n_space_divy][n_space_divx];
     float (*npt)[n_space_divy][n_space_divx];
     float (*currentj)[3][n_space_divz][n_space_divy][n_space_divx];
-    int (*cji)[n_space_divz][n_space_divy][n_space_divx];//[3][z][y][x]
+    int (*cji)[n_space_divz][n_space_divy][n_space_divx]; //[3][z][y][x]
     int (*cj_centeri)[3][n_space_divz][n_space_divy][n_space_divx];
     float (*jc)[n_space_divz][n_space_divy][n_space_divx];
 };

@@ -11,7 +11,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    static bool fastIO;
    static bool first = true;
    static int ncalc_e = 0, ncalc_i = 0;
-   cout << "check for unified memory " << endl;
+   // cout << "check for unified memory " << endl;
    if (first)
    { // get whether or not we are on an iGPU/similar, and can use certain memmory optimizations
       bool temp;
@@ -39,18 +39,18 @@ void get_densityfields(fields *fi, particles *pt, par *par)
 
    static cl::Buffer buff_npi(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi, fastIO ? fi->npi : NULL);
    static cl::Buffer buff_cji(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3, fastIO ? fi->cji : NULL);
-   cout << "buffers " << endl;
+   // cout << "buffers " << endl;
    static cl::Buffer buff_np_centeri(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3, fastIO ? fi->np_centeri : NULL);
    static cl::Buffer buff_cj_centeri(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3 * 3, fastIO ? fi->cj_centeri : NULL);
-   cout << "buffers " << endl;
+   //  cout << "buffers " << endl;
    static cl::Buffer buff_x0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[0] : NULL); // x0
    static cl::Buffer buff_y0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[0] : NULL); // y0
    static cl::Buffer buff_z0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0z[0] : NULL); // z0
    static cl::Buffer buff_x1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1x[0] : NULL); // x1
    static cl::Buffer buff_y1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1y[0] : NULL); // y1
    static cl::Buffer buff_z1_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos1z[0] : NULL); // z1
-   cout << "buffers " << endl;
-   static cl::Buffer buff_q_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->q[0] : NULL); // q
+                                                                                                                                     //  cout << "buffers " << endl;
+   static cl::Buffer buff_q_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->q[0] : NULL);      // q
 
    static cl::Buffer buff_x0_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[1] : NULL); // x0
    static cl::Buffer buff_y0_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[1] : NULL); // y0
@@ -61,7 +61,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
 
    static cl::Buffer buff_q_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->q[1] : NULL); // q
 
-   cout << "command q" << endl; //  create queue to which we will push commands for the device.
+   // cout << "command q" << endl; //  create queue to which we will push commands for the device.
 
    static cl::CommandQueue queue(context_g, default_device_g);
    cl::Kernel kernel_add = cl::Kernel(program_g, "density"); // select the kernel program to run
@@ -90,7 +90,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
    queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
    //  set arguments to be fed into the kernel program
-   cout << "kernel arguments for electron" << endl;
+   // cout << "kernel arguments for electron" << endl;
 
    kernel_add.setArg(0, buff_x0_e); // x0
    kernel_add.setArg(1, buff_y0_e); // y0
@@ -107,13 +107,13 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    kernel_add.setArg(11, buff_cj_centeri); // npt
    kernel_add.setArg(12, buff_q_e);        // q
                                            // kernel_add.setArg(14, sizeof(int), n_cells);          // ncells
-   cout << "run kernel for electron" << endl;
+                                           // cout << "run kernel for electron" << endl;
 
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
-   cout << "run kernel for electron done" << endl;
+   // cout << "run kernel for electron done" << endl;
    queue.finish(); // wait for the end of the kernel program
-   cout << "read electron density" << endl;
+                   // cout << "read electron density" << endl;
    if (fastIO)
    { // is mapping required?
      // mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
@@ -154,7 +154,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    kernel_add.setArg(11, buff_cj_centeri); // npt
    kernel_add.setArg(12, buff_q_i);        // q
                                            // kernel_add.setArg(14, sizeof(int), &n_cells);          // ncells
-   cout << "run kernel for ions" << endl;
+                                           // cout << "run kernel for ions" << endl;
    //  run the kernel
    queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
    queue.finish(); // wait for the end of the kernel program

@@ -199,11 +199,11 @@ fields *alloc_fields(par *par)
 
     f->E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells));                             // selfgenerated E field
     f->Ee = new float[3][n_space_divz][n_space_divy][n_space_divx];                                                                             // External E field
-    f->Ea = static_cast<float(*)[n_space_divy][n_space_divx][3][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Electric field
+    f->Ea = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Electric field
 
     f->B = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // new float[3][n_space_divz][n_space_divy][n_space_divx];
     f->Be = new float[3][n_space_divz][n_space_divy][n_space_divx];
-    f->Ba = static_cast<float(*)[n_space_divy][n_space_divx][3][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Magnetic field
+    f->Ba = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Magnetic field
 
     f->V = reinterpret_cast<float(&)[1][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(n_cells));
 
