@@ -112,7 +112,7 @@ void save_files(int i_time, double t, fields *fi, particles *pt, par *par);
 void get_densityfields(fields *fi, particles *pt, par *par);
 void calc_trilin_constants(fields *fi, par *par);
 
-void changedt(particles *p, int inc, par *par);
+int changedt(particles *p, int inc, par *par);
 
 void calcU(fields *fi, particles *pt, par *par);
 

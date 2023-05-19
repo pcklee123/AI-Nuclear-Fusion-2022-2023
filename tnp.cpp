@@ -112,6 +112,7 @@ void tnp(fields *fi, particles *pt, par *par)
          queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
       }
    }
+   int cdt;
    for (int ntime = 0; ntime < par->nc; ntime++)
    {
       kernel_trilin.setArg(0, buff_Ea); // the 1st argument to the kernel program Ea
@@ -214,7 +215,7 @@ void tnp(fields *fi, particles *pt, par *par)
       //   timer.mark();
       // set externally applied fields this is inside time loop so we can set time varying E and B field
       // calcEeBe(Ee,Be,t); // find E field must work out every i,j,k depends on charge in every other cell
-      int cdt = calcEBV(fi, par);
+      cdt = calcEBV(fi, par);
       //    cout << "EBV: " << timer.elapsed() << "s, ";
       if (fastIO)
       { // is mapping required?
@@ -225,7 +226,6 @@ void tnp(fields *fi, particles *pt, par *par)
          queue.enqueueWriteBuffer(buff_E, CL_TRUE, 0, n_cellsf * 3, fi->E);
          queue.enqueueWriteBuffer(buff_B, CL_TRUE, 0, n_cellsf * 3, fi->B);
       }
-      changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
    }
    if (fastIO)
    { // is mapping required?
@@ -249,6 +249,23 @@ void tnp(fields *fi, particles *pt, par *par)
 
       queue.enqueueReadBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
       queue.enqueueReadBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
+      if (changedt(pt, cdt, par))
+      {
+         queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
+         queue.enqueueWriteBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
+         queue.enqueueWriteBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
+         queue.enqueueWriteBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
+         queue.enqueueWriteBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
+         queue.enqueueWriteBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
+
+         queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
+         queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
+         queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
+         queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
+         queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
+         queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
+         // cout<<"change_dt done"<<endl;
+      };
    }
    first = false;
 }

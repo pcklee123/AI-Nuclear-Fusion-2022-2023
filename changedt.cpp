@@ -1,5 +1,5 @@
 #include "include/traj.h"
-void changedt(particles *pt, int cdt, par *par)
+int changedt(particles *pt, int cdt, par *par)
 {
     float inc = 0;
     //   cout << endl<< cdt << " ";
@@ -45,10 +45,12 @@ void changedt(particles *pt, int cdt, par *par)
         //    cout << "dt: increase B too low E too low\n";
         break;
     default:
-     //   cout << "error cdt" << endl;
-        return;
+        //   cout << "no change dt" << endl;
+        return 0;
     }
 #pragma omp parallel for simd
     for (int n = 0; n < par->n_part[0] * 3 * 2; n++)
         pt->pos0[n] = pt->pos1[n] - (pt->pos1[n] - pt->pos0[n]) * inc;
+    //   cout << "dt changed" << endl;
+    return 1;
 }

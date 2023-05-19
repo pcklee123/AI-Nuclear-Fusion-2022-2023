@@ -1,13 +1,13 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 0
+#define cldevice 1
 #define sphere        // do hot spot  problem
                       // #define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
 #define Temp_d 1e7    // in Kelvin
-constexpr int f1 = 1; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+constexpr int f1 = 32; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 2;
-constexpr float incf = 1.2f;        // increment
+constexpr float incf = 1.0f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
 constexpr int n_space = 32;                                      // must be 2 to power of n
@@ -21,7 +21,7 @@ constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 1;    // in T
-constexpr float Emax0 = 1e9; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float Emax0 = 1e10; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 1e-3; // in T
 constexpr float Ez0 = 0;
