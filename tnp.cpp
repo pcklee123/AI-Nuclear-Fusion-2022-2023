@@ -81,44 +81,39 @@ void tnp(fields *fi, particles *pt, par *par)
    par->Ecoef = {0, 0};
 #endif
    // cout << " Bconst=" << par->Bcoef[0] << ", Econst=" << par->Ecoef[0] << endl;
-
-   for (int ntime = 0; ntime < par->nc; ntime++)
+   if (fastIO)
+   { // is mapping required? // Yes we might need to map because OpenCL does not guarantee that the data will be shared, alternatively use SVM
+     // auto * mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_WRITE, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
+   }
+   else
    {
 
-      // write input arrays to the device
-      if (fastIO)
-      { // is mapping required? // Yes we might need to map because OpenCL does not guarantee that the data will be shared, alternatively use SVM
-        // auto * mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_WRITE, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
-      }
-      else
-      {
-         //  cout << "write buffer" << endl;
+      if (first)
+      { //  cout << "write buffer" << endl;
          queue.enqueueWriteBuffer(buff_E, CL_TRUE, 0, n_cellsf * 3, fi->E);
          queue.enqueueWriteBuffer(buff_B, CL_TRUE, 0, n_cellsf * 3, fi->B);
-         //  queue.enqueueWriteBuffer(buff_Ea, CL_TRUE, 0, sizeof(float) * nc, fi->Ea);
-         //  queue.enqueueWriteBuffer(buff_Ba, CL_TRUE, 0, sizeof(float) * nc, fi->Ba);
-         if (first)
-         {
-            queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
-            queue.enqueueWriteBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
-            queue.enqueueWriteBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
-            queue.enqueueWriteBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
-            queue.enqueueWriteBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
-            queue.enqueueWriteBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
 
-            queue.enqueueWriteBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
+         queue.enqueueWriteBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
+         queue.enqueueWriteBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
+         queue.enqueueWriteBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
+         queue.enqueueWriteBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
+         queue.enqueueWriteBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
+         queue.enqueueWriteBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
 
-            queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
-            queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
-            queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
-            queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
-            queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
-            queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
+         queue.enqueueWriteBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
 
-            queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
-         }
+         queue.enqueueWriteBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
+         queue.enqueueWriteBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
+         queue.enqueueWriteBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
+         queue.enqueueWriteBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
+         queue.enqueueWriteBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
+         queue.enqueueWriteBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
+
+         queue.enqueueWriteBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
       }
-
+   }
+   for (int ntime = 0; ntime < par->nc; ntime++)
+   {
       kernel_trilin.setArg(0, buff_Ea); // the 1st argument to the kernel program Ea
       kernel_trilin.setArg(1, buff_E);  // Ba
       // run the kernel
@@ -133,7 +128,6 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
       queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
       queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
-      // return;
       //  set arguments to be fed into the kernel program
       //  cout << "kernel arguments for electron" << endl;
 
@@ -200,20 +194,6 @@ void tnp(fields *fi, particles *pt, par *par)
       }
       else
       {
-         queue.enqueueReadBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
-         queue.enqueueReadBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
-         queue.enqueueReadBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
-         queue.enqueueReadBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
-         queue.enqueueReadBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
-         queue.enqueueReadBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
-
-         queue.enqueueReadBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
-         queue.enqueueReadBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
-         queue.enqueueReadBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
-         queue.enqueueReadBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
-         queue.enqueueReadBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
-         queue.enqueueReadBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
-
          queue.enqueueReadBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
          queue.enqueueReadBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
 
@@ -231,13 +211,44 @@ void tnp(fields *fi, particles *pt, par *par)
       for (unsigned int i = 0; i < n_cells * 3; i++)
          (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] / par->dt[0] + (reinterpret_cast<float *>(fi->currentj[1]))[i] / par->dt[1];
 #pragma omp barrier
-   //   timer.mark();
+      //   timer.mark();
       // set externally applied fields this is inside time loop so we can set time varying E and B field
       // calcEeBe(Ee,Be,t); // find E field must work out every i,j,k depends on charge in every other cell
       int cdt = calcEBV(fi, par);
-  //    cout << "EBV: " << timer.elapsed() << "s, ";
-
+      //    cout << "EBV: " << timer.elapsed() << "s, ";
+      if (fastIO)
+      { // is mapping required?
+        // mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
+      }
+      else
+      {
+         queue.enqueueWriteBuffer(buff_E, CL_TRUE, 0, n_cellsf * 3, fi->E);
+         queue.enqueueWriteBuffer(buff_B, CL_TRUE, 0, n_cellsf * 3, fi->B);
+      }
       changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
+   }
+   if (fastIO)
+   { // is mapping required?
+     // mapped_buff_x0_e = (float *)queue.enqueueMapBuffer(buff_x0_e, CL_TRUE, CL_MAP_READ, 0, sizeof(float) * n); queue.enqueueUnmapMemObject(buff_x0_e, mapped_buff_x0_e);
+   }
+   else
+   {
+      queue.enqueueReadBuffer(buff_x0_e, CL_TRUE, 0, n4, pt->pos0x[0]);
+      queue.enqueueReadBuffer(buff_y0_e, CL_TRUE, 0, n4, pt->pos0y[0]);
+      queue.enqueueReadBuffer(buff_z0_e, CL_TRUE, 0, n4, pt->pos0z[0]);
+      queue.enqueueReadBuffer(buff_x1_e, CL_TRUE, 0, n4, pt->pos1x[0]);
+      queue.enqueueReadBuffer(buff_y1_e, CL_TRUE, 0, n4, pt->pos1y[0]);
+      queue.enqueueReadBuffer(buff_z1_e, CL_TRUE, 0, n4, pt->pos1z[0]);
+
+      queue.enqueueReadBuffer(buff_x0_i, CL_TRUE, 0, n4, pt->pos0x[1]);
+      queue.enqueueReadBuffer(buff_y0_i, CL_TRUE, 0, n4, pt->pos0y[1]);
+      queue.enqueueReadBuffer(buff_z0_i, CL_TRUE, 0, n4, pt->pos0z[1]);
+      queue.enqueueReadBuffer(buff_x1_i, CL_TRUE, 0, n4, pt->pos1x[1]);
+      queue.enqueueReadBuffer(buff_y1_i, CL_TRUE, 0, n4, pt->pos1y[1]);
+      queue.enqueueReadBuffer(buff_z1_i, CL_TRUE, 0, n4, pt->pos1z[1]);
+
+      queue.enqueueReadBuffer(buff_q_e, CL_TRUE, 0, n4, pt->q[0]);
+      queue.enqueueReadBuffer(buff_q_i, CL_TRUE, 0, n4, pt->q[1]);
    }
    first = false;
 }
