@@ -156,7 +156,7 @@ void info(par *par)
         info_file << "Data extent z, 0," << n_space - 1 << endl;
         info_file << "electron Temp+e = ," << Temp_e << ",K" << endl;
         info_file << "Maximum expected B = ," << par->Bmax << endl;
-        info_file << "time step between prints = ," << par->dt[0] * par->ncalcp[0] * nc << ",s" << endl;
+        info_file << "time step between prints = ," << par->dt[0] * par->ncalcp[0] * par->nc << ",s" << endl;
         info_file << "time step between EBcalc = ," << par->dt[0] * par->ncalcp[0] << ",s" << endl;
         info_file << "dt_e = ," << par->dt[0] << ",s" << endl;
         info_file << "dt_i = ," << par->dt[1] << ",s" << endl;

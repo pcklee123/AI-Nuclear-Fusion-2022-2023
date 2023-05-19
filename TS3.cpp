@@ -23,11 +23,12 @@ int main()
     particles *pt = alloc_particles(par);
     const unsigned int n_cells = n_space_divx * n_space_divy * n_space_divz;
     fields *fi = alloc_fields(par);
-
     int total_ncalc[2] = {0, 0}; // particle 0 - electron, particle 1 deuteron
+    info(par);                   // printout initial info.csv file
     cout << "Start up time = " << timer.replace() << "s\n";
     // startup stuff set output path opencl and print initial info
-    info(par); // printout initial info.csv file
+
+    timer.mark();
 #define generateRandom
 #ifdef generateRandom
 #ifdef sphere
@@ -53,7 +54,6 @@ int main()
     //  cout << "get_densityfields done" << endl;
     int cdt = calcEBV(fi, par);
     // int cdt=0;
-
     changedt(pt, cdt, par); /* change time step if E or B too big*/
 
 #ifdef Uon_
@@ -67,61 +67,32 @@ int main()
     //    cout << "logentry" << endl;
     log_entry(0, 0, cdt, total_ncalc, t, par); // Write everything to log
 
-    // cout << "        calc_trilin_constants(fi, par)\n";
-    // calc_trilin_constants(fi, par);
-    // cout << "        calc_trilin_constants(fi, par)\n";
-
 #pragma omp barrier
 
     cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << 0 << ")\n";
 
     for (i_time = 1; i_time < ndatapoints; i_time++)
     {
-        for (int ntime = 0; ntime < nc; ntime++)
-        {
-            timer.mark();     // For timestep
-            timer.mark();     // Work out motion
-            tnp(fi, pt, par); //  calculate the next position par->ncalcp[p] times
-            for (int p = 0; p < 2; ++p)
-                total_ncalc[p] += par->ncalcp[p];
-            cout << "motion: " << timer.elapsed() << "s, ";
-            t += par->dt[0] * par->ncalcp[0];
+        timer.mark();     // For timestep
+        timer.mark();     // Work out motion
+        tnp(fi, pt, par); //  calculate the next position par->ncalcp[p] times
+        for (int p = 0; p < 2; ++p)
+            total_ncalc[p] += par->nc * par->ncalcp[p];
+        cout << "motion: " << timer.elapsed() << "s, ";
+        t += par->dt[0] * par->ncalcp[0] * par->nc;
 
-            //  find number of particle and current density fields
-            //  timer.mark();
-            // get_densityfields(fi, pt, par);
-            //  cout << "density: " << timer.elapsed() << "s, ";
-
-            timer.mark();
-            // set externally applied fields this is inside time loop so we can set time varying E and B field
-            // calcEeBe(Ee,Be,t); // find E field must work out every i,j,k depends on charge in every other cell
-            int cdt = calcEBV(fi, par);
-            cout << "EBV: " << timer.elapsed() << "s, ";
-
-            // calculate constants for each cell for trilinear interpolation
-            timer.mark();
-
-            changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
-
-            //  calc_trilin_constants(fi, par);
-
-            cout << "trilin, calcU ... :  " << timer.elapsed() << "s\n";
-            cout << i_time << "." << ntime << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
-        }
-        // print out all files for paraview
+        cout << i_time << "." << par->nc << " t = " << t << "(compute_time = " << timer.elapsed() << "s) : ";
 
 #ifdef Uon_
         //        cout << "calculate the total potential energy U\n";
         // timer.mark();// calculate the total potential energy U
-        calcU(fi, pt, par); // cout << "U: " << timer.elapsed() << "s, ";
-                            //       cout << "calculate the total potential energy U done\n";
+        calcU(fi, pt, par);
+        //       cout << "calculate the total potential energy U done\n";
+        // cout << "U: " << timer.elapsed() << "s, ";
 #endif
-        timer.mark();
-        //      cout << "savefiles" << endl;
-
-        save_files(i_time, t, fi, pt, par);
+        timer.mark();                       //      cout << "savefiles" << endl;
+        save_files(i_time, t, fi, pt, par); // print out all files for paraview
         //        cout << "logentry" << endl;
-
         log_entry(i_time, 0, cdt, total_ncalc, t, par); // cout<<"log entry done"<<endl;
         cout << "print data: " << timer.elapsed() << "s (no. of electron time steps calculated: " << total_ncalc[0] << ")\n";
     }

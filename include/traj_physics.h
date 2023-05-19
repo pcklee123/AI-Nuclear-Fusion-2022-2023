@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 1
+#define cldevice 0
 #define sphere        // do hot spot  problem
                       // #define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
@@ -39,7 +39,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc = 1;            // f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int nc1 = 10;            // f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
@@ -111,14 +111,12 @@ struct par // useful parameters
     float Ecoef[2] = {0, 0};
     float Bcoef[2] = {0, 0};
     unsigned int ncalcp[2] = {md_me, 1};
+    unsigned int nc=nc1;
     unsigned int n_partp[2] = {n_parte, n_partd}; // 0,number of "super" electrons, electron +deuteriom ions, total
     unsigned int cl_align = 4096;
     std::string outpath;
 };
 
-struct field // fields
-{
-};
 
 struct particles // particles
 {
