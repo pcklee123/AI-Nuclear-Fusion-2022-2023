@@ -120,13 +120,12 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_trilin.setArg(1, buff_E);  // Ba
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n_cells), cl::NullRange);
-   //queue.finish(); // wait for the end of the kernel program
+   // queue.finish(); // wait for the end of the kernel program
 
    kernel_trilin.setArg(0, buff_Ba); // the 1st argument to the kernel program Ea
    kernel_trilin.setArg(1, buff_B);  // Ba
    queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n_cells), cl::NullRange);
-//   queue.finish(); // wait for the end of the kernel program
-
+   //
    queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
    queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
    queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
@@ -156,7 +155,7 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_tnp.setArg(18, buff_q_e);                      // q
 
    // cout << "run kernel for electron" << endl;
-
+   queue.finish(); // wait for the end of the kernel program
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_tnp, cl::NullRange, cl::NDRange(n0), cl::NullRange);
 
