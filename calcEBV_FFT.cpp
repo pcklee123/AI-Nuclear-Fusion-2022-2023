@@ -395,6 +395,7 @@ int calcEBV(fields *fi, par *par)
 
 #ifdef Uon_
 #ifdef Eon_ // if both Uon and Eon are defined
+/*
     {
         // Perform estimate of electric potential energy
         size_t i, j, k, jj = 0;
@@ -408,6 +409,7 @@ int calcEBV(fields *fi, par *par)
         EUtot *= 0.5f; // * e_charge / ev_to_j; <- this is just 1
         cout << "Eele (estimate): " << EUtot << ", ";
     }
+    */
 #endif
 #endif
 

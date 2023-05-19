@@ -231,11 +231,11 @@ void tnp(fields *fi, particles *pt, par *par)
       for (unsigned int i = 0; i < n_cells * 3; i++)
          (reinterpret_cast<float *>(fi->jc))[i] = (reinterpret_cast<float *>(fi->currentj[0]))[i] / par->dt[0] + (reinterpret_cast<float *>(fi->currentj[1]))[i] / par->dt[1];
 #pragma omp barrier
-      timer.mark();
+   //   timer.mark();
       // set externally applied fields this is inside time loop so we can set time varying E and B field
       // calcEeBe(Ee,Be,t); // find E field must work out every i,j,k depends on charge in every other cell
       int cdt = calcEBV(fi, par);
-      cout << "EBV: " << timer.elapsed() << "s, ";
+  //    cout << "EBV: " << timer.elapsed() << "s, ";
 
       changedt(pt, cdt, par); // cout<<"change_dt done"<<endl;
    }
