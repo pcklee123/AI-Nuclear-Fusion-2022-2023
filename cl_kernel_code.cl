@@ -60,6 +60,12 @@ void kernel vector_muls_addv(global float *A, global const float *B,
   A[i] = Bb * A[i] + C[i];  // Do the operation
 }
 
+void kernel vector_add(global float *A, global const float *B,
+                             global const float *C) {
+  int i = get_global_id(0); // Get index of current element processed
+  A[i] = B[i] + C[i];  // Do the operation
+}
+
 void kernel vector_muls(global float *A, global const float *B) {
   float Bb = B[0];
   int i = get_global_id(0); // Get index of current element processed
@@ -338,6 +344,7 @@ void kernel trilin_k(
     global float8 *Ea, // E, B coeff Ea[k][j][i][3][8] according to tnp_k
     global const float *E_flat // E or B 3 components per cell E[3][k][j][i]
 ) {
+  //return;
   const float dV = DX * DY * DZ;
   const float dV1 = 1.0f / dV;
 
