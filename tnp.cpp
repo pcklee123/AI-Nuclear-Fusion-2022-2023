@@ -121,7 +121,7 @@ void tnp(fields *fi, particles *pt, par *par)
    // run the kernel
    queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n_cells), cl::NullRange);
    queue.finish(); // wait for the end of the kernel program
-   
+
    kernel_trilin.setArg(0, buff_Ba); // the 1st argument to the kernel program Ea
    kernel_trilin.setArg(1, buff_B);  // Ba
    queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n_cells), cl::NullRange);

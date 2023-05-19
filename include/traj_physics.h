@@ -137,9 +137,9 @@ struct particles // particles
 
 struct fields                                              // particles
 {                                                          //[{x,y,z}][k][j][i]
-    float (*E)[n_space_divz][n_space_divy][n_space_divx];  // selfgenerated E field[3]
-    float (*Ee)[n_space_divz][n_space_divy][n_space_divx]; // External E field[3]
-    float (*Ea)[n_space_divy][n_space_divx][3][ncoeff];    // coefficients for Trilinear interpolation Electric field
+    float (*E)[n_space_divz][n_space_divy][n_space_divx];  // selfgenerated E field[3][k][j][i]
+    float (*Ee)[n_space_divz][n_space_divy][n_space_divx]; // External E field[3][k][j][i]
+    float (*Ea)[n_space_divy][n_space_divx][3][ncoeff];    // coefficients for Trilinear interpolation Electric field Ea[k][j][i][3][8]
     float (*B)[n_space_divz][n_space_divy][n_space_divx];
     float (*Be)[n_space_divz][n_space_divy][n_space_divx];
     float (*Ba)[n_space_divy][n_space_divx][3][ncoeff]; // coefficients for Trilinear interpolation Magnetic field
