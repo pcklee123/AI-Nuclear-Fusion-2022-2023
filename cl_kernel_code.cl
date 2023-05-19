@@ -334,8 +334,85 @@ void kernel density(global float *x0, global float *y0,
   currentj[idx02] = cji[idx02] / 65536.0f;
 }
 
-void kernel trilin_k(global const float8 *a1, // E, B coeff 8 coefficients per component per cell
-                     global const float *a2 // E or B 3 components per cell
+void kernel trilin_k(
+    global float8 *Ea, // E, B coeff 8 coefficients per component per cell
+    global const float *E_flat // E or B 3 components per cell
 ) {
-  uint id = get_global_id(0);
+  const float dV = DX * DY * DZ;
+  const float dV1 = 1.0f / dV;
+  const int odx000 = 0;
+  const int odx001 = 1;  // iskip
+  const int odx010 = NX; // jskip
+  const int odx011 = odx001 + odx010;
+  const int odx100 = NY * NX;
+  const int odx101 = odx100 + odx001;
+  const int odx110 = odx100 + odx010;
+  const int odx111 = odx100 + odx011;
+
+  int offset = get_global_id(0);
+  int E_idx = offset / (NX - 1);
+  offset *= 3 * NX * NY * NZ;
+
+  const unsigned int n_cells = (NX - 1) * (NY - 1) * (NZ - 1);
+  // if (E_idx >= n_cells)return;
+
+  const unsigned int k = E_idx / (NY - 1);
+  E_idx %= NY - 1;
+  const unsigned int j = E_idx;
+  const unsigned int z_offset = k * NX * NY;
+  const unsigned int y_offset = j * NX;
+
+  const float z0 = k * DZ + ZLOW;
+  const float z1 = z0 + DZ;
+  const float y0 = j * DY + YLOW;
+  const float y1 = y0 + DY;
+  const float y0z0 = y0 * z0, y0z1 = y0 * z1, y1z0 = y1 * z0, y1z1 = y1 * z1;
+
+  offset += z_offset + y_offset;
+
+  int i = offset % NX;
+  const float x0 = i * DX + XLOW;
+  const float x1 = x0 + DX;
+  const float x0y0z0 = x0 * y0z0, x0y0z1 = x0 * y0z1, x0y1z0 = x0 * y1z0,
+              x0y1z1 = x0 * y1z1;
+  const float x1y0z0 = x1 * y0z0, x1y0z1 = x1 * y0z1, x1y1z0 = x1 * y1z0,
+              x1y1z1 = x1 * y1z1;
+  const float x0y0 = x0 * y0, x0y1 = x0 * y1, x1y0 = x1 * y0, x1y1 = x1 * y1;
+  const float x0z0 = x0 * z0, x0z1 = x0 * z1, x1z0 = x1 * z0, x1z1 = x1 * z1;
+
+  for (int c = 0; c < 3; ++c, offset += NX * NY * NZ) {
+    const float c000 = E_flat[offset];          // E[c][k][j][i];
+    const float c001 = E_flat[offset + odx100]; // E[c][k1][j][i];
+    const float c010 = E_flat[offset + odx010]; // E[c][k][j1][i];
+    const float c011 = E_flat[offset + odx110]; // E[c][k1][j1][i];
+    const float c100 = E_flat[offset + odx001]; // E[c][k][j][i1];
+    const float c101 = E_flat[offset + odx101]; // E[c][k1][j][i1];
+    const float c110 = E_flat[offset + odx011]; // E[c][k][j1][i1];
+    const float c111 = E_flat[offset + odx111]; // E[c][k1][j1][i1];
+
+    int oa = offset * 8;
+    Ea[oa] = (-c000 * x1y1z1 + c001 * x1y1z0 + c010 * x1y0z1 - c011 * x1y0z0 +
+              c100 * x0y1z1 - c101 * x0y1z0 - c110 * x0y0z1 + c111 * x0y0z0) *
+             dV1;
+    Ea[oa + 1] = ((c000 - c100) * y1z1 + (-c001 + c101) * y1z0 +
+                  (-c010 + c110) * y0z1 + (c011 - c111) * y0z0) *
+                 dV1;
+    Ea[oa + 2] = ((c000 - c010) * x1z1 + (-c001 + c011) * x1z0 +
+                  (-c100 + c110) * x0z1 + (c101 - c111) * x0z0) *
+                 dV1;
+    Ea[oa + 3] = ((c000 - c001) * x1y1 + (-c010 + c011) * x1y0 +
+                  (-c100 + c101) * x0y1 + (c110 - c111) * x0y0) *
+                 dV1;
+    Ea[oa + 4] =
+        ((-c000 + c010 + c100 - c110) * z1 + (c001 - c011 - c101 + c111) * z0) *
+        dV1;
+    Ea[oa + 5] =
+        ((-c000 + c001 + c100 - c101) * y1 + (c010 - c011 - c110 + c111) * y0) *
+        dV1;
+    Ea[oa + 6] =
+        ((-c000 + c001 + c010 - c011) * x1 + (c100 - c101 - c110 + c111) * x0) *
+        dV1;
+    Ea[oa + 7] = (c000 - c001 - c010 + c011 - c100 + c101 + c110 - c111) * dV1;
+  }
+}
 }

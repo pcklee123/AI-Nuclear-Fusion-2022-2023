@@ -31,8 +31,8 @@ void tnp(fields *fi, particles *pt, par *par)
    // Assume buffers A, B, I, J (Ea, Ba, ci, cf) will always be the same. Then we save a bit of time.
    static cl::Buffer buff_E(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, n_cellsf * 3, fastIO ? fi->Ea : NULL);
    static cl::Buffer buff_B(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, n_cellsf * 3, fastIO ? fi->Ba : NULL);
-   static cl::Buffer buff_Ea(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
-   static cl::Buffer buff_Ba(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_ONLY, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
+   static cl::Buffer buff_Ea(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * nc, fastIO ? fi->Ea : NULL);
+   static cl::Buffer buff_Ba(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, sizeof(float) * nc, fastIO ? fi->Ba : NULL);
    static cl::Buffer buff_np_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsf, fastIO ? fi->np[0] : NULL);
    static cl::Buffer buff_np_i(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsf, fastIO ? fi->np[1] : NULL);
    static cl::Buffer buff_currentj_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsf * 3, fastIO ? fi->currentj[0] : NULL);
@@ -119,12 +119,12 @@ void tnp(fields *fi, particles *pt, par *par)
    kernel_trilin.setArg(0, buff_Ea); // the 1st argument to the kernel program Ea
    kernel_trilin.setArg(1, buff_E);  // Ba
    // run the kernel
-   queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+   queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n_cells), cl::NullRange);
    queue.finish(); // wait for the end of the kernel program
    
    kernel_trilin.setArg(0, buff_Ba); // the 1st argument to the kernel program Ea
    kernel_trilin.setArg(1, buff_B);  // Ba
-   queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+   queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n_cells), cl::NullRange);
    queue.finish(); // wait for the end of the kernel program
 
    queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
