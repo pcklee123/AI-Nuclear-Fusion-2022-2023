@@ -358,8 +358,8 @@ void kernel trilin_k(
   int offset = get_global_id(0);
   int co = 0;
   for (int c = 0; c < 3; ++c, co += n_cells) {
-    unsigned int k = offset / (NX * NY);
-    unsigned int j = offset / NX;
+    unsigned int k = (offset / (NX * NY)) % NZ;
+    unsigned int j = (offset / NX) % NY;
     unsigned int i = offset % NX;
     const int odx000 = 0;
     const int odx001 = i < NX ? 1 : 0;  // iskip
@@ -377,8 +377,9 @@ void kernel trilin_k(
     const float x0 = i * DX + XLOW;
     const float x1 = x0 + DX;
 
-    const float x0dy = x0 * DY;
-    const float x0dz = x0 * DX;
+
+    /*    const float x0dy = x0 * DY;
+    const float x0dz = x0 * DZ;
     const float y0dz = y0 * DZ;
     const float y0dx = y0 * DX;
     const float z0dx = z0 * DX;
@@ -389,24 +390,29 @@ void kernel trilin_k(
     const float y1dx = y0dx + dxdy;
     const float z1dx = z0dx + dzdx;
     const float z1dy = z0dy + dydz;
-    /*
-const float x0y0 = x0 * y0, x0y1 = x0 * y1, x1y0 = x1 * y0, x1y1 = x1 * y1;
-const float y0z0 = y0 * z0, y0z1 = y0 * z1, y1z0 = y1 * z0, y1z1 = y1 * z1;
-const float x0z0 = x0 * z0, x0z1 = x0 * z1, x1z0 = x1 * z0, x1z1 = x1 * z1;
-        */
-    const float x0y0 = x0 * y0, x0y1 = x0y0 * x0dy, x1y0 = x0y0 + y0dx,
-                x1y1 = x1y0 + x1dy;
-    const float y0z0 = y0 * z0, y0z1 = y0z0 + y0dz, y1z0 = y0z0 + z0dy,
-                y1z1 = y0z1 + z1dy;
-    const float x0z0 = x0 * z0, x0z1 = x0z0 + x0dz, x1z0 = x0z0 * z0dx,
-                x1z1 = x1z0 * x1dz;
-    const float x0y0dz = x0y0 * DZ, x0z0dy = x0z0 * DY, y0z0dx = y0z0 * DZ;
+    const float x0y0 = x0 * y0;
+    const float x0y1 = x0y0 * x0dy, x1y0 = x0y0 + y0dx, x1y1 = x1y0 + x1dy;
+    const float y0z0 = y0 * z0;
+    const float y0z1 = y0z0 + y0dz, y1z0 = y0z0 + z0dy, y1z1 = y0z1 + z1dy;
+    const float x0z0 = x0 * z0;
+    const float x0z1 = x0z0 + x0dz, x1z0 = x0z0 * z0dx, x1z1 = x1z0 * x1dz;
+    const float x0y0dz = x0y0 * DZ, x0z0dy = x0z0 * DY, y0z0dx = y0z0 * DX;
     const float x0y1dz = x0y1 * DZ, x1y0dz = x1y0 * DZ, x1z0dy = x1z0 * DY;
     const float x1y1dz = x1y1 * DZ;
-    const float x0y0z0 = x0 * y0z0, x0y0z1 = x0y0z0 + x0y0dz,
-                x0y1z0 = x0y0z0 + x0z0dy, x0y1z1 = x0y1z0 + x0y1dz;
+    const float x0y0z0 = x0 * y0z0;
+    const float x0y0z1 = x0y0z0 + x0y0dz, x0y1z0 = x0y0z0 + x0z0dy,
+                x0y1z1 = x0y1z0 + x0y1dz;
     const float x1y0z0 = x0y0z0 + y0z0dx, x1y0z1 = x1y0z0 + x1y0dz,
                 x1y1z0 = x1y0z0 + x1z0dy, x1y1z1 = x1y1z0 + x1y1dz;
+ */
+    const float x0y0 = x0 * y0, x0y1 = x0 * y1, x1y0 = x1 * y0, x1y1 = x1 * y1;
+    const float y0z0 = y0 * z0, y0z1 = y0 * z1, y1z0 = y1 * z0, y1z1 = y1 * z1;
+    const float x0z0 = x0 * z0, x0z1 = x0 * z1, x1z0 = x1 * z0, x1z1 = x1 * z1;
+
+    const float x0y0z0 = x0 * y0z0, x0y0z1 = x0 * y0z1, x0y1z0 = x0 * y1z0,
+                x0y1z1 = x0 * y1z1;
+    const float x1y0z0 = x1 * y0z0, x1y0z1 = x1 * y0z1, x1y1z0 = x1 * y1z0,
+                x1y1z1 = x1 * y1z1;
 
     const float c000 = E_flat[offset + co + odx000]; // E[c][k][j][i];
     const float c001 = E_flat[offset + co + odx100]; // E[c][k1][j][i];
