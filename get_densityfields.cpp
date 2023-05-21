@@ -64,7 +64,7 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    // cout << "command q" << endl; //  create queue to which we will push commands for the device.
 
    static cl::CommandQueue queue(context_g, default_device_g);
-   cl::Kernel kernel_add = cl::Kernel(program_g, "density"); // select the kernel program to run
+   cl::Kernel kernel_density = cl::Kernel(program_g, "density"); // select the kernel program to run
    // write input arrays to the device
    if (fastIO)
    { // is mapping required? // Yes we might need to map because OpenCL does not guarantee that the data will be shared, alternatively use SVM
@@ -92,25 +92,25 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    //  set arguments to be fed into the kernel program
    // cout << "kernel arguments for electron" << endl;
 
-   kernel_add.setArg(0, buff_x0_e); // x0
-   kernel_add.setArg(1, buff_y0_e); // y0
-   kernel_add.setArg(2, buff_z0_e); // z0
-   kernel_add.setArg(3, buff_x1_e); // x1
-   kernel_add.setArg(4, buff_y1_e); // y1
-   kernel_add.setArg(5, buff_z1_e); // z1
+   kernel_density.setArg(0, buff_x0_e); // x0
+   kernel_density.setArg(1, buff_y0_e); // y0
+   kernel_density.setArg(2, buff_z0_e); // z0
+   kernel_density.setArg(3, buff_x1_e); // x1
+   kernel_density.setArg(4, buff_y1_e); // y1
+   kernel_density.setArg(5, buff_z1_e); // z1
 
-   kernel_add.setArg(6, buff_np_e);        // np
-   kernel_add.setArg(7, buff_currentj_e);  // current
-   kernel_add.setArg(8, buff_npi);         // npt
-   kernel_add.setArg(9, buff_np_centeri);  // npt
-   kernel_add.setArg(10, buff_cji);        // current
-   kernel_add.setArg(11, buff_cj_centeri); // npt
-   kernel_add.setArg(12, buff_q_e);        // q
-                                           // kernel_add.setArg(14, sizeof(int), n_cells);          // ncells
+   kernel_density.setArg(6, buff_np_e);        // np
+   kernel_density.setArg(7, buff_currentj_e);  // current
+   kernel_density.setArg(8, buff_npi);         // npt
+   kernel_density.setArg(9, buff_np_centeri);  // npt
+   kernel_density.setArg(10, buff_cji);        // current
+   kernel_density.setArg(11, buff_cj_centeri); // npt
+   kernel_density.setArg(12, buff_q_e);        // q
+                                           // kernel_density.setArg(14, sizeof(int), n_cells);          // ncells
                                            // cout << "run kernel for electron" << endl;
 
    // run the kernel
-   queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+   queue.enqueueNDRangeKernel(kernel_density, cl::NullRange, cl::NDRange(n0), cl::NullRange);
    // cout << "run kernel for electron done" << endl;
    queue.finish(); // wait for the end of the kernel program
                    // cout << "read electron density" << endl;
@@ -139,24 +139,24 @@ void get_densityfields(fields *fi, particles *pt, par *par)
    queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
    //  set arguments to be fed into the kernel program
 
-   kernel_add.setArg(0, buff_x0_i); // x0
-   kernel_add.setArg(1, buff_y0_i); // y0
-   kernel_add.setArg(2, buff_z0_i); // z0
-   kernel_add.setArg(3, buff_x1_i); // x1
-   kernel_add.setArg(4, buff_y1_i); // y1
-   kernel_add.setArg(5, buff_z1_i); // z1
+   kernel_density.setArg(0, buff_x0_i); // x0
+   kernel_density.setArg(1, buff_y0_i); // y0
+   kernel_density.setArg(2, buff_z0_i); // z0
+   kernel_density.setArg(3, buff_x1_i); // x1
+   kernel_density.setArg(4, buff_y1_i); // y1
+   kernel_density.setArg(5, buff_z1_i); // z1
 
-   kernel_add.setArg(6, buff_np_i);        // npt
-   kernel_add.setArg(7, buff_currentj_i);  // current
-   kernel_add.setArg(8, buff_npi);         // npt
-   kernel_add.setArg(9, buff_np_centeri);  // npt
-   kernel_add.setArg(10, buff_cji);        // current
-   kernel_add.setArg(11, buff_cj_centeri); // npt
-   kernel_add.setArg(12, buff_q_i);        // q
-                                           // kernel_add.setArg(14, sizeof(int), &n_cells);          // ncells
+   kernel_density.setArg(6, buff_np_i);        // npt
+   kernel_density.setArg(7, buff_currentj_i);  // current
+   kernel_density.setArg(8, buff_npi);         // npt
+   kernel_density.setArg(9, buff_np_centeri);  // npt
+   kernel_density.setArg(10, buff_cji);        // current
+   kernel_density.setArg(11, buff_cj_centeri); // npt
+   kernel_density.setArg(12, buff_q_i);        // q
+                                           // kernel_density.setArg(14, sizeof(int), &n_cells);          // ncells
                                            // cout << "run kernel for ions" << endl;
    //  run the kernel
-   queue.enqueueNDRangeKernel(kernel_add, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+   queue.enqueueNDRangeKernel(kernel_density, cl::NullRange, cl::NDRange(n0), cl::NullRange);
    queue.finish(); // wait for the end of the kernel program
    // read result arrays from the device to main memory
    if (fastIO)

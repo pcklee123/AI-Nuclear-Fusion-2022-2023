@@ -66,6 +66,7 @@ void tnp(fields *fi, particles *pt, par *par)
    static cl::CommandQueue queue(context_g, default_device_g);
    cl::Kernel kernel_tnp = cl::Kernel(program_g, "tnp_k_implicit"); // select the kernel program to run
    cl::Kernel kernel_trilin = cl::Kernel(program_g, "trilin_k");    // select the kernel program to run
+   cl::Kernel kernel_density = cl::Kernel(program_g, "density");    // select the kernel program to run
    ncalc_e = par->ncalcp[0];
    ncalc_i = par->ncalcp[1];
 #ifdef BFon_
@@ -156,7 +157,25 @@ void tnp(fields *fi, particles *pt, par *par)
       queue.finish(); // wait for the end of the kernel program
       // run the kernel
       queue.enqueueNDRangeKernel(kernel_tnp, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+      kernel_density.setArg(0, buff_x0_e); // x0
+      kernel_density.setArg(1, buff_y0_e); // y0
+      kernel_density.setArg(2, buff_z0_e); // z0
+      kernel_density.setArg(3, buff_x1_e); // x1
+      kernel_density.setArg(4, buff_y1_e); // y1
+      kernel_density.setArg(5, buff_z1_e); // z1
 
+      kernel_density.setArg(6, buff_np_e);        // np
+      kernel_density.setArg(7, buff_currentj_e);  // current
+      kernel_density.setArg(8, buff_npi);         // npt
+      kernel_density.setArg(9, buff_np_centeri);  // npt
+      kernel_density.setArg(10, buff_cji);        // current
+      kernel_density.setArg(11, buff_cj_centeri); // npt
+      kernel_density.setArg(12, buff_q_e);        // q
+                                              // kernel_density.setArg(14, sizeof(int), n_cells);          // ncells
+                                              // cout << "run kernel for electron" << endl;
+
+      // run the kernel
+      queue.enqueueNDRangeKernel(kernel_density, cl::NullRange, cl::NDRange(n0), cl::NullRange);
       queue.finish(); // wait for the end of the kernel program
 
       queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
