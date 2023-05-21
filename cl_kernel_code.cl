@@ -89,9 +89,6 @@ void kernel tnp_k_implicit(global const float8 *a1,
                            float Ecoef, // Bcoeff, Ecoeff
                            const unsigned int n,
                            const unsigned int ncalc, // n, ncalc
-                           //   global float *np, global float *currentj,
-                           //  global int *npi, global int *np_centeri,
-                           //  global int *cji, global int *cj_centeri,
                            global int *q) {
 
   uint id = get_global_id(0);
@@ -108,7 +105,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
               ZL = ZLOW + 1.5f * DZ;
   const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
               ZH = ZHIGH - 1.5f * DZ;
-
+  const float8 ones = (float8)(1, 1, 1, 1, 1, 1, 1, 1);
   for (int t = 0; t < ncalc; t++) {
 
     // if (x <= XLOW || x >= XHIGH || y <= YLOW || y >= YHIGH || z <= ZLOW ||
@@ -120,6 +117,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
         (uint)((x - XLOW) / DX); // round down the cells - this is intentional
     idx *= 3;
     pos = (float8)(1.f, x, y, z, xy, xz, yz, xyz);
+
     // Is there no better way to do this? Why does float8 not have dot()?
     if (prev_idx != idx) {
       store0 = a1[idx]; // Ex
@@ -133,6 +131,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
     temp = store0 * pos;
     float xE = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;
+   // xE = dot(temp, ones);
     temp = store1 * pos;
     float yE = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;
@@ -207,28 +206,27 @@ void kernel tnp_k_implicit(global const float8 *a1,
   z1[id] = z;
 }
 
-void kernel density(global float *x0, global float *y0,
-                    global float *z0, // prev pos
-                    global float *x1, global float *y1,
-                    global float *z1,                         // current pos
-                    global float *np, global float *currentj, //
-                    global int *npi, global int *np_centeri,  //
-                    global int *cji, global int *cj_centeri, global int *q) {
+void kernel density(global const float *x0, global const float *y0,
+                    global const float *z0, // prev pos
+                    global const float *x1, global const float *y1,
+                    global const float *z1, // current pos
+                    global int *npi, global int *cji, global int *q) {
   const float XL = XLOW + 1.5f * DX, YL = YLOW + 1.5f * DY,
               ZL = ZLOW + 1.5f * DZ;
   const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
               ZH = ZHIGH - 1.5f * DZ;
+  const float invDX = 1.0f / DX, invDY = 1.0f / DY, invDZ = 1.0f / DZ;
 
   uint id = get_global_id(0);
   float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
         z = z1[id];
 
-  uint k = round((z - ZLOW) / DZ);
-  uint j = round((y - YLOW) / DY);
-  uint i = round((x - XLOW) / DX);
-  int ofx = ((x - XLOW) / DX - i) * 256.0f;
-  int ofy = ((y - YLOW) / DY - j) * 256.0f;
-  int ofz = ((z - ZLOW) / DZ - k) * 256.0f;
+  uint k = round((z - ZLOW) * invDZ);
+  uint j = round((y - YLOW) * invDY);
+  uint i = round((x - XLOW) * invDX);
+  int ofx = ((x - XLOW) * invDX - i) * 256.0f;
+  int ofy = ((y - YLOW) * invDY - j) * 256.0f;
+  int ofz = ((z - ZLOW) * invDZ - k) * 256.0f;
   // oct 000,001,010,011,100,101,110,111
   int odx000 = 0;
   int odx001 = ofx > 0 ? 1 : -1;
@@ -249,60 +247,75 @@ void kernel density(global float *x0, global float *y0,
   uint idx01 = idx00 + NZ * NY * NX;
   uint idx02 = idx01 + NZ * NY * NX;
 
-  int f000 = q[id] * (fx1 * fy1 * fz1) / 16384;
-  int f001 = q[id] * (fz1 * fy1 * fx0) / 16384;
-  int f010 = q[id] * (fz1 * fy0 * fx1) / 16384;
-  int f011 = q[id] * (fz1 * fy0 * fx0) / 16384;
-  int f100 = q[id] * (fz0 * fy1 * fx1) / 16384;
-  int f101 = q[id] * (fz0 * fy1 * fx0) / 16384;
-  int f110 = q[id] * (fz0 * fy0 * fx1) / 16384;
-  int f111 = q[id] * (fz0 * fy0 * fx0) / 16384;
-
+  int8 f = (((fz1 * fy1 * fx1) >> 14), ((fz1 * fy1 * fx0) >> 14),
+            ((fz1 * fy0 * fx1) >> 14), ((fz1 * fy0 * fx0) >> 14),
+            ((fz0 * fy1 * fx1) >> 14), ((fz0 * fy1 * fx0) >> 14),
+            ((fz0 * fy0 * fx1) >> 14), ((fz0 * fy0 * fx0) >> 14));
+  f = q[id] * f;
   // np density
-  atomic_add(&npi[idx00 + odx000], f000);
-  atomic_add(&npi[idx00 + odx001], f001);
-  atomic_add(&npi[idx00 + odx010], f010);
-  atomic_add(&npi[idx00 + odx011], f011);
-  atomic_add(&npi[idx00 + odx100], f100);
-  atomic_add(&npi[idx00 + odx101], f101);
-  atomic_add(&npi[idx00 + odx110], f110);
-  atomic_add(&npi[idx00 + odx111], f111);
+  atomic_add(&npi[idx00 + odx000], f.s0);
+  atomic_add(&npi[idx00 + odx001], f.s1);
+  atomic_add(&npi[idx00 + odx010], f.s2);
+  atomic_add(&npi[idx00 + odx011], f.s3);
+  atomic_add(&npi[idx00 + odx100], f.s4);
+  atomic_add(&npi[idx00 + odx101], f.s5);
+  atomic_add(&npi[idx00 + odx110], f.s6);
+  atomic_add(&npi[idx00 + odx111], f.s7);
+  /*
+
+    npi[idx00 + odx000] += f.s0;
+  npi[idx00 + odx001] += f.s1;
+  npi[idx00 + odx010] += f.s2;
+  npi[idx00 + odx011] += f.s3;
+  npi[idx00 + odx100] += f.s4;
+  npi[idx00 + odx101] += f.s5;
+  npi[idx00 + odx110] += f.s6;
+  npi[idx00 + odx111] += f.s7; */
 
   // current x-component
-  int vxi = ((x - xprev) * 65536.0f) / DX;
-  atomic_add(&cji[idx00 + odx000], vxi * f000);
-  atomic_add(&cji[idx00 + odx001], vxi * f001);
-  atomic_add(&cji[idx00 + odx010], vxi * f010);
-  atomic_add(&cji[idx00 + odx011], vxi * f011);
-  atomic_add(&cji[idx00 + odx100], vxi * f100);
-  atomic_add(&cji[idx00 + odx101], vxi * f101);
-  atomic_add(&cji[idx00 + odx110], vxi * f110);
-  atomic_add(&cji[idx00 + odx111], vxi * f111);
+  int8 vxi = (int)((x - xprev) * 65536.0f * invDX) * f;
+  atomic_add(&cji[idx00 + odx000], vxi.s0);
+  atomic_add(&cji[idx00 + odx001], vxi.s1);
+  atomic_add(&cji[idx00 + odx010], vxi.s2);
+  atomic_add(&cji[idx00 + odx011], vxi.s3);
+  atomic_add(&cji[idx00 + odx100], vxi.s4);
+  atomic_add(&cji[idx00 + odx101], vxi.s5);
+  atomic_add(&cji[idx00 + odx110], vxi.s6);
+  atomic_add(&cji[idx00 + odx111], vxi.s7);
 
-  int vyi = ((y - yprev) * 65536.0f) / DY;
-  atomic_add(&cji[idx01 + odx000], vyi * f000);
-  atomic_add(&cji[idx01 + odx001], vyi * f001);
-  atomic_add(&cji[idx01 + odx010], vyi * f010);
-  atomic_add(&cji[idx01 + odx011], vyi * f011);
-  atomic_add(&cji[idx01 + odx100], vyi * f100);
-  atomic_add(&cji[idx01 + odx101], vyi * f101);
-  atomic_add(&cji[idx01 + odx110], vyi * f110);
-  atomic_add(&cji[idx01 + odx111], vyi * f111);
+  int8 vyi = (int)((y - yprev) * 65536.0f * invDY) * f;
+  atomic_add(&cji[idx01 + odx000], vyi.s0);
+  atomic_add(&cji[idx01 + odx001], vyi.s1);
+  atomic_add(&cji[idx01 + odx010], vyi.s2);
+  atomic_add(&cji[idx01 + odx011], vyi.s3);
+  atomic_add(&cji[idx01 + odx100], vyi.s4);
+  atomic_add(&cji[idx01 + odx101], vyi.s5);
+  atomic_add(&cji[idx01 + odx110], vyi.s6);
+  atomic_add(&cji[idx01 + odx111], vyi.s7);
 
-  int vzi = ((z - zprev) * 65536.0f) / DZ;
-  atomic_add(&cji[idx02 + odx000], vzi * f000);
-  atomic_add(&cji[idx02 + odx001], vzi * f001);
-  atomic_add(&cji[idx02 + odx010], vzi * f010);
-  atomic_add(&cji[idx02 + odx011], vzi * f011);
-  atomic_add(&cji[idx02 + odx100], vzi * f100);
-  atomic_add(&cji[idx02 + odx101], vzi * f101);
-  atomic_add(&cji[idx02 + odx110], vzi * f110);
-  atomic_add(&cji[idx02 + odx111], vzi * f111);
+  int8 vzi = (int)((z - zprev) * 65536.0f * invDZ) * f;
+  atomic_add(&cji[idx02 + odx000], vzi.s0);
+  atomic_add(&cji[idx02 + odx001], vzi.s1);
+  atomic_add(&cji[idx02 + odx010], vzi.s2);
+  atomic_add(&cji[idx02 + odx011], vzi.s3);
+  atomic_add(&cji[idx02 + odx100], vzi.s4);
+  atomic_add(&cji[idx02 + odx101], vzi.s5);
+  atomic_add(&cji[idx02 + odx110], vzi.s6);
+  atomic_add(&cji[idx02 + odx111], vzi.s7);
+}
 
-  np[idx00] = npi[idx00] / 128.0f;
-  currentj[idx00] = cji[idx00] * DX / 65536.0f;
-  currentj[idx01] = cji[idx01] * DY / 65536.0f;
-  currentj[idx02] = cji[idx02] * DZ / 65536.0f;
+void kernel df(global float *np, global const int *npi, global float *currentj,
+               global const int *cji) {
+  float dx = DX * 1.1920929e-7f, dy = DY * 1.1920929e-7f,
+        dz = DZ * 1.1920929e-7f;
+  float dn = 0.0078125f;
+  uint idx00 = get_global_id(0);
+  uint idx01 = idx00 + NZ * NY * NX;
+  uint idx02 = idx01 + NZ * NY * NX;
+  np[idx00] = dn * npi[idx00];
+  currentj[idx00] = dx * cji[idx00];
+  currentj[idx01] = dy * cji[idx01];
+  currentj[idx02] = dz * cji[idx02];
 }
 
 void kernel trilin_k(

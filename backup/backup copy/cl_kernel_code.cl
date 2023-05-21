@@ -89,9 +89,9 @@ void kernel tnp_k_implicit(global const float8 *a1,
                            float Ecoef, // Bcoeff, Ecoeff
                            const unsigned int n,
                            const unsigned int ncalc, // n, ncalc
-                           //   global float *np, global float *currentj,
-                           //  global int *npi, global int *np_centeri,
-                           //  global int *cji, global int *cj_centeri,
+                           global float *np, global float *currentj,
+                           global int *npi, global int *np_centeri,
+                           global int *cji, global int *cj_centeri,
                            global int *q) {
 
   uint id = get_global_id(0);
@@ -184,7 +184,13 @@ void kernel tnp_k_implicit(global const float8 *a1,
                  fma(vyye, yzP - xP, fma(-vz, xxP + yyP, fma(zzP, zE, zE)))),
              vz);
   }
-
+  x0[id] = xprev;
+  y0[id] = yprev;
+  z0[id] = zprev;
+  x1[id] = x;
+  y1[id] = y;
+  z1[id] = z;
+  
   xprev = x > XL ? xprev : XL;
   xprev = x < XH ? xprev : XH;
   yprev = y > YL ? yprev : YL;
@@ -199,12 +205,86 @@ void kernel tnp_k_implicit(global const float8 *a1,
   z = z > ZL ? z : ZL;
   z = z < ZH ? z : ZH;
 
-  x0[id] = xprev;
-  y0[id] = yprev;
-  z0[id] = zprev;
-  x1[id] = x;
-  y1[id] = y;
-  z1[id] = z;
+  uint k = round((z - ZLOW) / DZ);
+  uint j = round((y - YLOW) / DY);
+  uint i = round((x - XLOW) / DX);
+  int ofx = ((x - XLOW) / DX - i) * 256.0f;
+  int ofy = ((y - YLOW) / DY - j) * 256.0f;
+  int ofz = ((z - ZLOW) / DZ - k) * 256.0f;
+  // oct 000,001,010,011,100,101,110,111
+  int odx000 = 0;
+  int odx001 = ofx > 0 ? 1 : -1;
+  int odx010 = ofy > 0 ? NX : -NX;
+  int odx011 = odx001 + odx010;
+  int odx100 = ofz > 0 ? NX * NY : -NX * NY;
+  int odx101 = odx100 + odx001;
+  int odx110 = odx100 + odx010;
+  int odx111 = odx100 + odx011;
+
+  int fx0 = abs(ofx);
+  int fy0 = abs(ofy);
+  int fz0 = abs(ofz);
+  int fx1 = 128 - fx0;
+  int fy1 = 128 - fy0;
+  int fz1 = 128 - fz0;
+  uint idx00 = k * NY * NX + j * NX + i;
+  uint idx01 = idx00 + NZ * NY * NX;
+  uint idx02 = idx01 + NZ * NY * NX;
+
+  int f000 = q[id] * (fx1 * fy1 * fz1) / 16384;
+  int f001 = q[id] * (fz1 * fy1 * fx0) / 16384;
+  int f010 = q[id] * (fz1 * fy0 * fx1) / 16384;
+  int f011 = q[id] * (fz1 * fy0 * fx0) / 16384;
+  int f100 = q[id] * (fz0 * fy1 * fx1) / 16384;
+  int f101 = q[id] * (fz0 * fy1 * fx0) / 16384;
+  int f110 = q[id] * (fz0 * fy0 * fx1) / 16384;
+  int f111 = q[id] * (fz0 * fy0 * fx0) / 16384;
+
+  // np density
+  atomic_add(&npi[idx00 + odx000], f000);
+  atomic_add(&npi[idx00 + odx001], f001);
+  atomic_add(&npi[idx00 + odx010], f010);
+  atomic_add(&npi[idx00 + odx011], f011);
+  atomic_add(&npi[idx00 + odx100], f100);
+  atomic_add(&npi[idx00 + odx101], f101);
+  atomic_add(&npi[idx00 + odx110], f110);
+  atomic_add(&npi[idx00 + odx111], f111);
+
+  // current x-component
+  int vxi = ((x - xprev) * 65536.0f) / DX;
+  atomic_add(&cji[idx00 + odx000], vxi * f000);
+  atomic_add(&cji[idx00 + odx001], vxi * f001);
+  atomic_add(&cji[idx00 + odx010], vxi * f010);
+  atomic_add(&cji[idx00 + odx011], vxi * f011);
+  atomic_add(&cji[idx00 + odx100], vxi * f100);
+  atomic_add(&cji[idx00 + odx101], vxi * f101);
+  atomic_add(&cji[idx00 + odx110], vxi * f110);
+  atomic_add(&cji[idx00 + odx111], vxi * f111);
+
+  int vyi = ((y - yprev) * 65536.0f) / DY;
+  atomic_add(&cji[idx01 + odx000], vyi * f000);
+  atomic_add(&cji[idx01 + odx001], vyi * f001);
+  atomic_add(&cji[idx01 + odx010], vyi * f010);
+  atomic_add(&cji[idx01 + odx011], vyi * f011);
+  atomic_add(&cji[idx01 + odx100], vyi * f100);
+  atomic_add(&cji[idx01 + odx101], vyi * f101);
+  atomic_add(&cji[idx01 + odx110], vyi * f110);
+  atomic_add(&cji[idx01 + odx111], vyi * f111);
+
+  int vzi = ((z - zprev) * 65536.0f) / DZ;
+  atomic_add(&cji[idx02 + odx000], vzi * f000);
+  atomic_add(&cji[idx02 + odx001], vzi * f001);
+  atomic_add(&cji[idx02 + odx010], vzi * f010);
+  atomic_add(&cji[idx02 + odx011], vzi * f011);
+  atomic_add(&cji[idx02 + odx100], vzi * f100);
+  atomic_add(&cji[idx02 + odx101], vzi * f101);
+  atomic_add(&cji[idx02 + odx110], vzi * f110);
+  atomic_add(&cji[idx02 + odx111], vzi * f111);
+
+  np[idx00] = npi[idx00] / 128.0f;
+  currentj[idx00] = cji[idx00] * DX / 65536.0f;
+  currentj[idx01] = cji[idx01] * DY / 65536.0f;
+  currentj[idx02] = cji[idx02] * DZ / 65536.0f;
 }
 
 void kernel density(global float *x0, global float *y0,
@@ -222,6 +302,19 @@ void kernel density(global float *x0, global float *y0,
   uint id = get_global_id(0);
   float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
         z = z1[id];
+  xprev = x > XL ? xprev : XL;
+  xprev = x < XH ? xprev : XH;
+  yprev = y > YL ? yprev : YL;
+  yprev = y < YH ? yprev : YH;
+  zprev = z > ZL ? zprev : ZL;
+  zprev = z < ZH ? zprev : ZH;
+  q[id] = (x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH) ? q[id] : 0;
+  x = x > XL ? x : XL;
+  x = x < XH ? x : XH;
+  y = y > YL ? y : YL;
+  y = y < YH ? y : YH;
+  z = z > ZL ? z : ZL;
+  z = z < ZH ? z : ZH;
 
   uint k = round((z - ZLOW) / DZ);
   uint j = round((y - YLOW) / DY);
@@ -342,6 +435,33 @@ void kernel trilin_k(
     const float x0 = i * DX + XLOW;
     const float x1 = x0 + DX;
 
+    /*    const float x0dy = x0 * DY;
+    const float x0dz = x0 * DZ;
+    const float y0dz = y0 * DZ;
+    const float y0dx = y0 * DX;
+    const float z0dx = z0 * DX;
+    const float z0dy = z0 * DY;
+    const float x1dy = x0dy + dxdy;
+    const float x1dz = x0dz + dzdx;
+    const float y1dz = y0dz + dydz;
+    const float y1dx = y0dx + dxdy;
+    const float z1dx = z0dx + dzdx;
+    const float z1dy = z0dy + dydz;
+    const float x0y0 = x0 * y0;
+    const float x0y1 = x0y0 * x0dy, x1y0 = x0y0 + y0dx, x1y1 = x1y0 + x1dy;
+    const float y0z0 = y0 * z0;
+    const float y0z1 = y0z0 + y0dz, y1z0 = y0z0 + z0dy, y1z1 = y0z1 + z1dy;
+    const float x0z0 = x0 * z0;
+    const float x0z1 = x0z0 + x0dz, x1z0 = x0z0 * z0dx, x1z1 = x1z0 * x1dz;
+    const float x0y0dz = x0y0 * DZ, x0z0dy = x0z0 * DY, y0z0dx = y0z0 * DX;
+    const float x0y1dz = x0y1 * DZ, x1y0dz = x1y0 * DZ, x1z0dy = x1z0 * DY;
+    const float x1y1dz = x1y1 * DZ;
+    const float x0y0z0 = x0 * y0z0;
+    const float x0y0z1 = x0y0z0 + x0y0dz, x0y1z0 = x0y0z0 + x0z0dy,
+                x0y1z1 = x0y1z0 + x0y1dz;
+    const float x1y0z0 = x0y0z0 + y0z0dx, x1y0z1 = x1y0z0 + x1y0dz,
+                x1y1z0 = x1y0z0 + x1z0dy, x1y1z1 = x1y1z0 + x1y1dz;
+ */
     const float x0y0 = x0 * y0, x0y1 = x0 * y1, x1y0 = x1 * y0, x1y1 = x1 * y1;
     const float y0z0 = y0 * z0, y0z1 = y0 * z1, y1z0 = y1 * z0, y1z1 = y1 * z1;
     const float x0z0 = x0 * z0, x0z1 = x0 * z1, x1z0 = x1 * z0, x1z1 = x1 * z1;
