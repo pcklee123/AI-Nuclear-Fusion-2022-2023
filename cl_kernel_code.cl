@@ -131,7 +131,6 @@ void kernel tnp_k_implicit(global const float8 *a1,
     temp = store0 * pos;
     float xE = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;
-   // xE = dot(temp, ones);
     temp = store1 * pos;
     float yE = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;

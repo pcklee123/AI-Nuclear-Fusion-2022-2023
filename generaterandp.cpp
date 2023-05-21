@@ -23,7 +23,7 @@ void generate_rand_sphere(particles *pt, par *par)
     {
         cerr << "a0 = " << a0 << " too large for this density Debyle Length = " << Debye_Length << endl;
 
-        exit(1);
+        //exit(1);
     }
     float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass) + v0[0][0] * v0[0][0] + v0[0][1] * v0[0][1] + v0[0][2] * v0[0][2]);
     // float Tv = a0 / vel_e; // time for electron to move across 1 cell if E=0
