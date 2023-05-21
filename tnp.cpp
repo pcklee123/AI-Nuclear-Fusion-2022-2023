@@ -126,12 +126,14 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_trilin.setArg(1, buff_B);  // Ba
       queue.enqueueNDRangeKernel(kernel_trilin, cl::NullRange, cl::NDRange(n_cells), cl::NullRange);
       //
+
       queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
       queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
       queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
       queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
       //  set arguments to be fed into the kernel program
       //  cout << "kernel arguments for electron" << endl;
+      queue.finish(); // wait for trilinear to end before startin tnp electron
 
       kernel_tnp.setArg(0, buff_Ea);                        // the 1st argument to the kernel program Ea
       kernel_tnp.setArg(1, buff_Ba);                        // Ba
@@ -145,25 +147,23 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_tnp.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
       kernel_tnp.setArg(10, sizeof(int), &par->n_partp[0]); // npart
       kernel_tnp.setArg(11, sizeof(int), &ncalc_e);         // ncalc
-      kernel_tnp.setArg(12, buff_np_e);                     // np
-      kernel_tnp.setArg(13, buff_currentj_e);               // current
-      kernel_tnp.setArg(14, buff_npi);                      // npt
-      kernel_tnp.setArg(15, buff_np_centeri);               // npt
-      kernel_tnp.setArg(16, buff_cji);                      // current
-      kernel_tnp.setArg(17, buff_cj_centeri);               // npt
-      kernel_tnp.setArg(18, buff_q_e);                      // q
+                                                            //      kernel_tnp.setArg(12, buff_np_e);                     // np
+                                                            //      kernel_tnp.setArg(13, buff_currentj_e);               // current
+                                                            //      kernel_tnp.setArg(14, buff_npi);                      // npt
+                                                            //      kernel_tnp.setArg(15, buff_np_centeri);               // npt
+                                                            //      kernel_tnp.setArg(16, buff_cji);                      // current
+                                                            //      kernel_tnp.setArg(17, buff_cj_centeri);               // npt
+      kernel_tnp.setArg(12, buff_q_e);                      // q
 
       // cout << "run kernel for electron" << endl;
-      queue.finish(); // wait for the end of the kernel program
-      // run the kernel
       queue.enqueueNDRangeKernel(kernel_tnp, cl::NullRange, cl::NDRange(n0), cl::NullRange);
-      kernel_density.setArg(0, buff_x0_e); // x0
-      kernel_density.setArg(1, buff_y0_e); // y0
-      kernel_density.setArg(2, buff_z0_e); // z0
-      kernel_density.setArg(3, buff_x1_e); // x1
-      kernel_density.setArg(4, buff_y1_e); // y1
-      kernel_density.setArg(5, buff_z1_e); // z1
 
+      kernel_density.setArg(0, buff_x0_e);        // x0
+      kernel_density.setArg(1, buff_y0_e);        // y0
+      kernel_density.setArg(2, buff_z0_e);        // z0
+      kernel_density.setArg(3, buff_x1_e);        // x1
+      kernel_density.setArg(4, buff_y1_e);        // y1
+      kernel_density.setArg(5, buff_z1_e);        // z1
       kernel_density.setArg(6, buff_np_e);        // np
       kernel_density.setArg(7, buff_currentj_e);  // current
       kernel_density.setArg(8, buff_npi);         // npt
@@ -171,17 +171,12 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_density.setArg(10, buff_cji);        // current
       kernel_density.setArg(11, buff_cj_centeri); // npt
       kernel_density.setArg(12, buff_q_e);        // q
-                                              // kernel_density.setArg(14, sizeof(int), n_cells);          // ncells
-                                              // cout << "run kernel for electron" << endl;
-
-      // run the kernel
+                                                  // kernel_density.setArg(14, sizeof(int), n_cells);          // ncells
+                                                  // cout << "run kernel for electron" << endl;
+      queue.finish();                             // wait for the end of the tnp electron to finish before starting density electron
+      // run the kernel tyo get electron density
       queue.enqueueNDRangeKernel(kernel_density, cl::NullRange, cl::NDRange(n0), cl::NullRange);
-      queue.finish(); // wait for the end of the kernel program
 
-      queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
-      queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
-      queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
-      queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
       //  set arguments to be fed into the kernel program
       kernel_tnp.setArg(0, buff_Ea);                        // the 1st argument to the kernel program Ea
       kernel_tnp.setArg(1, buff_Ba);                        // Ba
@@ -195,18 +190,43 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_tnp.setArg(9, sizeof(float), &par->Ecoef[1]);  // Econst
       kernel_tnp.setArg(10, sizeof(int), &par->n_partp[1]); // npart
       kernel_tnp.setArg(11, sizeof(int), &ncalc_i);         //
-      kernel_tnp.setArg(12, buff_np_i);                     // npt
-      kernel_tnp.setArg(13, buff_currentj_i);               // current
-      kernel_tnp.setArg(14, buff_npi);                      // npt
-      kernel_tnp.setArg(15, buff_np_centeri);               // npt
-      kernel_tnp.setArg(16, buff_cji);                      // current
-      kernel_tnp.setArg(17, buff_cj_centeri);               // npt
-      kernel_tnp.setArg(18, buff_q_i);                      // q
+                                                            //  kernel_tnp.setArg(12, buff_np_i);                     // npt
+                                                            //  kernel_tnp.setArg(13, buff_currentj_i);               // current
+                                                            //  kernel_tnp.setArg(14, buff_npi);                      // npt
+                                                            //  kernel_tnp.setArg(15, buff_np_centeri);               // npt
+                                                            //  kernel_tnp.setArg(16, buff_cji);                      // current
+                                                            //  kernel_tnp.setArg(17, buff_cj_centeri);               // npt
+      kernel_tnp.setArg(12, buff_q_i);                      // q
                                                             // kernel_tnp.setArg(14, sizeof(int), &n_cells);          // ncells
       // cout << "run kernel for ions" << endl;
-      //  run the kernel
       queue.enqueueNDRangeKernel(kernel_tnp, cl::NullRange, cl::NDRange(n0), cl::NullRange);
-      queue.finish(); // wait for the end of the kernel program
+
+      queue.enqueueFillBuffer(buff_npi, 0, 0, n_cellsi);
+      queue.enqueueFillBuffer(buff_np_centeri, 0, 0, n_cellsi * 3);
+      queue.enqueueFillBuffer(buff_cji, 0, 0, n_cellsi * 3);
+      queue.enqueueFillBuffer(buff_cj_centeri, 0, 0, n_cellsi * 3 * 3);
+
+      queue.finish(); // wait for the tnp for ions to finish before
+
+      kernel_density.setArg(0, buff_x0_i);        // x0
+      kernel_density.setArg(1, buff_y0_i);        // y0
+      kernel_density.setArg(2, buff_z0_i);        // z0
+      kernel_density.setArg(3, buff_x1_i);        // x1
+      kernel_density.setArg(4, buff_y1_i);        // y1
+      kernel_density.setArg(5, buff_z1_i);        // z1
+      kernel_density.setArg(6, buff_np_i);        // np
+      kernel_density.setArg(7, buff_currentj_i);  // current
+      kernel_density.setArg(8, buff_npi);         // npt
+      kernel_density.setArg(9, buff_np_centeri);  // npt
+      kernel_density.setArg(10, buff_cji);        // current
+      kernel_density.setArg(11, buff_cj_centeri); // npt
+      kernel_density.setArg(12, buff_q_i);        // q
+                                                  // kernel_density.setArg(14, sizeof(int), n_cells);          // ncells
+                                                  // cout << "run kernel for electron" << endl;
+                                                  // wait for the end of the tnp ion to finish before starting density ion
+      // run the kernel to get ion density
+      queue.enqueueNDRangeKernel(kernel_density, cl::NullRange, cl::NDRange(n0), cl::NullRange);
+      queue.finish();
       // read result arrays from the device to main memory
       if (fastIO)
       { // is mapping required?

@@ -89,9 +89,9 @@ void kernel tnp_k_implicit(global const float8 *a1,
                            float Ecoef, // Bcoeff, Ecoeff
                            const unsigned int n,
                            const unsigned int ncalc, // n, ncalc
-                           global float *np, global float *currentj,
-                           global int *npi, global int *np_centeri,
-                           global int *cji, global int *cj_centeri,
+                           //   global float *np, global float *currentj,
+                           //  global int *npi, global int *np_centeri,
+                           //  global int *cji, global int *cj_centeri,
                            global int *q) {
 
   uint id = get_global_id(0);
