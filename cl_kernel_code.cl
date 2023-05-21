@@ -215,7 +215,7 @@ void kernel density(global const float *x0, global const float *y0,
   const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
               ZH = ZHIGH - 1.5f * DZ;
   const float invDX = 1.0f / DX, invDY = 1.0f / DY, invDZ = 1.0f / DZ;
-
+  int8 f = (1, 0, 0, 0, 0, 0, 0, 0);
   uint id = get_global_id(0);
   float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
         z = z1[id];
@@ -246,10 +246,15 @@ void kernel density(global const float *x0, global const float *y0,
   uint idx01 = idx00 + NZ * NY * NX;
   uint idx02 = idx01 + NZ * NY * NX;
 
-  int8 f = (((fz1 * fy1 * fx1) >> 14), ((fz1 * fy1 * fx0) >> 14),
-            ((fz1 * fy0 * fx1) >> 14), ((fz1 * fy0 * fx0) >> 14),
-            ((fz0 * fy1 * fx1) >> 14), ((fz0 * fy1 * fx0) >> 14),
-            ((fz0 * fy0 * fx1) >> 14), ((fz0 * fy0 * fx0) >> 14));
+  /* int8 f = (((fz1 * fy1 * fx1) >> 14), ((fz1 * fy1 * fx0) >> 14),
+             ((fz1 * fy0 * fx1) >> 14), ((fz1 * fy0 * fx0) >> 14),
+             ((fz0 * fy1 * fx1) >> 14), ((fz0 * fy1 * fx0) >> 14),
+             ((fz0 * fy0 * fx1) >> 14), ((fz0 * fy0 * fx0) >> 14));*/
+
+  f.s0 = ((fz1 * fy1 * fx1) >> 14), f.s1 = ((fz1 * fy1 * fx0) >> 14),
+  f.s2 = ((fz1 * fy0 * fx1) >> 14), f.s3 = ((fz1 * fy0 * fx0) >> 14),
+  f.s3 = ((fz0 * fy1 * fx1) >> 14), f.s5 = ((fz0 * fy1 * fx0) >> 14),
+  f.s6 = ((fz0 * fy0 * fx1) >> 14), f.s7 = ((fz0 * fy0 * fx0) >> 14);
   f = q[id] * f;
   // np density
   atomic_add(&npi[idx00 + odx000], f.s0);
