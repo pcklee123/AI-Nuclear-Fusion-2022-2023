@@ -92,7 +92,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
                            global int *q) {
 
   uint id = get_global_id(0);
- // uint prev_idx = UINT_MAX;
+  uint prev_idx = UINT_MAX;
   float xprev = x0[id], yprev = y0[id], zprev = z0[id], x = x1[id], y = y1[id],
         z = z1[id];
   float8 temp, pos;
@@ -119,15 +119,15 @@ void kernel tnp_k_implicit(global const float8 *a1,
     pos = (float8)(1.f, x, y, z, xy, xz, yz, xyz);
 
     // Is there no better way to do this? Why does float8 not have dot()?
-  //  if (prev_idx != idx) {
+    if (prev_idx != idx) {
       store0 = a1[idx]; // Ex
       store1 = a1[idx + 1];
       store2 = a1[idx + 2];
       store3 = a2[idx]; // Bx
       store4 = a2[idx + 1];
       store5 = a2[idx + 2];
-    //  prev_idx = idx;
- //   }
+      prev_idx = idx;
+    }
     temp = store0 * pos;
     float xE = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;
