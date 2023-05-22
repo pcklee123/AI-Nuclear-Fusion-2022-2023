@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 1
+#define cldevice 0
 #define sphere        // do hot spot  problem
                       // #define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
@@ -10,7 +10,7 @@ constexpr int f2 = f1 * 2;
 constexpr float incf = 1.0f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
-constexpr int n_space = 128;                                      // must be 2 to power of n
+constexpr int n_space = 32;                                      // must be 2 to power of n
 constexpr float nback = 8;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
