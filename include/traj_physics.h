@@ -23,7 +23,7 @@ constexpr float r0_f = n_space / 8; //  radius of sphere or cylinder
 constexpr float Bmax0 = 10;    // in T
 constexpr float Emax0 = 3e10; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
-constexpr float Bz0 = .1; // in T
+constexpr float Bz0 = -1; // in T
 constexpr float Ez0 = 0;
 constexpr float a0 = 0.0025e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
 constexpr float target_part = 3e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
