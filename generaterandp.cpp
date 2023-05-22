@@ -23,7 +23,7 @@ void generate_rand_sphere(particles *pt, par *par)
     {
         cerr << "a0 = " << a0 << " too large for this density Debyle Length = " << Debye_Length << endl;
 
-        //exit(1);
+        // exit(1);
     }
     float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass) + v0[0][0] * v0[0][0] + v0[0][1] * v0[0][1] + v0[0][2] * v0[0][2]);
     // float Tv = a0 / vel_e; // time for electron to move across 1 cell if E=0
@@ -194,8 +194,8 @@ void generate_rand_cylinder(float pos0x[2][n_partd], float pos0y[2][n_partd], fl
             pos1y[p][n] = pos0y[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][1]) * par->dt[p];
             pos0z[p][n] = z;
             pos1z[p][n] = pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * par->dt[p];
-            //           cout << pos1z[p][n] << " ";
-            //          if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << par->dt[p]<<endl;
+            // cout << pos1z[p][n] << " ";
+            // if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << par->dt[p]<<endl;
             q[p][n] = qs[p];
             m[p][n] = mp[p];
         }
