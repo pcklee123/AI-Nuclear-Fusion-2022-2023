@@ -2,7 +2,7 @@
 #define maxcells 32
 #define cldevice 0
 //#define sphere        // do hot spot  problem
-  #define cylinder //do hot rod problem
+#define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
 #define Temp_d 1e7    // in Kelvin
 constexpr int f1 = 1; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
