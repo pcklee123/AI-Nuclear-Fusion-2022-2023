@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 0
+#define cldevice 1
 //#define sphere        // do hot spot  problem
 #define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
@@ -16,14 +16,14 @@ constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to
 constexpr int n_parte = n_partd;
 
 constexpr float R_s = n_space / 1;  // LPF smoothing radius
-constexpr float r0_f = n_space / 4; //  radius of sphere or cylinder
+constexpr float r0_f = n_space / 2; //  radius of sphere or cylinder
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 1;    // in T
-constexpr float Emax0 = 1e9; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float Bmax0 = 10;    // in T
+constexpr float Emax0 = 3e10; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
-constexpr float Bz0 = 1e-3; // in T
+constexpr float Bz0 = .1; // in T
 constexpr float Ez0 = 0;
 constexpr float a0 = 0.0025e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
 constexpr float target_part = 3e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium

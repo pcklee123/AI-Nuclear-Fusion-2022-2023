@@ -4,7 +4,7 @@ void generate_rand_sphere(particles *pt, par *par)
     // spherical plasma set plasma parameters
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, 0 /*1e6*/}, {0, 0, 0}};
+    float v0[2][3] = {{0, 0, -1e7 /*1e6*/}, {0, 0, 0}};
 
     float r0 = r0_f * a0; // if sphere this is the radius
     float area = 4 * pi * r0 * r0;
@@ -102,7 +102,7 @@ void generate_rand_cylinder(particles *pt, par *par)
     // spherical plasma radius is 1/8 of total extent.
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, -1e7f}, {0, 0, 0}}; /*1e6*/
+    float v0[2][3] = {{0, 0, -1e8f}, {0, 0, 0}}; /*1e6*/
 
     float r0 = r0_f * a0; // the radius
     float area = pi * r0 * r0;
