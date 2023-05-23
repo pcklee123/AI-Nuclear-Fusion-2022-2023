@@ -10,7 +10,7 @@ void tnp(fields *fi, particles *pt, par *par)
    unsigned int n_cellsf = n_cells * sizeof(float);
    static bool fastIO;
    static bool first = true;
-   static int ncalc_e = 0, ncalc_i = 0;
+ //  static int ncalc_e = 0, ncalc_i = 0;
 
    if (first)
    { // get whether or not we are on an iGPU/similar, and can use certain memmory optimizations
@@ -73,8 +73,8 @@ void tnp(fields *fi, particles *pt, par *par)
    cl::Kernel kernel_trilin = cl::Kernel(program_g, "trilin_k"); // select the kernel program to run
    cl::Kernel kernel_density = cl::Kernel(program_g, "density"); // select the kernel program to run
    cl::Kernel kernel_df = cl::Kernel(program_g, "df");           // select the kernel program to run
-   ncalc_e = par->ncalcp[0];
-   ncalc_i = par->ncalcp[1];
+  // ncalc_e = par->ncalcp[0];
+  // ncalc_i = par->ncalcp[1];
 #ifdef BFon_
    par->Bcoef[0] = (float)qs[0] * e_charge_mass / (float)mp[0] * par->dt[0] * 0.5f;
    par->Bcoef[1] = (float)qs[1] * e_charge_mass / (float)mp[1] * par->dt[1] * 0.5f;
@@ -152,7 +152,7 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_tnp.setArg(8, sizeof(float), &par->Bcoef[0]);  // Bconst
       kernel_tnp.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
       kernel_tnp.setArg(10, sizeof(int), &par->n_partp[0]); // npart
-      kernel_tnp.setArg(11, sizeof(int), &ncalc_e);         // ncalc
+      kernel_tnp.setArg(11, sizeof(int), &par->ncalcp[0]);         // ncalc
       kernel_tnp.setArg(12, buff_q_e);                      // q
 
       // cout << "run kernel for electron" << endl;
@@ -191,7 +191,7 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_tnp.setArg(8, sizeof(float), &par->Bcoef[1]);  // Bconst
       kernel_tnp.setArg(9, sizeof(float), &par->Ecoef[1]);  // Econst
       kernel_tnp.setArg(10, sizeof(int), &par->n_partp[1]); // npart
-      kernel_tnp.setArg(11, sizeof(int), &ncalc_i);         //
+      kernel_tnp.setArg(11, sizeof(int), &par->ncalcp[1]);         //
       kernel_tnp.setArg(12, buff_q_i);                      // q
 
       // cout << "run kernel for ions" << endl;
