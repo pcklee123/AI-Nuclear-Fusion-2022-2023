@@ -5,9 +5,9 @@
 #define cylinder //do hot rod problem
 #define Temp_e 1e5    // in Kelvin
 #define Temp_d 1e7    // in Kelvin
-constexpr int f1 = 1; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 2;
-constexpr float incf = 1.0f;        // increment
+constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
 constexpr int n_space = 32;                                      // must be 2 to power of n
@@ -16,17 +16,18 @@ constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to
 constexpr int n_parte = n_partd;
 
 constexpr float R_s = n_space / 1;  // LPF smoothing radius
-constexpr float r0_f = n_space / 8; //  radius of sphere or cylinder
+constexpr float r0_f = n_space / 16; //  radius of sphere or cylinder
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 20;    // in T
 constexpr float Emax0 = 1e12; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
-constexpr float Bz0 = 0; // in T
-constexpr float Ez0 = 0;
-constexpr float a0 = 0.0025e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
-constexpr float target_part = 3e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float Bz0 = 1e-3; // in T, static constant fields
+constexpr float Ez0 = 1e6f;//in V/m
+constexpr float vz0 = 1e8f;
+constexpr float a0 = 0.1e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
+constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 

@@ -248,7 +248,8 @@ int calcEBV(fields *fi, par *par)
                                         precalc_r3[0][2][loc_k][loc_j][loc_i][1] *= w;
                                                     precalc_r3[1][0][loc_k][loc_j][loc_i][1] *= w;
                                         precalc_r3[1][1][loc_k][loc_j][loc_i][1] *= w;
-                                        precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= w;//*
+                                        precalc_r3[1][2][loc_k][loc_j][loc_i][1] *= w;
+                                        //*
                     precalc_r3[1][0][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[1][1][loc_k][loc_j][loc_i][0] *= w;
                     precalc_r3[1][2][loc_k][loc_j][loc_i][0] *= w;
@@ -261,8 +262,7 @@ int calcEBV(fields *fi, par *par)
 #endif
                 }
             }
-        }
-        */
+        }*/
         delete[] precalc_r3_base;
         delete[] precalc_r2_base;
         first = 0;
