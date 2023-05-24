@@ -184,7 +184,7 @@ void generate_rand_cylinder(particles *pt, par *par)
         {
             float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.5);
             double x, y, z;
-            z = gsl_ran_flat(rng, -1.0, 1.0) * a0 * (n_space - 2) * 0.5;
+            z = gsl_ran_flat(rng, -1.0, 1.0) * a0 * (n_space - 3) * 0.5;
             gsl_ran_dir_2d(rng, &x, &y);
             pt->pos0x[p][n] = r * x;
             pt->pos1x[p][n] = pt->pos0x[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][0]) * par->dt[p];
