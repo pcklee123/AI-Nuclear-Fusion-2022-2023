@@ -27,7 +27,7 @@ constexpr float Bz0 = 1e-3; // in T, static constant fields
 constexpr float Ez0 = 1e6f;//in V/m
 constexpr float vz0 = 1e8f;
 constexpr float a0 = 0.1e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
-constexpr float target_part = 1e8; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 
