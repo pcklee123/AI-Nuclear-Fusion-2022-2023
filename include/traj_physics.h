@@ -24,8 +24,8 @@ constexpr float Bmax0 = 20;    // in T
 constexpr float Emax0 = 1e12; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 1e-3; // in T, static constant fields
-constexpr float Ez0 = 0;//in V/m
-constexpr float vz0 = 1e7f;
+constexpr float Ez0 = 1e6f;//in V/m
+constexpr float vz0 = 1e8f;
 constexpr float a0 = 0.0025e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
 constexpr float target_part = 1e7; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
