@@ -4,7 +4,7 @@ void generate_rand_sphere(particles *pt, par *par)
     // spherical plasma set plasma parameters
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, 0 /*1e6*/}, {0, 0, 0}};
+    float v0[2][3] = {{0, 0, -vz0}, {0, 0, vz0/60}};
 
     float r0 = r0_f * a0; // if sphere this is the radius
     float area = 4 * pi * r0 * r0;
@@ -96,13 +96,10 @@ void generate_rand_sphere(particles *pt, par *par)
 void generate_rand_cylinder(particles *pt, par *par)
 
 {
-    // set plasma parameters
-    // float mp[2]= {9.10938356e-31,3.3435837724e-27}; //kg
-    //  int qs[2] = {-1, 1}; // Sign of charge
-    // spherical plasma radius is 1/8 of total extent.
+    // cylindrical plasma radius is r0_f*a0 .
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, 1e6f}, {0, 0, -1e6f / 60}}; /*1e6*/
+    float v0[2][3] = {{0, 0, -vz0}, {0, 0, vz0 / 60}}; /*1e6*/
 
     float r0 = r0_f * a0; // the radius
     float area = pi * r0 * r0;
@@ -167,10 +164,10 @@ void generate_rand_cylinder(particles *pt, par *par)
         int na = 0;
         for (int n = 0; n < nback; ++n) // set number of particles per cell in background
         {
-            for (int k = 1; k < n_space_divz - 1; ++k)
+            for (int k = 2; k < n_space_divz - 2; ++k)
             {
-                for (int j = 1; j < n_space_divy - 1; ++j)
-                    for (int i = 1; i < n_space_divx - 1; ++i)
+                for (int j = 2; j < n_space_divy - 2; ++j)
+                    for (int i = 2; i < n_space_divx - 2; ++i)
                     {
                         pt->pos0x[p][na] = ((float)(i - n_space_divx / 2) + (float)rand() / RAND_MAX) * a0;
                         pt->pos0y[p][na] = ((float)(j - n_space_divy / 2) + (float)rand() / RAND_MAX) * a0;

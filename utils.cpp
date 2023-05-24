@@ -68,11 +68,16 @@ void log_headers()
     logger.write("E_tot");
     logger.write("Emax");
     logger.write("Bmax");
+    logger.write("Ecoeff_e");
+    logger.write("Bcoeff_e");
+    logger.write("Ecoeff_i");
+    logger.write("Bcoeff_i");
     logger.newline();
 }
 
 void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par *par)
 {
+    float ntall = par->nt[1] - par->nt[0];
     logger.write(i_time);
     logger.write(ntime);
     logger.write(cdt);
@@ -83,13 +88,17 @@ void log_entry(int i_time, int ntime, int cdt, int total_ncalc[2], double t, par
     logger.write(t * 1e12); // in ps
     logger.write(par->nt[0]);
     logger.write(par->nt[1]);
-    logger.write(par->KEtot[0]);
-    logger.write(par->KEtot[1]);
-    logger.write(par->UE);
-    logger.write(par->UB);
-    logger.write(par->KEtot[0] + par->KEtot[1] + par->UB + par->UE);
+    logger.write(-par->KEtot[0] / par->nt[0]);
+    logger.write(par->KEtot[1] / par->nt[1]);
+    logger.write(par->UE / ntall);
+    logger.write(par->UB / ntall);
+    logger.write((par->KEtot[0] + par->KEtot[1] + par->UB + par->UE) / ntall);
     logger.write(par->Emax);
-    logger.write(par->Bmax);
+    logger.write(par->Bmax*1000);
+    logger.write(par->Ecoef[0] * 1e21);
+    logger.write(par->Bcoef[0] * 1e9);
+    logger.write(par->Ecoef[1] * 1e21);
+    logger.write(par->Bcoef[1] * 1e9);
     logger.newline();
 }
 float maxvalf(float *data_1d, int n)
@@ -197,8 +206,8 @@ fields *alloc_fields(par *par)
     auto *f = (fields *)malloc(sizeof(fields));
     /** CL: Ensure that Ea/Ba contain multiple of 64 bytes, ie. multiple of 16 floats **/
 
-    f->E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells));                             // selfgenerated E field
-    f->Ee = new float[3][n_space_divz][n_space_divy][n_space_divx];                                                                             // External E field
+    f->E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells));                                        // selfgenerated E field
+    f->Ee = new float[3][n_space_divz][n_space_divy][n_space_divx];                                                                                        // External E field
     f->Ea = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Electric field
 
     f->B = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // new float[3][n_space_divz][n_space_divy][n_space_divx];
