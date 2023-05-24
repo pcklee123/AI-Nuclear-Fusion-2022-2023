@@ -229,7 +229,7 @@ void kernel tnp_k_implicitz(global const float8 *a1,
               ZL = ZLOW + 1.5f * DZ;
   const float XH = XHIGH - 1.5f * DX, YH = YHIGH - 1.5f * DY,
               ZH = ZHIGH - 1.5f * DZ;
-  const float ZDZ = ZH - ZL;
+  const float ZDZ = ZH - ZL - DZ/10;
   const float8 ones = (float8)(1, 1, 1, 1, 1, 1, 1, 1);
   for (int t = 0; t < ncalc; t++) {
 
@@ -311,15 +311,15 @@ void kernel tnp_k_implicitz(global const float8 *a1,
   xprev = x < XH ? xprev : XH;
   yprev = y > YL ? yprev : YL;
   yprev = y < YH ? yprev : YH;
-  zprev = z > ZL ? zprev : zprev + ZH;
-  zprev = z < ZH ? zprev : zprev - ZH;
-  q[id] = (x > XL & x<XH & y> YL & y<YH & z> ZL & z < ZH) ? q[id] : 0;
+  zprev = z > ZL ? zprev : zprev + ZDZ;
+  zprev = z < ZH ? zprev : zprev - ZDZ;
+  q[id] = (x > XL & x<XH & y> YL & y < YH) ? q[id] : 0;
   x = x > XL ? x : XL;
   x = x < XH ? x : XH;
   y = y > YL ? y : YL;
   y = y < YH ? y : YH;
-  z = z > ZL ? z : ZL;
-  z = z < ZH ? z : ZH;
+  z = z > ZL ? z : z + ZDZ;
+  z = z < ZH ? z : z - ZDZ;
 
   x0[id] = xprev;
   y0[id] = yprev;

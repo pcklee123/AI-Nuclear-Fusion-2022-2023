@@ -10,7 +10,7 @@ void tnp(fields *fi, particles *pt, par *par)
    unsigned int n_cellsf = n_cells * sizeof(float);
    static bool fastIO;
    static bool first = true;
-   static int ncalc_e = 0, ncalc_i = 0;
+ //  static int ncalc_e = 0, ncalc_i = 0;
 
    if (first)
    { // get whether or not we are on an iGPU/similar, and can use certain memmory optimizations
@@ -41,8 +41,8 @@ void tnp(fields *fi, particles *pt, par *par)
    static cl::Buffer buff_npi(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi, fastIO ? fi->npi : NULL);
    static cl::Buffer buff_cji(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3, fastIO ? fi->cji : NULL);
 
-  // static cl::Buffer buff_np_centeri(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3, fastIO ? fi->np_centeri : NULL);
-   //static cl::Buffer buff_cj_centeri(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3 * 3, fastIO ? fi->cj_centeri : NULL);
+   // static cl::Buffer buff_np_centeri(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3, fastIO ? fi->np_centeri : NULL);
+   // static cl::Buffer buff_cj_centeri(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n_cellsi * 3 * 3, fastIO ? fi->cj_centeri : NULL);
 
    static cl::Buffer buff_x0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0x[0] : NULL); // x0
    static cl::Buffer buff_y0_e(context_g, (fastIO ? CL_MEM_USE_HOST_PTR : 0) | CL_MEM_READ_WRITE, n4, fastIO ? pt->pos0y[0] : NULL); // y0
@@ -64,12 +64,17 @@ void tnp(fields *fi, particles *pt, par *par)
                                                                                                                                 // */
    // cout << "command q" << endl; //  create queue to which we will push commands for the device.
    static cl::CommandQueue queue(context_g, default_device_g);
+#ifdef sphere
    cl::Kernel kernel_tnp = cl::Kernel(program_g, "tnp_k_implicit"); // select the kernel program to run
-   cl::Kernel kernel_trilin = cl::Kernel(program_g, "trilin_k");    // select the kernel program to run
-   cl::Kernel kernel_density = cl::Kernel(program_g, "density");    // select the kernel program to run
-   cl::Kernel kernel_df = cl::Kernel(program_g, "df");              // select the kernel program to run
-   ncalc_e = par->ncalcp[0];
-   ncalc_i = par->ncalcp[1];
+#endif
+#ifdef cylinder
+   cl::Kernel kernel_tnp = cl::Kernel(program_g, "tnp_k_implicitz"); // select the kernel program to run
+#endif
+   cl::Kernel kernel_trilin = cl::Kernel(program_g, "trilin_k"); // select the kernel program to run
+   cl::Kernel kernel_density = cl::Kernel(program_g, "density"); // select the kernel program to run
+   cl::Kernel kernel_df = cl::Kernel(program_g, "df");           // select the kernel program to run
+  // ncalc_e = par->ncalcp[0];
+  // ncalc_i = par->ncalcp[1];
 #ifdef BFon_
    par->Bcoef[0] = (float)qs[0] * e_charge_mass / (float)mp[0] * par->dt[0] * 0.5f;
    par->Bcoef[1] = (float)qs[1] * e_charge_mass / (float)mp[1] * par->dt[1] * 0.5f;
@@ -147,7 +152,7 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_tnp.setArg(8, sizeof(float), &par->Bcoef[0]);  // Bconst
       kernel_tnp.setArg(9, sizeof(float), &par->Ecoef[0]);  // Econst
       kernel_tnp.setArg(10, sizeof(int), &par->n_partp[0]); // npart
-      kernel_tnp.setArg(11, sizeof(int), &ncalc_e);         // ncalc
+      kernel_tnp.setArg(11, sizeof(int), &par->ncalcp[0]);         // ncalc
       kernel_tnp.setArg(12, buff_q_e);                      // q
 
       // cout << "run kernel for electron" << endl;
@@ -186,7 +191,7 @@ void tnp(fields *fi, particles *pt, par *par)
       kernel_tnp.setArg(8, sizeof(float), &par->Bcoef[1]);  // Bconst
       kernel_tnp.setArg(9, sizeof(float), &par->Ecoef[1]);  // Econst
       kernel_tnp.setArg(10, sizeof(int), &par->n_partp[1]); // npart
-      kernel_tnp.setArg(11, sizeof(int), &ncalc_i);         //
+      kernel_tnp.setArg(11, sizeof(int), &par->ncalcp[1]);         //
       kernel_tnp.setArg(12, buff_q_i);                      // q
 
       // cout << "run kernel for ions" << endl;

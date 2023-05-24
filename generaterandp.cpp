@@ -102,7 +102,7 @@ void generate_rand_cylinder(particles *pt, par *par)
     // spherical plasma radius is 1/8 of total extent.
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, -1e7f}, {0, 0, 0}}; /*1e6*/
+    float v0[2][3] = {{0, 0, 1e6f}, {0, 0, -1e6f / 60}}; /*1e6*/
 
     float r0 = r0_f * a0; // the radius
     float area = pi * r0 * r0;
@@ -120,6 +120,13 @@ void generate_rand_cylinder(particles *pt, par *par)
     float plasma_freq = sqrt(Density_e * e_charge * e_charge_mass / (mp[0] * epsilon0)) / (2 * pi);
     float plasma_period = 1 / plasma_freq;
     float Debye_Length = sqrt(epsilon0 * kb * Temp[0] / (Density_e * e_charge * e_charge));
+    info_file << "debyeLength=" << Debye_Length << ", a0 = " << a0 << endl;
+    if (Debye_Length < a0)
+    {
+        cerr << "a0 = " << a0 << " too large for this density Debyle Length = " << Debye_Length << endl;
+
+        // exit(1);
+    }
     float vel_e = sqrt(kb * Temp[0] / (mp[0] * e_mass) + v0[0][0] * v0[0][0] + v0[0][1] * v0[0][1] + v0[0][2] * v0[0][2]);
     info_file << "electron velocity due to temp and initial velocity " << vel_e << endl;
     float Tv = a0 / vel_e; // time for electron to move across 1 cell
@@ -171,8 +178,8 @@ void generate_rand_cylinder(particles *pt, par *par)
                         pt->pos1x[p][na] = pt->pos0x[p][na];
                         pt->pos1y[p][na] = pt->pos0y[p][na];
                         pt->pos1z[p][na] = pt->pos0z[p][na];
-                         pt->q[p][na] = qs[p];
-                         pt->m[p][na] = mp[p];
+                        pt->q[p][na] = qs[p];
+                        pt->m[p][na] = mp[p];
                         na++;
                     }
                 //      cout << pt->pos1z[p][na - 1] << " ";
@@ -194,8 +201,8 @@ void generate_rand_cylinder(particles *pt, par *par)
             pt->pos1z[p][n] = pt->pos0z[p][n] + (gsl_ran_gaussian(rng, sigma[p]) + v0[p][2]) * par->dt[p];
             // cout << pt->pos1z[p][n] << " ";
             // if (n==0) cout << "p = " <<p <<", sigma = " <<sigma[p]<<", temp = " << Temp[p] << ",mass of particle = " << mp[p] << par->dt[p]<<endl;
-             pt->q[p][n] = qs[p];
-             pt->m[p][n] = mp[p];
+            pt->q[p][n] = qs[p];
+            pt->m[p][n] = mp[p];
         }
         //        nt[p] +=  pt->q[p][n];
     }
