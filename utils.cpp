@@ -183,7 +183,7 @@ particles *alloc_particles(par *par)
     // position of particle and velocity: stored as 2 positions at slightly different times [2 positions previous and current][3 components][2 types of particles][number of particles]
     /** CL: Ensure that pos0/1.. contain multiple of 64 bytes, ie. multiple of 16 floats **/
     //*
-    pt->pos = reinterpret_cast<float(&)[2][3][2][n_partd]>(*((float *)_aligned_malloc(sizeof(float) * par->n_part[0] * 2 * 3 * 2, par->cl_align)));
+    pt->pos = reinterpret_cast<float(&)[2][3][2][n_partd]>(*((float *)aligned_alloc(sizeof(float) * par->n_part[0] * 2 * 3 * 2, par->cl_align)));
     // convenience pointers pos0[3 components][2 types of particles][n-particles] as 1D
     pt->pos0 = reinterpret_cast<float(*)>(pt->pos[0]);
     pt->pos1 = reinterpret_cast<float(*)>(pt->pos[1]);
@@ -195,8 +195,8 @@ particles *alloc_particles(par *par)
     pt->pos1z = reinterpret_cast<float(&)[2][n_partd]>(*(float *)(pt->pos[1][2]));
 
     //    charge of particles
-    auto *q = static_cast<int(*)[n_partd]>(_aligned_malloc(2 * n_partd * sizeof(int), par->cl_align)); // charge of each particle +1 for H,D or T or -1 for electron can also be +2 for He for example
-    auto *m = static_cast<int(*)[n_partd]>(_aligned_malloc(2 * n_partd * sizeof(int), par->cl_align)); // mass of of each particle not really useful unless we want to simulate many different types of particles
+    auto *q = static_cast<int(*)[n_partd]>(aligned_alloc(2 * n_partd * sizeof(int), par->cl_align)); // charge of each particle +1 for H,D or T or -1 for electron can also be +2 for He for example
+    auto *m = static_cast<int(*)[n_partd]>(aligned_alloc(2 * n_partd * sizeof(int), par->cl_align)); // mass of of each particle not really useful unless we want to simulate many different types of particles
     pt->q = q;
     pt->m = m;
     return pt;
@@ -208,21 +208,21 @@ fields *alloc_fields(par *par)
 
     f->E = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells));                                        // selfgenerated E field
     f->Ee = new float[3][n_space_divz][n_space_divy][n_space_divx];                                                                                        // External E field
-    f->Ea = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Electric field
+    f->Ea = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][ncoeff]>(aligned_alloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Electric field
 
     f->B = reinterpret_cast<float(&)[3][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(3 * n_cells)); // new float[3][n_space_divz][n_space_divy][n_space_divx];
     f->Be = new float[3][n_space_divz][n_space_divy][n_space_divx];
-    f->Ba = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][ncoeff]>(_aligned_malloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Magnetic field
+    f->Ba = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx][ncoeff]>(aligned_alloc(sizeof(float) * n_cells * 3 * ncoeff, par->cl_align)); // coefficients for Trilinear interpolation Magnetic field
 
     f->V = reinterpret_cast<float(&)[1][n_space_divz][n_space_divy][n_space_divx]>(*fftwf_alloc_real(n_cells));
 
-    f->np = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * n_cells * sizeof(float), alignment));
-    f->npi = static_cast<int(*)[n_space_divy][n_space_divx]>(_aligned_malloc(n_cells * sizeof(int), alignment));
-    f->np_centeri = static_cast<int(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(n_cells * 3 * sizeof(int), alignment));
-    f->npt = static_cast<float(*)[n_space_divy][n_space_divx]>(_aligned_malloc(n_cells * sizeof(float), alignment));
-    f->currentj = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(2 * 3 * n_cells * sizeof(float), alignment));
-    f->cji = static_cast<int(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(n_cells * sizeof(int) * 3, alignment));
-    f->cj_centeri = static_cast<int(*)[3][n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(n_cells * sizeof(int) * 3 * 3, alignment));
-    f->jc = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(_aligned_malloc(3 * n_cells * sizeof(float), alignment));
+    f->np = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(aligned_alloc(2 * n_cells * sizeof(float), alignment));
+    f->npi = static_cast<int(*)[n_space_divy][n_space_divx]>(aligned_alloc(n_cells * sizeof(int), alignment));
+    f->np_centeri = static_cast<int(*)[n_space_divz][n_space_divy][n_space_divx]>(aligned_alloc(n_cells * 3 * sizeof(int), alignment));
+    f->npt = static_cast<float(*)[n_space_divy][n_space_divx]>(aligned_alloc(n_cells * sizeof(float), alignment));
+    f->currentj = static_cast<float(*)[3][n_space_divz][n_space_divy][n_space_divx]>(aligned_alloc(2 * 3 * n_cells * sizeof(float), alignment));
+    f->cji = static_cast<int(*)[n_space_divz][n_space_divy][n_space_divx]>(aligned_alloc(n_cells * sizeof(int) * 3, alignment));
+    f->cj_centeri = static_cast<int(*)[3][n_space_divz][n_space_divy][n_space_divx]>(aligned_alloc(n_cells * sizeof(int) * 3 * 3, alignment));
+    f->jc = static_cast<float(*)[n_space_divz][n_space_divy][n_space_divx]>(aligned_alloc(3 * n_cells * sizeof(float), alignment));
     return f;
 }

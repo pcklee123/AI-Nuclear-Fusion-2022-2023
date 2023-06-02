@@ -20,7 +20,9 @@
 #include <vtk/vtkFloatArray.h>
 #include <vtk/vtkDoubleArray.h>
 #include <vtk/vtkPolyData.h>
-#include <vtkCellData.h>
+#include <vtk/vtkCellData.h>
+#include <vtk/vtkSmartPointer.h>
+
 #include <vtk/vtkInformation.h>
 #include <vtk/vtkTable.h>
 
@@ -34,7 +36,7 @@
 #include <complex>
 // #include <infft.h>
 
-#include <nfft3.h>
+//#include <nfft3.h>
 // #include "nfft3mp.h"
 #include <fftw3.h>
 
