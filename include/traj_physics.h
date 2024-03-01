@@ -10,7 +10,7 @@ constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
-constexpr int n_space = 64;                                      // must be 2 to power of n
+constexpr int n_space = 128;                                      // must be 2 to power of n
 constexpr float nback = 32;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
