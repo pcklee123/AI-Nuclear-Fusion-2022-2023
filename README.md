@@ -13,12 +13,16 @@ Original code in 2021 by Hilary,Yin Yue and Chloe, extensive improvements by Sam
 ### Prerequisites for windows
 - MSYS2
 - to avoid confusion, use either of "mingw64" or "ucrt" and do not mix the two. The following examples make use of ucrt  
-- Tools 
-    pacman -S base-devel cmake git mingw-w64-ucrt-x86_64-gcc paraview  
+- Tools: 
+    - pacman -S base-devel cmake git mingw-w64-ucrt-x86_64-gcc 
+    - install windows native paraview, visual code studio
+
 - Libs (Opencl, OpenMP, gsl, fftw, vtk, nfftw)
-    pacman -S mingw-w64-ucrt-x86_64-opencl-headers mingw-w64-ucrt-x86_64-opencl-clhpp mingw-w64-ucrt-x86_64-opencl-icd mingw-w64-ucrt-x86_64-openmp mingw-w64-ucrt-x86_64-gsl mingw-w64-ucrt-x86_64-fftw mingw-w64-ucrt-x86_64-vtk 
-using float version of nfftw3f. should install from source using ./configure --enable-float
-https://www-user.tu-chemnitz.de/~potts/nfft/installation.php
+    - pacman -S mingw-w64-ucrt-x86_64-opencl-headers mingw-w64-ucrt-x86_64-opencl-clhpp mingw-w64-ucrt-x86_64-opencl-icd mingw-w64-ucrt-x86_64-openmp mingw-w64-ucrt-x86_64-gsl mingw-w64-ucrt-x86_64-fftw mingw-w64-ucrt-x86_64-vtk 
+
+    - If using float version of nfftw3f. should install from source using ./configure --enable-float
+    https://www-user.tu-chemnitz.de/~potts/nfft/installation.php
+
 
 - GCC added to PATH in MSYS
     - In the root directory, run `export PATH=$PATH:/ucrt64/bin`
