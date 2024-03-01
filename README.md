@@ -14,18 +14,19 @@ Original code in 2021 by Hilary,Yin Yue and Chloe, extensive improvements by Sam
 - MSYS2
 - to avoid confusion, use either of "mingw64" or "ucrt" and do not mix the two. The following examples make use of ucrt  
 - Tools: 
-    - pacman -S base-devel cmake git mingw-w64-ucrt-x86_64-gcc 
-    - install windows native paraview, visual code studio
+    - > pacman -S base-devel cmake git mingw-w64-ucrt-x86_64-gcc 
+    - install windows native paraview, visual studio code
 
 - Libs (Opencl, OpenMP, gsl, fftw, vtk, nfftw)
-    - pacman -S mingw-w64-ucrt-x86_64-opencl-headers mingw-w64-ucrt-x86_64-opencl-clhpp mingw-w64-ucrt-x86_64-opencl-icd mingw-w64-ucrt-x86_64-openmp mingw-w64-ucrt-x86_64-gsl mingw-w64-ucrt-x86_64-fftw mingw-w64-ucrt-x86_64-vtk 
+    - > pacman -S mingw-w64-ucrt-x86_64-opencl-headers mingw-w64-ucrt-x86_64-opencl-clhpp mingw-w64-ucrt-x86_64-opencl-icd mingw-w64-ucrt-x86_64-openmp mingw-w64-ucrt-x86_64-gsl mingw-w64-ucrt-x86_64-fftw mingw-w64-ucrt-x86_64-vtk 
 
     - If using float version of nfftw3f. should install from source using ./configure --enable-float
     https://www-user.tu-chemnitz.de/~potts/nfft/installation.php
 
 
 - GCC added to PATH in MSYS
-    - In the root directory, run `export PATH=$PATH:/ucrt64/bin`
+    - In the root directory, run 
+    - > export PATH=$PATH:/ucrt64/bin
     - this can also be added in windows "edit system environment variables" , "Path". Add C:\msys64\usr\bin and C:\msys64\ucrt64\bin
 
 ### Prerequisites for Linux
