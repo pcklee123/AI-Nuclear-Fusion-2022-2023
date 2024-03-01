@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 0
+#define cldevice 0 // 0 usually means integrated GPU
 //#define sphere        // do hot spot  problem
 #define cylinder //do hot rod problem
 #define Temp_e 1e5    // in Kelvin
