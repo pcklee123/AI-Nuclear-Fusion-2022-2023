@@ -21,13 +21,13 @@ constexpr float r0_f = n_space / 16; //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 0.001;    // in T
-constexpr float Emax0 = 100000; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float Emax0 = 1000000; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 1.0e-5; // in T, static constant fields
 constexpr float Ez0 = 0.0f;//in V/m
 constexpr float vz0 = 0.0f;
 constexpr float a0 = 0.1e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
-constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e10; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 
@@ -40,7 +40,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc1 = 1;            // f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int nc1 = 10;            // f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 1024
