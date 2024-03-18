@@ -3,14 +3,14 @@
 #define cldevice 0 // 0 usually means integrated GPU
 #define sphere        // do hot spot  problem
 //#define cylinder //do hot rod problem
-#define Temp_e 1e5    // in Kelvin
+#define Temp_e 1e7    // in Kelvin
 #define Temp_d 1e7    // in Kelvin
 constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
-constexpr int n_space = 64;                                      // must be 2 to power of n
+constexpr int n_space = 128;                                      // must be 2 to power of n
 constexpr float nback = 32;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;

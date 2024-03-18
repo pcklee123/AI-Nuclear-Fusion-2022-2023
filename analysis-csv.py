@@ -11,9 +11,9 @@ filenames = ['log.csv']
 for i, ax in enumerate(plots):
     df = pd.read_csv(filenames[i])
     #print(df.columns)
-    df['KEavg_ele'] = df['KEtot_ele'] / -df['ne']
-    df['KEavg_deut'] = df['KEtot_deut'] / df['ni']
-    df.plot(ax=ax, y=['KEtot_ele', 'KEtot_deut', 'Ele_pot', 'Mag_pot', 'E_tot'], secondary_y = 'ncalc_ele')
+    df['KEavg_ele'] = df['KEt_e'] / -df['ne']
+    df['KEavg_deut'] = df['KEt_d'] / df['ni']
+    df.plot(ax=ax, y=['KEt_e', 'KEt_d', 'Ele_pot', 'Mag_pot', 'E_tot'], secondary_y = 'nc_ele')
     scale_to_initial(df, 'ne')
     scale_to_initial(df, 'E_tot')
     df.plot(y=['ne_scl', 'E_tot_scl'])
