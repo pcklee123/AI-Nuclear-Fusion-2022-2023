@@ -64,12 +64,8 @@ Original code in 2021 by Hilary,Yin Yue and Chloe, extensive improvements by Sam
 
 - to get more performance, you might want to recompile the libraries used. for example to install fftw3 recompiled with OMP enabled:
  > wget https://www.fftw.org/fftw-3.3.10.tar.gz
-
  > tar xvzf fftw-3.3.10.tar.gz
-
 > cd fftw-3.3.10/
-
 > ./configure --enable-threads --enable-openmp --enable-avx --enable-avx2 --enable-avx512 --enable-avx-128-fma --enable-float --with-our-malloc --enable-sse2
-
 > make
  > make install
