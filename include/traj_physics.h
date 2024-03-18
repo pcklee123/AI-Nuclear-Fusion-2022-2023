@@ -11,7 +11,7 @@ constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
 constexpr int n_space = 128;                                      // must be 2 to power of n
-constexpr float nback = 32;                                       // background particles per cell - improves stability
+constexpr float nback = 4;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 
@@ -27,7 +27,7 @@ constexpr float Bz0 = 1.0e-5; // in T, static constant fields
 constexpr float Ez0 = 0.0f;//in V/m
 constexpr float vz0 = 0.0f;
 constexpr float a0 = 0.1e-3;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise eenrgy is not conseved if a particle moves across a cell
-constexpr float target_part = 1e7; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
+constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
 
 // technical parameters
 

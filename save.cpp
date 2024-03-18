@@ -28,7 +28,7 @@ void save_hist(int i_time, double t, particles *pt, par *par)
     }
     par->KEtot[p] = KE * 0.5 * mp[p] / (e_charge_mass * par->dt[p] * par->dt[p]) * r_part_spart; // as if these particles were actually samples of the greater thing
     par->nt[p] = nt * r_part_spart;
- //   cout << "p = " << p << ", KE = " << par->KEtot[p] << ", npart[p]" << par->n_part[p] << endl;
+    //   cout << "p = " << p << ", KE = " << par->KEtot[p] << ", npart[p]" << par->n_part[p] << endl;
   }
 
   // Create a vtkPolyData object
@@ -135,6 +135,14 @@ void save_vti_c(string filename, int i,
 void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *pt, par *par)
 {
   // cout << "save_vti_p"<<endl;
+  static int first = 1;
+  static int nr[n_output_part];
+  int nprtd = floor(par->n_part[p] / n_output_part);
+  if (first)
+  {
+    for (int i = 0; i < n_output_part; i++)
+      nr[i] = i * nprtd + rand() % nprtd;
+  }
   // Create a polydata object
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
   // Add the FieldData to the PolyData
@@ -149,12 +157,11 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
   vtkSmartPointer<vtkFloatArray> kineticEnergy = vtkSmartPointer<vtkFloatArray>::New();
   kineticEnergy->SetName("KE");
 
-  int nprtd = floor(par->n_part[p] / n_output_part);
   // #pragma omp parallel for simd
   //  #pragma omp distribute parallel for simd
   for (int nprt = 0; nprt < n_output_part; nprt++)
   {
-    int n = nprt * nprtd + rand() % nprtd;
+    int n = nr[nprt];
     if (nprtd == 0 && n >= par->n_part[p])
     {
       //  KE[p][nprt] = 0;
@@ -163,7 +170,7 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
       //  posp[p][nprt][2] = 0;
       continue;
     }
-    float dpos, dpos2 = 0;
+    float KE, dpos, dpos2 = 0;
     dpos = (pt->pos1x[p][n] - pt->pos0x[p][n]);
     dpos *= dpos;
     dpos2 += dpos;
@@ -173,9 +180,13 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
     dpos = (pt->pos1z[p][n] - pt->pos0z[p][n]);
     dpos *= dpos;
     dpos2 += dpos;
-    kineticEnergy->InsertNextValue(0.5 * pt->m[p][n] * (dpos2) / (e_charge_mass * par->dt[p] * par->dt[p]));
-    // in units of eV
-    points->InsertNextPoint(pt->pos1x[p][n], pt->pos1y[p][n], pt->pos1z[p][n]);
+    KE = 0.5 * pt->m[p][n] * (dpos2) / (e_charge_mass * par->dt[p] * par->dt[p]);
+    // if (KE>1)
+    {
+      kineticEnergy->InsertNextValue(KE);
+      // in units of eV
+      points->InsertNextPoint(pt->pos1x[p][n], pt->pos1y[p][n], pt->pos1z[p][n]);
+    }
   }
 
   polyData->SetPoints(points);
