@@ -21,7 +21,7 @@ constexpr float r0_f = n_space / 16; //  radius of sphere or cylinder
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
 constexpr float Bmax0 = 0.001;    // in T
-constexpr float Emax0 = 1000000; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
+constexpr float Emax0 = 10000000; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 1.0e-5; // in T, static constant fields
 constexpr float Ez0 = 0.0f;//in V/m
@@ -43,8 +43,8 @@ constexpr int ndatapoints = 300; // total number of time steps to calculate
 constexpr int nc1 = 10;            // f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
-#define Hist_n 1024
-#define Hist_max Temp_e / 11600 * 60 // in eV Kelvin to eV is divide by 11600
+#define Hist_n 512
+#define Hist_max Temp_e / 11600 * 30 // in eV Kelvin to eV is divide by 11600
 
 #define trilinon_
 #define Uon_ // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
