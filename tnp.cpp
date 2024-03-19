@@ -76,8 +76,9 @@ void tnp(fields *fi, particles *pt, par *par)
   // ncalc_e = par->ncalcp[0];
   // ncalc_i = par->ncalcp[1];
 #ifdef BFon_
-   par->Bcoef[0] = (float)qs[0] * e_charge_mass / (float)mp[0] * par->dt[0] * 0.5f;
-   par->Bcoef[1] = (float)qs[1] * e_charge_mass / (float)mp[1] * par->dt[1] * 0.5f;
+//check minus sign
+   par->Bcoef[0] = -(float)qs[0] * e_charge_mass / (float)mp[0] * par->dt[0] * 0.5f;
+   par->Bcoef[1] = -(float)qs[1] * e_charge_mass / (float)mp[1] * par->dt[1] * 0.5f;
 #else
    par->Bcoef = {0, 0};
 #endif

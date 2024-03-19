@@ -162,7 +162,7 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
   for (int nprt = 0; nprt < n_output_part; nprt++)
   {
     int n = nr[nprt];
-    if (nprtd == 0 && n >= par->n_part[p])
+   /* if (nprtd == 0 && n >= par->n_part[p])
     {
       //  KE[p][nprt] = 0;
       //  posp[p][nprt][0] = 0;
@@ -170,6 +170,7 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
       //  posp[p][nprt][2] = 0;
       continue;
     }
+    */
     float KE, dpos, dpos2 = 0;
     dpos = (pt->pos1x[p][n] - pt->pos0x[p][n]);
     dpos *= dpos;
@@ -181,7 +182,7 @@ void save_vtp(string filename, int i, uint64_t num, double t, int p, particles *
     dpos *= dpos;
     dpos2 += dpos;
     KE = 0.5 * pt->m[p][n] * (dpos2) / (e_charge_mass * par->dt[p] * par->dt[p]);
-    // if (KE>1)
+     if (KE>1)
     {
       kineticEnergy->InsertNextValue(KE);
       // in units of eV
