@@ -5,8 +5,8 @@
 //#define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
 #define Temp_d 1e7    // in Kelvin
-constexpr int f1 = 16; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
-constexpr int f2 = f1 * 2;
+constexpr int f1 = 4; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+constexpr int f2 = f1 * 1.2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
