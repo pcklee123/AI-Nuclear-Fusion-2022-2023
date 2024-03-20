@@ -115,7 +115,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
     uint idx =
         ((uint)((z - ZLOW) / DZ) * NZ + (uint)((y - YLOW) / DY)) * NY +
         (uint)((x - XLOW) / DX); // round down the cells - this is intentional
-    idx *= 3;
+    idx *= 3; // find out the index to which cell the particle is in. 
     pos = (float8)(1.f, x, y, z, xy, xz, yz, xyz);
     // Is there no better way to do this? Why does float8 not have dot()?
     if (prev_idx != idx) {
@@ -128,6 +128,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
       prev_idx = idx;
     }
     temp = store0 * pos;
+    //get interpolated Electric field at particle position
     float xE = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;
     temp = store1 * pos;
@@ -136,6 +137,7 @@ void kernel tnp_k_implicit(global const float8 *a1,
     temp = store2 * pos;
     float zE = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;
+    //get interpolated Magnetic field at particle position
     temp = store3 * pos;
     float xP = temp.s0 + temp.s1 + temp.s2 + temp.s3 + temp.s4 + temp.s5 +
                temp.s6 + temp.s7;
