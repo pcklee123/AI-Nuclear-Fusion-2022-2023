@@ -10,9 +10,9 @@ constexpr int f2 = f1 * 1.2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
-constexpr int n_space = 200;                                      // should be 2 to power of n for sater FFT
+constexpr int n_space = 128;                                      // should be 2 to power of n for sater FFT
 constexpr float nback = 1;                                       // background particles per cell - improves stability
-constexpr int n_partd = n_space * n_space * n_space * nback * 1; // must be 2 to power of n
+constexpr int n_partd = n_space * n_space * n_space * nback * 8; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 
 constexpr float R_s = n_space / 1;  // LPF smoothing radius
@@ -20,7 +20,7 @@ constexpr float r0_f = 4; //  radius of sphere or cylinder
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 0.01;    // in T earth's magnetic field is of the order of 1e-4 T 
+constexpr float Bmax0 = 0.01;    // in T earth's magnetic field is of the order of ~ 1e-4 T DPF ~ 100T
 constexpr float Emax0 = 1e5; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
 constexpr float Bz0 = 0.01; // in T, static constant fields
@@ -40,7 +40,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc1 = 20;            // f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int nc1 = 1;            // f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 512
