@@ -4,7 +4,7 @@ void generate_rand_sphere(particles *pt, par *par)
     // spherical plasma set plasma parameters
     float Temp[2] = {Temp_e, Temp_d}; // in K convert to eV divide by 1.160451812e4
     // initial bulk electron, ion velocity
-    float v0[2][3] = {{0, 0, -vz0}, {0, 0, vz0/60}};
+    float v0[2][3] = {{0, 0, -vz0}, {0, 0, vz0 / 60}};
 
     float r0 = r0_f * a0; // if sphere this is the radius
     float area = 4 * pi * r0 * r0;
@@ -61,6 +61,7 @@ void generate_rand_sphere(particles *pt, par *par)
                         pt->pos0x[p][na] = ((float)(i - n_space_divx / 2) + (float)rand() / RAND_MAX) * a0;
                         pt->pos0y[p][na] = ((float)(j - n_space_divy / 2) + (float)rand() / RAND_MAX) * a0;
                         pt->pos0z[p][na] = ((float)(k - n_space_divz / 2) + (float)rand() / RAND_MAX) * a0;
+
                         pt->pos1x[p][na] = pt->pos0x[p][na];
                         pt->pos1y[p][na] = pt->pos0y[p][na];
                         pt->pos1z[p][na] = pt->pos0z[p][na];
@@ -75,7 +76,8 @@ void generate_rand_sphere(particles *pt, par *par)
 #pragma omp parallel for ordered
         for (int n = na; n < n_partd; n++)
         {
-            float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.3333333333);
+            // float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.3333333333);
+            float r = gsl_ran_gaussian(rng, r0) ;
             // float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.5);
             double x, y, z;
             gsl_ran_dir_3d(rng, &x, &y, &z);
