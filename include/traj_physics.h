@@ -1,6 +1,6 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
-#define cldevice 0 // 0 usually means integrated GPU
+#define cldevice 1 // 0 usually means integrated GPU
 #define sphere        // do hot spot  problem
 //#define cylinder //do hot rod problem
 #define Temp_e 1e7    // in Kelvin
@@ -10,7 +10,7 @@ constexpr int f2 = f1 * 1.2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
-constexpr int n_space = 128;                                      // should be 2 to power of n for sater FFT
+constexpr int n_space = 256;                                      // should be 2 to power of n for sater FFT
 constexpr float nback = 1;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 8; // must be 2 to power of n
 constexpr int n_parte = n_partd;
