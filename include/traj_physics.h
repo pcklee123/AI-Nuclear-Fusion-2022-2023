@@ -44,7 +44,7 @@ constexpr int nc1 = 1;            // f1 * 1;      // number of times to calculat
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 512
-#define Hist_max Temp_e / 11600 * 30 // in eV Kelvin to eV is divide by 11600
+#define Hist_max Temp_e / 11600 * 60 // in eV Kelvin to eV is divide by 11600
 
 #define trilinon_
 #define Uon_ // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.
