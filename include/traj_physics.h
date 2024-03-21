@@ -10,7 +10,11 @@ constexpr int f2 = f1 * 1.2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
 
+<<<<<<< HEAD
 constexpr int n_space = 256;                                      // should be 2 to power of n for sater FFT
+=======
+constexpr int n_space = 128;                                      // should be 2 to power of n for sater FFT
+>>>>>>> dabcf9fdb7b58c195eb9cffb2048997da8cd7c13
 constexpr float nback = 1;                                       // background particles per cell - improves stability
 constexpr int n_partd = n_space * n_space * n_space * nback * 8; // must be 2 to power of n
 constexpr int n_parte = n_partd;
