@@ -1,11 +1,12 @@
 #define RamDisk // whether to use RamDisk if no ramdisk files will be in temp directory
 #define maxcells 32
 #define cldevice 0 // 0 usually means integrated GPU
-#define sphere        // do hot spot  problem
+//#define sphere        // do hot spot  problem
+#define impl_sphere        // do imploding hot spot  problem
 //#define cylinder //do hot rod problem
-#define Temp_e 1e7    // in Kelvin
-#define Temp_d 1e7    // in Kelvin
-constexpr int f1 = 32; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+#define Temp_e 1e4    // in Kelvin; Kelvin to eV is divide by 11600
+#define Temp_d 1e5    // in Kelvin
+constexpr int f1 = 128; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 1.2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
@@ -16,7 +17,7 @@ constexpr int n_partd = n_space * n_space * n_space * nback * 8; // must be 2 to
 constexpr int n_parte = n_partd;
 
 constexpr float R_s = n_space / 1;  // LPF smoothing radius
-constexpr float r0_f = 1; //  radius of sphere or cylinder
+constexpr float r0_f = n_space/8; //  radius of sphere or cylinder in terms of number of cells
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
@@ -28,7 +29,7 @@ constexpr float Ez0 = 0.0f;//in V/m
 constexpr float vz0 = 0.0f;
 constexpr float a0 = 1.0e-5;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise energy is not conserved if a particle moves across a cell
 constexpr float target_part = 2e8; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
-
+constexpr float v0_r=3.0e6;  //implosion velocity 3.1e5 - 1keV Deuterons, 0.27eV electrons
 // technical parameters
 
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
@@ -44,7 +45,7 @@ constexpr int nc1 = 5;            // f1 * 1;      // number of times to calculat
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 512
-#define Hist_max Temp_e / 11600 * 60 // in eV Kelvin to eV is divide by 11600
+#define Hist_max 50000 // in eV Kelvin to eV is divide by 11600
 
 #define trilinon_
 #define Uon_ // whether to calculate the electric (V) potential and potential energy (U). Needs Eon to be enabled.

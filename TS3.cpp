@@ -34,6 +34,9 @@ int main()
 #ifdef sphere
     generate_rand_sphere(pt, par);
 #endif // sphere
+#ifdef impl_sphere
+    generate_rand_impl_sphere(pt, par);
+#endif // sphere
 #ifdef cylinder
     generate_rand_cylinder(pt, par);
 #endif // cylinder

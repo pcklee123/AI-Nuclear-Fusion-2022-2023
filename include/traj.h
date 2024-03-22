@@ -124,7 +124,7 @@ void id_to_cell(int id, int *x, int *y, int *z);
 void save_hist(int i_time, double t, int q[2][n_partd], float pos0x[2][n_partd], float pos0y[2][n_partd], float pos0z[2][n_partd], float pos1x[2][n_partd], float pos1y[2][n_partd], float pos1z[2][n_partd], par *par);
 
 void generate_rand_sphere(particles *pt, par *par);
-
+void generate_rand_impl_sphere(particles *pt, par *par);
 void generate_rand_cylinder(particles *pt, par *par);
 void smoothscalarfield(float f[n_space_divz][n_space_divy][n_space_divx], float ftemp[n_space_divz][n_space_divy][n_space_divx],
                        float fc[n_space_divz][n_space_divy][n_space_divx][3], int s);
