@@ -12,7 +12,7 @@ constexpr float decf = 1.0f / incf; // decrement factor
 
 constexpr int n_space = 128;                                      // should be 2 to power of n for sater FFT
 constexpr float nback = 1;                                       // background particles per cell - improves stability
-constexpr int n_partd = n_space * n_space * n_space * nback * 8; // must be 2 to power of n
+constexpr int n_partd = n_space * n_space * n_space * nback * 2; // must be 2 to power of n
 constexpr int n_parte = n_partd;
 
 constexpr float R_s = n_space / 1;  // LPF smoothing radius
