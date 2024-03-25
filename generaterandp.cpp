@@ -176,7 +176,7 @@ void generate_rand_impl_sphere(particles *pt, par *par)
         {
             // float r = r0 * pow(gsl_ran_flat(rng, 0, 1), 0.3333333333);
             float r = gsl_ran_gaussian(rng, r0);
-            while (fabs(r)>=((float)n_space-1.0)/4.0*a0) r = gsl_ran_gaussian(rng, r0);
+            while (fabs(r)>=((float)n_space-1.0)/2.0*a0) r = gsl_ran_gaussian(rng, r0);
             double x, y, z;
             gsl_ran_dir_3d(rng, &x, &y, &z);
             pt->pos0x[p][n] = r * x;
