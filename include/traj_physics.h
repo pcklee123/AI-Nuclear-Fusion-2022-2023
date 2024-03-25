@@ -29,7 +29,7 @@ constexpr float Ez0 = 0.0f;//in V/m
 constexpr float vz0 = 0.0f;
 constexpr float a0 = 1.0e-5;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise energy is not conserved if a particle moves across a cell
 constexpr float target_part = 1e9; // 3.5e22 particles per m^3 per torr of ideal gas. 7e22 electrons for 1 torr of deuterium
-constexpr float v0_r = 3.0e5; 
+constexpr float v0_r = 3.0e5; //implosion velocity inwards is positive
 // technical parameters
 
 // Te 1e7,Td 1e7,B 0.1,E 1e8,nback 64, a0 0.1e-3,part 1e10,nspace 32 npartd *4 sphere, r1=1.8
