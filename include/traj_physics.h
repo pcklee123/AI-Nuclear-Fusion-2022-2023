@@ -4,8 +4,8 @@
 //#define sphere        // do hot spot  problem
 #define impl_sphere        // do hot spot  problem
 //#define cylinder //do hot rod problem
-#define Temp_e 1e4    // in Kelvin 1e7 ~1keV
-#define Temp_d 1e4    // in Kelvin
+#define Temp_e 1e6    // in Kelvin 1e7 ~1keV
+#define Temp_d 1e6    // in Kelvin
 constexpr int f1 = 32; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 1.2;
 constexpr float incf = 1.2f;        // increment
