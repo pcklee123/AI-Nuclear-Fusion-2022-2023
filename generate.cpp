@@ -241,16 +241,16 @@ void generateZpinchField(float Ee[3][n_space_divz][n_space_divy][n_space_divx], 
                 double r0 = r0_f * a0;
                 if (r >r0 )
                 {
-                    Be[0][k][j][i] = -Bz0 * y / (r * r) * r0;
-                    Be[1][k][j][i] = Bz0 * x / (r * r) * r0;
+                    Be[0][k][j][i] = -Btheta0 * y / (r * r) * r0;
+                    Be[1][k][j][i] = Btheta0 * x / (r * r) * r0;
                 }
                 else
                 {
-                    Be[0][k][j][i] = -Bz0 * y / r0;
-                    Be[1][k][j][i] = Bz0 * i / r0;
+                    Be[0][k][j][i] = -Btheta0 * y / r0;
+                    Be[1][k][j][i] = Btheta0 * x / r0;
                 }
 
-                Be[2][k][j][i] = 0; // 1*z*z+1;
+                Be[2][k][j][i] = Bz0; // 1*z*z+1;
             }
         }
     }

@@ -21,10 +21,11 @@ constexpr float r0_f = 16; //  radius of sphere or cylinder
 
 // The maximum expected E and B fields. If fields go beyond this, the the time step, cell size etc will be wrong. Should adjust and recalculate.
 //  maximum expected magnetic field
-constexpr float Bmax0 = 1;    // in T earth's magnetic field is of the order of ~ 1e-4 T DPF ~ 100T
+constexpr float Bmax0 = 1.001;    // in T earth's magnetic field is of the order of ~ 1e-4 T DPF ~ 100T
 constexpr float Emax0 = 1e5; // 1e11V/m is approximately interatomic E field -extremely large fields implies poor numerical stability
 
-constexpr float Bz0 =1; // in T, static constant fields
+constexpr float Bz0 =0.001; // in T, static constant fields
+constexpr float Btheta0 =1; // in T, static constant fields
 constexpr float Ez0 = 0.0f;//in V/m
 constexpr float vz0 = 0.0f;
 constexpr float a0 = 1.0e-5;      // typical dimensions of a cell in m This needs to be smaller than debye length otherwise energy is not conserved if a particle moves across a cell
