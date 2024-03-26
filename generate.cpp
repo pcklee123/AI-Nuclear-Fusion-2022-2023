@@ -220,26 +220,22 @@ void generateConstantBField(float Ee[3][n_space_divz][n_space_divy][n_space_divx
 
 void generateZpinchField(float Ee[3][n_space_divz][n_space_divy][n_space_divx], float Be[3][n_space_divz][n_space_divy][n_space_divx])
 {
-    // technically, we don't need to do this because 0 is just blank
-    for (unsigned int i = 0; i < n_space_divx; i++)
+    // radius of z-pinch
+    double r0 = r0_f * a0;
+    for ( int i = 0; i < n_space_divx; i++)
     {
-        // float x = ((float)i - (float)(n_space_divx) / 2.0) / ((float)(n_space_divx));
-        for (unsigned int j = 0; j < n_space_divy; j++)
+        double x = (i - n_space_divx / 2) * a0;
+        for ( int j = 0; j < n_space_divy; j++)
         {
-            // float y = ((float)j - (float)(n_space_divy) / 2.0) / ((float)(n_space_divy));
+            double y = (j - n_space_divy / 2) * a0;
+            double r = sqrt(pow(x, 2) + pow(y, 2));
             for (unsigned int k = 0; k < n_space_divz; k++)
             {
-                // float z = ((float)k - (float)(n_space_divz) / 2.0) / ((float)(n_space_divz));
-                // float r = sqrt(x * x + y * y + z * z); unused
-
                 Ee[0][k][j][i] = 0;   // 1000+i*100;
                 Ee[1][k][j][i] = 0;   // 2000+j*100;
                 Ee[2][k][j][i] = Ez0; // 3000+k*100;
-                double x = (i - n_space / 2) * a0;
-                double y = (j - n_space / 2) * a0;
-                double r = sqrt( pow(x, 2) +  pow(y, 2));
-                double r0 = r0_f * a0;
-                if (r >r0 )
+             
+                if (r > r0)
                 {
                     Be[0][k][j][i] = -Btheta0 * y / (r * r) * r0;
                     Be[1][k][j][i] = Btheta0 * x / (r * r) * r0;
@@ -257,7 +253,7 @@ void generateZpinchField(float Ee[3][n_space_divz][n_space_divy][n_space_divx], 
 }
 void generateField(fields *fi, par *par)
 {
-   // generateEmptyField(fi->Ee, fi->Be);
+    // generateEmptyField(fi->Ee, fi->Be);
     generateZpinchField(fi->Ee, fi->Be);
     // generateStripedEField(Ee, Be);
     // generateConstantBField(Ee, Be);
