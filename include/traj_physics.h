@@ -6,7 +6,7 @@
 // #define cylinder //do hot rod problem
 #define Temp_e 1e6     // in Kelvin 1e7 ~1keV
 #define Temp_d 1e6     // in Kelvin
-constexpr int f1 = 32; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
+constexpr int f1 = 8; // make bigger to make smaller time steps // 8 is min for sphere slight increas in KE
 constexpr int f2 = f1 * 1.2;
 constexpr float incf = 1.2f;        // increment
 constexpr float decf = 1.0f / incf; // decrement factor
@@ -42,7 +42,7 @@ constexpr int n_output_part = (n_partd > 9369) ? 9369 : n_partd; // maximum numb
 // const int nprtd=floor(n_partd/n_output_part);
 
 constexpr int ndatapoints = 300; // total number of time steps to calculate
-constexpr int nc1 = 1;           // f1 * 1;      // number of times to calculate E and B between printouts
+constexpr int nc1 = 4;           // f1 * 1;      // number of times to calculate E and B between printouts
 constexpr int md_me = 60;        // ratio of electron speed/deuteron speed at the same KE. Used to calculate electron motion more often than deuteron motion
 
 #define Hist_n 512
