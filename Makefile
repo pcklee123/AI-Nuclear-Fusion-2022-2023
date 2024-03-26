@@ -2,7 +2,7 @@ _DEPS = traj.h traj_physics.h
 _OBJ = utils.o TS3.o tnp.o generate.o generaterandp.o  save.o cl_code.o changedt.o calcEBV_FFT.o calcU.o  get_densityfields.o
 #sel_part_print.o smoothfield.o calc_trilin_constants.o
 IDIR = include
-
+dir_guard=@mkdir -p $(@D)
 #https://stackoverflow.com/questions/14492436/g-optimization-beyond-o3-ofast
 CC=g++
 #ucrt64
@@ -48,9 +48,11 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 DOBJ = $(patsubst %,$(DODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.cpp $(DEPS)
+	$(dir_guard)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(DODIR)/%.o: %.cpp $(DEPS)
+	$(dir_guard)
 	$(CC) -g -c -o $@ $< $(CFLAGSd)
 
 TS3: $(OBJ)
@@ -62,4 +64,4 @@ debug: $(DOBJ)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(DODIR)/*.o *~ core $(INCDIR)/*~ TS3.exe TS3debug.exe *.vti *.vtp 
+	rm -f $(ODIR)/*.o $(DODIR)/*.o *~ core $(INCDIR)/*~ TS3.exe TS3debug.exe *.vti *.vtp TS3

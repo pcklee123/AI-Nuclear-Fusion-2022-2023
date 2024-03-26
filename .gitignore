@@ -3,5 +3,5 @@ obj/*.o
 obj_debug/*.o
 *.csv
 *.exe
-TS3
+TS3.
 ~.*
